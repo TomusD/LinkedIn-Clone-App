@@ -25,6 +25,8 @@ class AdvertisementsActivity : ComponentActivity() {
 
     @Composable
     fun AdvertisementsScreen() {
+
+        // Lists of advertisements of other users and advertisements of the current user posted
         var advertisements by remember { mutableStateOf(listOf("Ad 1: Job opening at Company X", "Ad 2: Freelance opportunity", "Ad 3: Internship at Startup Y")) }
         var myAdvertisements by remember { mutableStateOf(listOf("My Ad 1: Looking for a designer", "My Ad 2: Developer needed")) }
 
@@ -81,6 +83,7 @@ class AdvertisementsActivity : ComponentActivity() {
         }
     }
 
+    // Advertisements cards
     @Composable
     fun AdvertisementItem(advertisement: String) {
         Card(
@@ -99,6 +102,7 @@ class AdvertisementsActivity : ComponentActivity() {
         }
     }
 
+    // User uploaded Advertisements cards
     @Composable
     fun MyAdvertisementItem(myAd: String) {
         Card(

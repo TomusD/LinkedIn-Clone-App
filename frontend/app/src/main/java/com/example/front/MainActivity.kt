@@ -25,6 +25,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun MainScreen() {
 
+        // Buttons for all screens
         Column(
             modifier = Modifier
                 .fillMaxSize()

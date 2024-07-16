@@ -26,6 +26,8 @@ class MessagesActivity : ComponentActivity() {
 
     @Composable
     fun MessagesScreen() {
+
+        // Variable for new Message text field and list of messages
         var messages by remember { mutableStateOf(listOf("Message 1", "Message 2", "Message 3", "Message 4")) }
         var newMessage by remember { mutableStateOf("") }
 
@@ -40,6 +42,7 @@ class MessagesActivity : ComponentActivity() {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
+            // All Messages list
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -56,21 +59,22 @@ class MessagesActivity : ComponentActivity() {
                 horizontalArrangement = Arrangement.SpaceEvenly)
             {
 
-                Button(
-                    onClick = {
-                        if (newMessage  != ""){
-                        messages = messages + newMessage
-                        newMessage = ""
-                        }
-                    }) {
-                    Text("Send")
-                }
-
+                // New message Text Field
                 OutlinedTextField(
                     value = newMessage,
                     onValueChange = { newMessage = it },
                     label = { Text("New Message") }
                 )
+
+                Button(
+                    onClick = {
+                        if (newMessage != "") {
+                            messages = messages + newMessage
+                            newMessage = ""
+                        }
+                    }, modifier = Modifier.align(Alignment.CenterVertically)) {
+                    Text("Send")
+                }
             }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -78,6 +82,7 @@ class MessagesActivity : ComponentActivity() {
         }
     }
 
+    // All messages cards
     @Composable
     fun MessageItem(message: String) {
         Card(
