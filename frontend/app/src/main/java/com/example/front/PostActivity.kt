@@ -25,6 +25,8 @@ class PostActivity : ComponentActivity() {
 
     @Composable
     fun PostScreen() {
+
+        // Variable of post text field
         var text by remember { mutableStateOf("") }
 
         Column(
@@ -42,6 +44,7 @@ class PostActivity : ComponentActivity() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Post Text field
             OutlinedTextField(
                 value = text,
                 onValueChange = { text = it },
@@ -58,6 +61,7 @@ class PostActivity : ComponentActivity() {
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
+            //Multimedia Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -75,6 +79,7 @@ class PostActivity : ComponentActivity() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Post Button
             Button(
                 onClick = { /* Handle Post button click */ },
                 modifier = Modifier.align(Alignment.End)

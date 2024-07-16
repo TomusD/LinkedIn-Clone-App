@@ -26,6 +26,8 @@ class LoginActivity : ComponentActivity() {
 
     @Composable
     fun LoginScreen() {
+
+        // Mutable variables for Text Fields
         var email by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
 
@@ -44,6 +46,7 @@ class LoginActivity : ComponentActivity() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            //Text field for email
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -52,6 +55,7 @@ class LoginActivity : ComponentActivity() {
                 modifier = Modifier.fillMaxWidth()
             )
 
+            //Text field for password
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },

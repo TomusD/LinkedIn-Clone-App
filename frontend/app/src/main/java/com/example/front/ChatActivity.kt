@@ -33,6 +33,8 @@ class ChatActivity : ComponentActivity() {
 
     @Composable
     fun ChatScreen() {
+
+        //List of Conversations
         var conversations by remember { mutableStateOf(listOf("Conversation with Friend 1", "Conversation with Friend 2", "Conversation with Friend 3", "Conversation with Friend 4")) }
 
         Column(
@@ -51,6 +53,7 @@ class ChatActivity : ComponentActivity() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            //Start new conversation button
             Button(
                 onClick = {
                     val intent = Intent(this@ChatActivity, StartConversationActivity::class.java)
@@ -63,6 +66,7 @@ class ChatActivity : ComponentActivity() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            //List of conversations
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -74,9 +78,11 @@ class ChatActivity : ComponentActivity() {
         }
     }
 
+    //List of conversations cards
     @Composable
     fun ConversationItem(conversation: String) {
 
+        //Clickable cards to go to each user conversation
         Card(
             modifier = Modifier
                 .fillMaxWidth()

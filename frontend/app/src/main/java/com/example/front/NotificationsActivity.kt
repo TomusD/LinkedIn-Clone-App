@@ -4,16 +4,20 @@ import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
 import com.example.front.ui.theme.FrontEndTheme
-import org.w3c.dom.Comment
 
 class NotificationsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,6 +31,8 @@ class NotificationsActivity : ComponentActivity() {
 
     @Composable
     fun  NotificationsScreen() {
+
+        // Lists of friend requests and user articles
         var friendReqs by remember { mutableStateOf(listOf("Friend request 1", "Friend request 2", "Friend request 3"))}
         var myArticles by remember { mutableStateOf(listOf("My Article 1", "My Article 2")) }
 
@@ -80,6 +86,8 @@ class NotificationsActivity : ComponentActivity() {
             }
         }
     }
+
+    // Cards of friends requests and buttons
     @Composable
     fun FriendsRequestItem(friendReq: String) {
         Card(
@@ -87,18 +95,38 @@ class NotificationsActivity : ComponentActivity() {
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
             Column(
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        model = R.drawable.profile_placeholder
+                    ),
+                    contentDescription = "Profile Photo",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(128.dp)
+                        .clip(CircleShape)
+                )
+
                 Text(friendReq, style = MaterialTheme.typography.bodyLarge)
+
                 Spacer(modifier = Modifier.height(8.dp))
+
                 Button(onClick = { /* Handle More Information */ }) {
                     Text("More Information")
                 }
+
                 Spacer(modifier = Modifier.height(8.dp))
+
                 Button(onClick = { /* Handle Accept */ }) {
                     Text("Accept Request")
                 }
+
                 Spacer(modifier = Modifier.height(8.dp))
+
                 Button(onClick = { /* Handle Decline */ }) {
                     Text("Decline Request")
                 }
@@ -106,8 +134,11 @@ class NotificationsActivity : ComponentActivity() {
         }
     }
 
+    // Cards of Articles
     @Composable
     fun ArticleItem(myArticle: String) {
+
+        // List of comments
         var comments by remember { mutableStateOf(listOf("Comment 1", "Comment 2", "Comment 3", "Comment 4")) }
 
         Card(
@@ -127,7 +158,9 @@ class NotificationsActivity : ComponentActivity() {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
+                //List of comments inside articles cards
                 Box(modifier = Modifier.height(150.dp)) {
+
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
@@ -141,6 +174,7 @@ class NotificationsActivity : ComponentActivity() {
         }
     }
 
+    //List of comments inside articles cards
     @Composable
     fun CommentItem(comment: String) {
 

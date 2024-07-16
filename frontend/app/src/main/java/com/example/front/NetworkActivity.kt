@@ -35,6 +35,8 @@ class NetworkActivity : ComponentActivity() {
 
     @Composable
     fun  NetworkScreen() {
+
+        //List of connections and variable for text field
         var connections by remember { mutableStateOf(listOf("Friend 1","Friend 2", "Friend 3", "Friend 4")) }
         var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
 
@@ -54,14 +56,33 @@ class NetworkActivity : ComponentActivity() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                label = { Text("Search") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            )
+            // Text field for search
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+
+                TextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    label = { Text("Search") },
+                    modifier = Modifier
+                        .padding(16.dp)
+                )
+
+                Button(
+                    onClick = { /* Handle Search click */ },
+                    modifier = Modifier.size(60.dp).align(Alignment.CenterVertically)
+                ) {
+                    Image(
+                        painter = rememberAsyncImagePainter(
+                            model = R.drawable.search_icon
+                        ),
+                        contentDescription = "Search picture",
+                        modifier = Modifier.size(35.dp)
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -76,6 +97,7 @@ class NetworkActivity : ComponentActivity() {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
+            // Display List of Connected Friends
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -87,6 +109,8 @@ class NetworkActivity : ComponentActivity() {
         }
     }
 
+
+    // Cards that display the list of friends
     @Composable
     fun ConnectionsItem(connection: String) {
         Card(
@@ -111,15 +135,25 @@ class NetworkActivity : ComponentActivity() {
                 )
 
                 Text(connection, style = MaterialTheme.typography.bodyLarge)
+
                 Spacer(modifier = Modifier.height(8.dp))
+
                 Text("First Name", style = MaterialTheme.typography.bodyMedium)
+
                 Spacer(modifier = Modifier.height(8.dp))
+
                 Text("Last Name", style = MaterialTheme.typography.bodyMedium)
+
                 Spacer(modifier = Modifier.height(8.dp))
+
                 Text("Job", style = MaterialTheme.typography.bodyMedium)
+
                 Spacer(modifier = Modifier.height(8.dp))
+
                 Text("Company", style = MaterialTheme.typography.bodyMedium)
+
                 Spacer(modifier = Modifier.height(8.dp))
+
                 Button(onClick = { /* Handle Profile Page */ }) {
                     Text("Profile Page")
                 }

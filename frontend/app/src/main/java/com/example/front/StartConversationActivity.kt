@@ -29,9 +29,11 @@ class StartConversationActivity : ComponentActivity() {
 
     @Composable
     fun StartConversationScreen() {
+
+        // Variables of Text Fields and Latest friends that talked with
         var to by remember { mutableStateOf("") }
         var message by remember { mutableStateOf("") }
-        var lastUsers by remember { mutableStateOf(listOf("Friend 1", "Friend 2", "Friend 3")) }
+        var lastFriends by remember { mutableStateOf(listOf("Friend 1", "Friend 2", "Friend 3","Friend 4")) }
 
         Column(
             modifier = Modifier
@@ -47,6 +49,7 @@ class StartConversationActivity : ComponentActivity() {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
+            // To Text field
             OutlinedTextField(
                 value = to,
                 onValueChange = { to = it },
@@ -57,6 +60,7 @@ class StartConversationActivity : ComponentActivity() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Message Text field
             OutlinedTextField(
                 value = message,
                 onValueChange = { message = it },
@@ -79,28 +83,32 @@ class StartConversationActivity : ComponentActivity() {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
+            //List of latest friends talked to
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(lastUsers) { user ->
-                    LastUserItem(user)
+                items(lastFriends) { friend ->
+                    LastFriendsItem(friend)
                 }
             }
         }
     }
 
+    // Last friends list of cards
     @Composable
-    fun LastUserItem(user: String) {
+    fun LastFriendsItem(friend: String) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    val intent = Intent(this@StartConversationActivity, MessagesActivity::class.java)
-                    startActivity(intent) },
+                    val intent =
+                        Intent(this@StartConversationActivity, MessagesActivity::class.java)
+                    startActivity(intent)
+                },
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
             Text(
-                user,
+                friend,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(16.dp)
             )
