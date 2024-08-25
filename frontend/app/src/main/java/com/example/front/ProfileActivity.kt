@@ -23,6 +23,8 @@ class ProfileActivity : ComponentActivity() {
 
     @Composable
     fun ProfileScreen() {
+
+        // Variable of Text fields and boolean variable of public/private
         var experience by remember { mutableStateOf("") }
         var education by remember { mutableStateOf("") }
         var skills by remember { mutableStateOf("") }
@@ -37,6 +39,7 @@ class ProfileActivity : ComponentActivity() {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start
         ) {
+
             Text(
                 "Profile",
                 style = MaterialTheme.typography.titleLarge,
@@ -45,13 +48,17 @@ class ProfileActivity : ComponentActivity() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Experience Text Field
             OutlinedTextField(
                 value = experience,
                 onValueChange = { experience = it },
                 label = { Text("Professional Experience") },
                 modifier = Modifier.fillMaxWidth()
             )
+
             Row(verticalAlignment = Alignment.CenterVertically) {
+
+                // Public/Private checkbox
                 Checkbox(
                     checked = isExperiencePublic,
                     onCheckedChange = { isExperiencePublic = it }
@@ -61,6 +68,7 @@ class ProfileActivity : ComponentActivity() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Education Text Field
             OutlinedTextField(
                 value = education,
                 onValueChange = { education = it },
@@ -68,6 +76,8 @@ class ProfileActivity : ComponentActivity() {
                 modifier = Modifier.fillMaxWidth()
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
+
+                // Public/Private checkbox
                 Checkbox(
                     checked = isEducationPublic,
                     onCheckedChange = { isEducationPublic = it }
@@ -77,12 +87,15 @@ class ProfileActivity : ComponentActivity() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Skills Text Field
             OutlinedTextField(
                 value = skills,
                 onValueChange = { skills = it },
                 label = { Text("Skills") },
                 modifier = Modifier.fillMaxWidth()
             )
+
+            // Public/Private checkbox
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
                     checked = isSkillsPublic,
