@@ -10,26 +10,27 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.em
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.front.screens.HomeScreen
-import com.example.front.screens.JobsScreen
-import com.example.front.screens.NetworkScreen
-import com.example.front.screens.NotificationsScreen
-import com.example.front.screens.UploadScreen
+import com.example.front.screens.basic_screens.HomeScreen
+import com.example.front.screens.basic_screens.JobsScreen
+import com.example.front.screens.basic_screens.NetworkScreen
+import com.example.front.screens.basic_screens.NotificationsScreen
+import com.example.front.screens.basic_screens.UploadScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomNavigationBar() {
 //initializing the default selected item
     var navigationSelectedItem by remember {
-        mutableStateOf(0)
+        mutableIntStateOf(0)
     }
     /**
      * by using the rememberNavController()
@@ -48,15 +49,18 @@ fun BottomNavigationBar() {
                     //iterating all items with their respective indexes
                     NavigationBarItem(
                         selected = index == navigationSelectedItem,
+                        alwaysShowLabel = false,
                         label = {
-                            Text(navigationItem.label)
+                            Text(navigationItem.label, fontSize = 2.5.em)
                         },
                         icon = {
                             Icon(
                                 navigationItem.icon,
-                                contentDescription = navigationItem.label
+                                contentDescription = navigationItem.label,
                             )
                         },
+
+
                         onClick = {
                             navigationSelectedItem = index
                             navController.navigate(navigationItem.route) {
