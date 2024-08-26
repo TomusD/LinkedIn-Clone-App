@@ -1,3 +1,39 @@
 <resources>
-    <string name="app_name">Front</string>
+    <string name="app_name">ergasiapp</string>
+    <string name="welcome">Welcome to Ergasia</string>
+    <string name="intro_message">Sign in or create a new Account</string>
+    <string name="welcome_screen_image">welcome_image</string>
+    <string name="go_to_sign_in">Sign in</string>
+    <string name="no_account_yet_msg">Sign up</string>
+
+
+<!--    SignupScreen and SignInScreen-->
+    <string name="create_new_account">Create new account</string>
+    <string name="signin_message">Log in your account</string>
+
+    <string name="enter_name">Enter your name</string>
+    <string name="enter_name_label">Name</string>
+
+    <string name="enter_surname">Enter your surname</string>
+    <string name="enter_surname_label">Surname</string>
+
+    <string name="enter_email">Enter your email</string>
+    <string name="enter_email_label">Email</string>
+
+    <string name="enter_phone">Enter your phone number</string>
+    <string name="enter_phone_label">Phone number</string>
+
+    <string name="create_password">Create your password</string>
+    <string name="enter_password">Enter your password</string>
+    <string name="enter_password_label">Password</string>
+
+    <string name="verify_password">Verify your password</string>
+    <string name="verify_password_label">Verify password</string>
+
+    <string name="upload_image">Upload your image</string>
+    <string name="upload_image_label">Profile picture</string>
+
+    <string name="sign_up">Sign up</string>
+    <string name="sign_in">Sign in</string>
+
 </resources>
