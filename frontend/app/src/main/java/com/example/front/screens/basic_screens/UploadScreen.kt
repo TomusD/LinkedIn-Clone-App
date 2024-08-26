@@ -1,4 +1,4 @@
-package com.example.front.screens
+package com.example.front.screens.basic_screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
@@ -13,7 +13,7 @@ import androidx.navigation.NavController
 import com.example.front.ui.theme.FrontEndTheme
 
 @Composable
-fun NotificationsScreen(navController: NavController) {
+fun UploadScreen(navController: NavController) {
     FrontEndTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -42,7 +42,7 @@ fun NotificationsScreen(navController: NavController) {
 //                    )
 //                }
                 Text(
-                    "Notifications Screen",
+                    "Upload Screen",
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(vertical = 20.dp)
                 )
