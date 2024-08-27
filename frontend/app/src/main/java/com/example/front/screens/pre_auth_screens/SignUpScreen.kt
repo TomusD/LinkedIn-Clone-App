@@ -41,6 +41,7 @@ import androidx.navigation.NavController
 import com.example.front.R
 import com.example.front.data.ApiClient
 import com.example.front.data.response.Test
+import com.example.front.data.response.User
 import com.example.front.ui.theme.Unna
 
 import retrofit2.Call
@@ -53,20 +54,21 @@ import retrofit2.Response
 fun SignUpScreen(navController: NavController) {
 
     var name by remember { mutableStateOf("") }
+    var surname by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var pass by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var verify_pass by remember { mutableStateOf("") }
+
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(40.dp),
+        modifier = Modifier.fillMaxSize().padding(40.dp),
         verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.Start
     ) {
         IconButton(
             onClick = {navController.navigateUp()}) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Go back"
-            )
+            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Go back")
         }
 
         Text(
@@ -79,56 +81,33 @@ fun SignUpScreen(navController: NavController) {
         )
 
         TextField(
-            value = name, onValueChange = { newText ->
-                name = newText
-            },
-            label = {
-                Text(text = stringResource(R.string.enter_name_label))
-            },
-            placeholder = {
-                Text(text = stringResource(R.string.enter_name))
-            },
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.Transparent
-            )
+            value = name, onValueChange = { newText -> name = newText },
+            label = {Text(text = stringResource(R.string.enter_name_label)) },
+            placeholder = {Text(text = stringResource(R.string.enter_name)) },
+            colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent)
         )
 
-        var email by remember { mutableStateOf("") }
         TextField(
-            value = email,
-            onValueChange = { newText ->
-                email = newText
-            },
-            label = {
-                Text(text = stringResource(R.string.enter_email_label))
-            },
-            placeholder = {
-                Text(text = stringResource(R.string.enter_email))
-            },
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.Transparent
-            ),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            value = surname, onValueChange = { newText -> surname = newText },
+            label = {Text(text = stringResource(R.string.enter_surname_label)) },
+            placeholder = {Text(text = stringResource(R.string.enter_surname)) },
+            colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent)
+        )
 
+        TextField(
+            value = email, onValueChange = { newText -> email = newText },
+            label = { Text(text = stringResource(R.string.enter_email_label)) },
+            placeholder = { Text(text = stringResource(R.string.enter_email)) },
+            colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             )
 
-        var pass by remember { mutableStateOf("") }
-        var passwordVisible by remember { mutableStateOf(false) }
 
         TextField(
-            value = pass,
-            onValueChange = { newText ->
-                pass = newText
-            },
-            label = {
-                Text(text = stringResource(R.string.enter_password_label))
-            },
-            placeholder = {
-                Text(text = stringResource(R.string.create_password))
-            },
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.Transparent
-            ),
+            value = pass, onValueChange = { newText -> pass = newText },
+            label = { Text(text = stringResource(R.string.enter_password_label)) },
+            placeholder = {Text(text = stringResource(R.string.create_password)) },
+            colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
@@ -136,16 +115,13 @@ fun SignUpScreen(navController: NavController) {
                     Icons.Filled.Face
                 else Icons.Filled.Favorite
 
-                IconButton(onClick = {
-                    passwordVisible = !passwordVisible
-                }) {
+                IconButton(onClick = {passwordVisible = !passwordVisible }) {
                     Icon(imageVector = image, contentDescription = "")
                 }
             },
         )
 
 
-        var verify_pass by remember { mutableStateOf("") }
         TextField(
             value = verify_pass,
             onValueChange = { newText -> verify_pass = newText },
@@ -162,9 +138,7 @@ fun SignUpScreen(navController: NavController) {
                     Icons.Filled.Face
                 else Icons.Filled.Favorite
 
-                IconButton(onClick = {
-                    passwordVisible = !passwordVisible
-                }) {
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(imageVector = image, contentDescription = "")
                 }
             },
@@ -172,15 +146,16 @@ fun SignUpScreen(navController: NavController) {
 
         Button(
             onClick = {
-                val call = ApiClient.apiService.getMessage()
+                val newUser: User = User(name, surname, email, pass, "image_path")
+                val call = ApiClient.apiService.signUpUser(newUser)
 
                 call.enqueue(object : Callback<Test> {
                     override fun onResponse(call: Call<Test>, response: Response<Test>) {
                         if (response.isSuccessful) {
                             val res = response.body()
-                            val d = Log.d("TEST", res.toString())
+                            Log.d("TEST", res.toString())
                         } else {
-                            Log.d("TEST", "RESPONSE NOT SUCCESFULL")
+                            Log.d("TEST", "RESPONSE NOT SUCCESSFUL")
                             // Handle error
                         }
                     }
@@ -189,8 +164,7 @@ fun SignUpScreen(navController: NavController) {
                         Log.d("TEST", "FAILURE: "+ t.message.toString())
 
                     }
-                }
-                )
+                })
             },
             Modifier
                 .fillMaxWidth()
