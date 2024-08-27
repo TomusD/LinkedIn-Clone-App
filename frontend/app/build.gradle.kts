@@ -1,3 +1,8 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
+val ip: String = gradleLocalProperties(rootDir, providers).getProperty("ip") ?: ""
+val port: String = gradleLocalProperties(rootDir, providers).getProperty("port") ?: ""
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -18,9 +23,14 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
     }
 
     buildTypes {
+        getByName("debug") {
+            buildConfigField("String", "ip", "$ip")
+            buildConfigField("String", "port", "$port")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -39,6 +49,7 @@ android {
         jvmTarget = "1.8"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
     composeOptions {
@@ -53,6 +64,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.coil.compose)
     implementation(libs.androidx.navigation.fragment.ktx)
