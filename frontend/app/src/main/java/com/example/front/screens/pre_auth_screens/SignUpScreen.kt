@@ -1,5 +1,6 @@
 package com.example.front.screens.pre_auth_screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,7 +39,14 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.front.R
+import com.example.front.data.ApiClient
+import com.example.front.data.response.Test
 import com.example.front.ui.theme.Unna
+
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -140,18 +148,13 @@ fun SignUpScreen(navController: NavController) {
         var verify_pass by remember { mutableStateOf("") }
         TextField(
             value = verify_pass,
-            onValueChange = { newText ->
-                verify_pass = newText
-            },
-            label = {
-                Text(text = stringResource(R.string.verify_password_label))
-            },
-            placeholder = {
-                Text(text = stringResource(R.string.verify_password))
-            },
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.Transparent
-            ),
+            onValueChange = { newText -> verify_pass = newText },
+            label = {Text(text = stringResource(R.string.verify_password_label)) },
+            singleLine = true,
+            isError = true,
+            supportingText = { Text(text = "Verify your password")},
+            placeholder = {Text(text = stringResource(R.string.verify_password)) },
+            colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
@@ -168,7 +171,27 @@ fun SignUpScreen(navController: NavController) {
         )
 
         Button(
-            onClick = {},
+            onClick = {
+                val call = ApiClient.apiService.getMessage()
+
+                call.enqueue(object : Callback<Test> {
+                    override fun onResponse(call: Call<Test>, response: Response<Test>) {
+                        if (response.isSuccessful) {
+                            val res = response.body()
+                            val d = Log.d("TEST", res.toString())
+                        } else {
+                            Log.d("TEST", "RESPONSE NOT SUCCESFULL")
+                            // Handle error
+                        }
+                    }
+
+                    override fun onFailure(call: Call<Test>, t: Throwable) {
+                        Log.d("TEST", "FAILURE: "+ t.message.toString())
+
+                    }
+                }
+                )
+            },
             Modifier
                 .fillMaxWidth()
                 .height(50.dp),
