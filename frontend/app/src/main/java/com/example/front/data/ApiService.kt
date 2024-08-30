@@ -1,20 +1,21 @@
 package com.example.front.data
 
+import com.example.front.data.request.UserLoginRequest
 import com.example.front.data.response.Test
-import com.example.front.data.response.User
-import okhttp3.Response
+import com.example.front.data.request.UserRegister
+import com.example.front.data.response.UserLoginResponse
 import retrofit2.Call
 import retrofit2.http.Body
-import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.Headers
 import retrofit2.http.POST
-import retrofit2.http.Path
 
 interface ApiService {
-    @GET("/")
-    fun getMessage() : Call<Test>
+    @Headers("Content-Type: application/json")
+    @POST("/token")
+    fun signInUser(@Body user: UserLoginRequest): Call<UserLoginResponse>
 
     @Headers("Content-Type: application/json")
-    @POST("/signup")
-    fun signUpUser(@Body user: User): Call<Test>
+    @POST("/users")
+    fun signUpUser(@Body user: UserRegister): Call<UserRegister>
 }
