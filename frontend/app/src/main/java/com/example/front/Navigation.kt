@@ -26,10 +26,22 @@ fun Navigation() {
         }
         navigation(startDestination = "welcome_route", route = "auth") {
             composable(route = PreAuthScreens.Signin.route) {
-                SignInScreen(navController)
+                SignInScreen(navController,
+                    onLoginSuccess ={
+                        navController.navigate("main") {
+                            popUpTo("auth") {inclusive=true}
+                        }
+                    }
+                )
             }
             composable(route = PreAuthScreens.Signup.route) {
                 SignUpScreen(navController)
+            }
+        }
+
+        navigation(startDestination = "home_route", route = "main") {
+            composable(Screens.Home.route) {
+                BottomNavigationBar()
             }
         }
     }

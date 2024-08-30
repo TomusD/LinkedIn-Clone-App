@@ -156,15 +156,15 @@ fun SignUpScreen(navController: NavController) {
                     override fun onResponse(call: Call<UserRegister>, response: Response<UserRegister>) {
                         if (response.isSuccessful) {
                             val res = response.body()
-                            Log.d("TEST", res.toString())
+                            Log.d("MYTEST", res.toString())
                         } else {
-                            Log.d("TEST", "RESPONSE NOT SUCCESSFUL")
+                            Log.d("MYTEST", "RESPONSE NOT SUCCESSFUL")
                             // Handle error
                         }
                     }
 
                     override fun onFailure(call: Call<UserRegister>, t: Throwable) {
-                        Log.d("TEST", "FAILURE: "+ t.message.toString())
+                        Log.d("MYTEST", "FAILURE: "+ t.message.toString())
 
                     }
                 })

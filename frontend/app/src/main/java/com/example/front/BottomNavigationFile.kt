@@ -32,10 +32,6 @@ fun BottomNavigationBar() {
     var navigationSelectedItem by remember {
         mutableIntStateOf(0)
     }
-    /**
-     * by using the rememberNavController()
-     * we can get the instance of the navController
-     */
     val navController = rememberNavController()
 
 //scaffold to hold our bottom navigation Bar
@@ -79,28 +75,13 @@ fun BottomNavigationBar() {
         NavHost(
             navController = navController,
             startDestination = Screens.Home.route,
-            modifier = Modifier.padding(paddingValues = paddingValues)
-        ) {
-            composable(Screens.Home.route) {
-                HomeScreen(
-                    navController
-                )            }
-            composable(Screens.Upload.route) {
-                UploadScreen(
-                    navController
-                )               }
-            composable(Screens.Network.route) {
-                NetworkScreen(
-                    navController
-                )                  }
-            composable(Screens.Jobs.route) {
-                JobsScreen(
-                    navController
-                )                  }
-            composable(Screens.Notifications.route) {
-                NotificationsScreen(
-                    navController
-                )                  }
+            modifier = Modifier.padding(paddingValues = paddingValues))
+        {
+            composable(Screens.Home.route) { HomeScreen(navController) }
+            composable(Screens.Upload.route) { UploadScreen(navController) }
+            composable(Screens.Network.route) { NetworkScreen(navController) }
+            composable(Screens.Jobs.route) { JobsScreen(navController) }
+            composable(Screens.Notifications.route) { NotificationsScreen(navController) }
         }
     }
 }

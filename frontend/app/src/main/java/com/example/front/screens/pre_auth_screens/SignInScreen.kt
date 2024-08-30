@@ -53,7 +53,7 @@ import retrofit2.Response
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignInScreen(navController: NavController) {
+fun SignInScreen(navController: NavController, onLoginSuccess: () -> Unit) {
     val context = LocalContext.current
 
     var email by remember { mutableStateOf("") }
@@ -121,15 +121,16 @@ fun SignInScreen(navController: NavController) {
                     override fun onResponse(call: Call<UserLoginResponse>, response: Response<UserLoginResponse>) {
                         if (response.isSuccessful) {
                             val res = response.body()
-                            Log.d("TEST", res.toString())
+                            Log.d("MYTEST", res.toString())
+                            onLoginSuccess()
                         } else {
-                            Log.d("TEST", "RESPONSE NOT SUCCESSFUL")
+                            Log.d("MYTEST", "RESPONSE NOT SUCCESSFUL")
                             // Handle error
                         }
                     }
 
                     override fun onFailure(call: Call<UserLoginResponse>, t: Throwable) {
-                        Log.d("TEST", "FAILURE: "+ t.message.toString())
+                        Log.d("MYTEST", "FAILURE: "+ t.message.toString())
 
                     }
                 })
