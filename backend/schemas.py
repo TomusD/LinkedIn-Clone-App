@@ -28,6 +28,7 @@ class UserBase(BaseModel):
     email: EmailStr
     image_path: str
 
+# Inherits from UserBase
 class UserRegister(UserBase):
     password: str
 

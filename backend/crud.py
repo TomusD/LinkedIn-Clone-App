@@ -16,15 +16,15 @@ def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
 
-def create_user(db: Session, user: schemas.UserRegister):
-    hashed_pwd = hashing.hash_password(user.password)
+def create_user(db: Session, schema_user: schemas.UserRegister):
+    hashed_pwd = hashing.hash_password(schema_user.password)
 
     db_user = models.User(
-        name=user.name, 
-        surname=user.surname,
-        email=user.email,
+        name=schema_user.name, 
+        surname=schema_user.surname,
+        email=schema_user.email,
         hashed_password=hashed_pwd,
-        image_path=user.image_path
+        image_path=schema_user.image_path
         )
     db.add(db_user)
     db.commit()
