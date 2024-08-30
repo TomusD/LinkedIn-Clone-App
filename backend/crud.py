@@ -30,7 +30,7 @@ def create_user(db: Session, user: schemas.UserRegister):
     db.commit()
     db.refresh(db_user)
     print(db.query(models.User).all())
-    return db_user
+    return schemas.UserRegister(name=db_user.name, surname=db_user.surname, password=db_user.hashed_password, email=db_user.email, image_path=db_user.image_path)
 
 
 def authenticate_user(db: Session, email: str, password: str):

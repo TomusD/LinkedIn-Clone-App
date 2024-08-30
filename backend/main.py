@@ -48,7 +48,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 #     return {'access_token': token, 'token_type': 'bearer','refresh_token':refresh,"user_id":user.id}
 
-@app.post("/users", tags=["auth"])
+@app.post("/users", response_model=schemas.UserRegister, tags=["auth"])
 def create_user(user: schemas.UserRegister, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
