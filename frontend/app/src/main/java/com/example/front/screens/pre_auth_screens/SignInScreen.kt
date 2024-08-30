@@ -1,5 +1,6 @@
 package com.example.front.screens.pre_auth_screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -38,16 +40,28 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.front.R
+import com.example.front.data.ApiClient
+import com.example.front.data.SessionManager
+import com.example.front.data.request.UserLoginRequest
+import com.example.front.data.request.UserRegister
+import com.example.front.data.response.Test
+import com.example.front.data.response.UserLoginResponse
 import com.example.front.ui.theme.Unna
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignInScreen(navController: NavController) {
+    val context = LocalContext.current
+
+    var email by remember { mutableStateOf("") }
+    var pass by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(40.dp),
+        modifier = Modifier.fillMaxSize().padding(40.dp),
         verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.Start,
     ) {
@@ -68,42 +82,22 @@ fun SignInScreen(navController: NavController) {
             lineHeight = 1.em
         )
 
-        var email by remember { mutableStateOf("") }
         TextField(
             value = email,
-            onValueChange = { newText ->
-                email = newText
-            },
-            label = {
-                Text(text = stringResource(R.string.enter_email_label))
-            },
-            placeholder = {
-                Text(text = stringResource(R.string.enter_email))
-            },
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.Transparent
-            ),
+            onValueChange = { newText -> email = newText },
+            label = { Text(text = stringResource(R.string.enter_email_label)) },
+            placeholder = { Text(text = stringResource(R.string.enter_email)) },
+            colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             singleLine = true,
         )
 
-        var pass by remember { mutableStateOf("") }
-        var passwordVisible by remember { mutableStateOf(false) }
-
         TextField(
             value = pass,
-            onValueChange = { newText ->
-                pass = newText
-            },
-            label = {
-                Text(text = stringResource(R.string.enter_password_label))
-            },
-            placeholder = {
-                Text(text = stringResource(R.string.enter_password))
-            },
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.Transparent
-            ),
+            onValueChange = { newText -> pass = newText },
+            label = { Text(text = stringResource(R.string.enter_password_label)) },
+            placeholder = { Text(text = stringResource(R.string.enter_password)) },
+            colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent),
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -112,31 +106,34 @@ fun SignInScreen(navController: NavController) {
                     Icons.Filled.FavoriteBorder
                 else Icons.Filled.Favorite
 
-                IconButton(onClick = {
-                    passwordVisible = !passwordVisible
-                }) {
-                    Icon(imageVector = image, contentDescription = "")
-                }
-            },
+                IconButton(onClick = {passwordVisible = !passwordVisible }) { Icon(imageVector = image, contentDescription = "") }
+            }
         )
 
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.SpaceBetween,
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            Text(text = stringResource(R.string.remember_me))
-//
-//            var switchState by remember {
-//                mutableStateOf(false)
-//            }
-//            Switch(checked = switchState, onCheckedChange = {
-//                switchState = it
-//            })
-//        }
-
         Button(
-            onClick = {},
+            onClick = {
+                var apiClient = ApiClient()
+
+                val user = UserLoginRequest(email, pass)
+                val call = apiClient.getApiService(context).signInUser(user)
+
+                call.enqueue(object : Callback<UserLoginResponse> {
+                    override fun onResponse(call: Call<UserLoginResponse>, response: Response<UserLoginResponse>) {
+                        if (response.isSuccessful) {
+                            val res = response.body()
+                            Log.d("TEST", res.toString())
+                        } else {
+                            Log.d("TEST", "RESPONSE NOT SUCCESSFUL")
+                            // Handle error
+                        }
+                    }
+
+                    override fun onFailure(call: Call<UserLoginResponse>, t: Throwable) {
+                        Log.d("TEST", "FAILURE: "+ t.message.toString())
+
+                    }
+                })
+            },
             Modifier
                 .fillMaxWidth()
                 .height(50.dp),

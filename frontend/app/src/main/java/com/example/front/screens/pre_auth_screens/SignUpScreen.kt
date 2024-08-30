@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -40,8 +41,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.front.R
 import com.example.front.data.ApiClient
+import com.example.front.data.request.UserRegister
 import com.example.front.data.response.Test
-import com.example.front.data.response.User
 import com.example.front.ui.theme.Unna
 
 import retrofit2.Call
@@ -52,6 +53,7 @@ import retrofit2.Response
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(navController: NavController) {
+    val context = LocalContext.current
 
     var name by remember { mutableStateOf("") }
     var surname by remember { mutableStateOf("") }
@@ -146,11 +148,12 @@ fun SignUpScreen(navController: NavController) {
 
         Button(
             onClick = {
-                val newUser: User = User(name, surname, email, pass, "image_path")
-                val call = ApiClient.apiService.signUpUser(newUser)
+                val apiClient = ApiClient()
+                val newUser = UserRegister(name, surname, email, pass, "image_path")
+                val call = apiClient.getApiService(context).signUpUser(newUser)
 
-                call.enqueue(object : Callback<Test> {
-                    override fun onResponse(call: Call<Test>, response: Response<Test>) {
+                call.enqueue(object : Callback<UserRegister> {
+                    override fun onResponse(call: Call<UserRegister>, response: Response<UserRegister>) {
                         if (response.isSuccessful) {
                             val res = response.body()
                             Log.d("TEST", res.toString())
@@ -160,7 +163,7 @@ fun SignUpScreen(navController: NavController) {
                         }
                     }
 
-                    override fun onFailure(call: Call<Test>, t: Throwable) {
+                    override fun onFailure(call: Call<UserRegister>, t: Throwable) {
                         Log.d("TEST", "FAILURE: "+ t.message.toString())
 
                     }
