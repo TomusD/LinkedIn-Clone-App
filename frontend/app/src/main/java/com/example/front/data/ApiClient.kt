@@ -1,21 +1,19 @@
 package com.example.front.data
 
-import androidx.compose.ui.res.stringResource
+import android.content.Context
 import com.example.front.BuildConfig
-import com.example.front.HttpClient
-import com.example.front.R
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.ByteArrayInputStream
-import java.io.InputStream
 
-import android.content.Context
+class ApiClient {
+    //val inputStream = context.applicationContext.resources
+    private val IP = BuildConfig.ip
+    private val PORT = BuildConfig.port
+    private val BASE_URL = "https://$IP:$PORT"
 
-//val inputStream = context.applicationContext.resources
-object RetrofitClient {
-    private const val IP = BuildConfig.ip
-    private const val PORT = BuildConfig.port
+    private lateinit var apiService: ApiService
 
     val cert: String = "-----BEGIN CERTIFICATE-----\n" +
             "MIIFazCCA1OgAwIBAgIUQO4kpbgcZ8sELedUZ6k5K6ZVC9IwDQYJKoZIhvcNAQEL\n" +
@@ -49,26 +47,30 @@ object RetrofitClient {
             "m5NS8qsj1fq7E3qetgIPND7HA7A6t7pgaWnTDE0q4bjVp0S4oHGc/N3r2ytRHqU=\n" +
             "-----END CERTIFICATE-----\n"
 
-//    private const val BASE_URL = "domaintesturlwow.com"
-    private const val BASE_URL = "https://$IP:$PORT"
 
     val inputStream = ByteArrayInputStream(cert.toByteArray())
 //    val inp : InputStream? = this.javaClass.getResourceAsStream("/raw/certificate.pem")
 
-    val client : OkHttpClient = HttpClient.getRetrofitInstance(inputStream, IP)
 
+    fun getApiService(context: Context): ApiService {
+        val client: OkHttpClient.Builder = HttpClient.getRetrofitInstance(inputStream, IP)
+        val clientBuilt: OkHttpClient = client.addInterceptor(AuthInterceptor(context)).build()
 
-    val retrofit: Retrofit by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(client)
-            .build()
+        // Initialize ApiService if not initialized yet
+        if (!::apiService.isInitialized) {
+            val retrofit = Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(clientBuilt)
+                .build()
+
+            apiService = retrofit.create(ApiService::class.java)
+        }
+
+        return apiService
     }
 }
 
-object ApiClient {
-    val apiService: ApiService by lazy {
-        RetrofitClient.retrofit.create(ApiService::class.java)
-    }
-}
+
+
+

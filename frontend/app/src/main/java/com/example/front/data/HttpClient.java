@@ -1,6 +1,4 @@
-package com.example.front;
-
-import android.content.Context;
+package com.example.front.data;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,22 +10,20 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import okhttp3.OkHttpClient;
-import retrofit2.Retrofit;
 
 
 public class HttpClient {
-    public static OkHttpClient getRetrofitInstance(InputStream cert, String ip) {
+    public static OkHttpClient.Builder getRetrofitInstance(InputStream cert, String ip) {
         try {
             // Load CAs from an InputStream
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
-            // Load the certificate from res/raw
+//            Load the certificate from res/raw
 //            InputStream caInput = context.getResources().openRawResource(R.raw.certificate);
             Certificate ca;
             try {
@@ -51,10 +47,9 @@ public class HttpClient {
             sslContext.init(null, tmf.getTrustManagers(), null);
 
             // Hostname verifier to avoid the error.
-            OkHttpClient client = new OkHttpClient.Builder()
+            OkHttpClient.Builder client = new OkHttpClient.Builder()
                     .sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) tmf.getTrustManagers()[0])
-                    .hostnameVerifier((hostname, session) -> hostname.equals(ip))
-                    .build();
+                    .hostnameVerifier((hostname, session) -> hostname.equals(ip));
 
             return client;
 
@@ -63,4 +58,4 @@ public class HttpClient {
             throw new RuntimeException(e);
         }
     }
-    }
+}
