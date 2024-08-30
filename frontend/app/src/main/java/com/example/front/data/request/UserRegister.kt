@@ -1,8 +1,8 @@
-package com.example.front.data.response
+package com.example.front.data.request
 
 import com.google.gson.annotations.SerializedName
 
-data class User(
+data class UserRegister (
     @SerializedName("name") val name: String?,
     @SerializedName("surname") val surname: String?,
     @SerializedName("email") val email: String?,
