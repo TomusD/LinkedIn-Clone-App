@@ -64,6 +64,12 @@ android {
 }
 
 dependencies {
+
+
+    implementation(libs.glide)
+    implementation(libs.androidx.runtime.livedata) // Check for the latest version
+    annotationProcessor(libs.compiler)
+
     // Coil for Compose
     implementation(libs.converter.scalars)
     implementation(libs.coil.compose.v270)
