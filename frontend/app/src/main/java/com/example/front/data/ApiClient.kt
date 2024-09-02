@@ -1,6 +1,7 @@
 package com.example.front.data
 
 import android.content.Context
+import android.icu.util.TimeUnit
 import com.example.front.BuildConfig
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -54,7 +55,13 @@ class ApiClient {
 
     fun getApiService(context: Context): ApiService {
         val client: OkHttpClient.Builder = HttpClient.getRetrofitInstance(inputStream, IP)
-        val clientBuilt: OkHttpClient = client.addInterceptor(AuthInterceptor(context)).build()
+        val clientBuilt: OkHttpClient = client
+            .addInterceptor(AuthInterceptor(context))
+            .connectTimeout(60L, java.util.concurrent.TimeUnit.SECONDS)
+            .callTimeout(60L, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(60L, java.util.concurrent.TimeUnit.SECONDS)
+            .writeTimeout(60L, java.util.concurrent.TimeUnit.SECONDS)
+            .build()
 
         // Initialize ApiService if not initialized yet
         if (!::apiService.isInitialized) {
