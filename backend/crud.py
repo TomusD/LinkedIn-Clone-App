@@ -29,7 +29,6 @@ def create_user(db: Session, schema_user: schemas.UserRegister):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    print(db.query(models.User).all())
     return schemas.UserRegister(name=db_user.name, surname=db_user.surname, password=db_user.hashed_password, email=db_user.email, image_path=db_user.image_path)
 
 

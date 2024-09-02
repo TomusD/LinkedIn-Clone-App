@@ -61,24 +61,6 @@ security_var = helpers.read_security_variables()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-# @route.post("/login")
-# def login(payload: schemas.LoginUser, db: Session = Depends(get_db)):
-#     if not payload.email:
-#         raise HTTPException(
-#             status_code=status.HTTP_403_FORBIDDEN,
-#             detail="Please add Phone number",
-#         )
-    
-#     user = crud.get_user_by_email(db, payload.email)
-#     if not user:
-#         raise HTTPException(status_code=400, detail="Incorrect username or password")
-
-#     # token =  create_access_token(user.id, timedelta(minutes=30)) 
-#     # refresh = create_refresh_token(user.id,timedelta(minutes = 1008))
-
-#     return {'access_token': token, 'token_type': 'bearer','refresh_token':refresh,"user_id":user.id}
-
-
 import copy
 from typing import Any
 @app.post("/users", response_class=JSONResponse, tags=["auth"])
