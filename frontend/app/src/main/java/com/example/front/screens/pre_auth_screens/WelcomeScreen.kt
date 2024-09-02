@@ -1,5 +1,9 @@
 package com.example.front.screens.pre_auth_screens
 
+import android.content.Context
+import android.widget.ImageView
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
@@ -17,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -24,8 +30,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
+import coil.size.Scale
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.example.front.PreAuthScreens
 import com.example.front.R
 import com.example.front.ui.theme.Typography
@@ -35,7 +49,7 @@ import com.example.front.ui.theme.Unna
 fun WelcomeScreen(navController: NavController) {
     Box(
         modifier = Modifier.fillMaxSize(),
-        ) {
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -44,7 +58,7 @@ fun WelcomeScreen(navController: NavController) {
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text (
+                Text(
                     text = stringResource(R.string.welcome),
                     Modifier.padding(0.dp, 0.dp, 0.dp, 5.dp),
                     fontSize = 40.sp,
@@ -60,9 +74,7 @@ fun WelcomeScreen(navController: NavController) {
             }
 
             Column(
-                modifier = Modifier
-                    .height(300.dp)
-                    .fillMaxWidth(),
+                modifier = Modifier.height(300.dp).fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AsyncImage(
@@ -103,6 +115,5 @@ fun WelcomeScreen(navController: NavController) {
                 }
             }
         }
-
     }
 }

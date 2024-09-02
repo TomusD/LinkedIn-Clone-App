@@ -64,10 +64,22 @@ android {
 }
 
 dependencies {
+
+
+    implementation(libs.glide)
+    implementation(libs.androidx.runtime.livedata) // Check for the latest version
+    annotationProcessor(libs.compiler)
+
+    // Coil for Compose
+    implementation(libs.converter.scalars)
+    implementation(libs.coil.compose.v270)
+    implementation(libs.ui)
+    implementation(libs.androidx.material)
+    implementation(libs.ui.tooling.preview)
+    debugImplementation(libs.ui.tooling)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.androidx.ui.text.google.fonts)
-    implementation(libs.coil.compose)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.navigation.compose)
