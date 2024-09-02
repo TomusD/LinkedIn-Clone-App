@@ -1,20 +1,34 @@
 package com.example.front.screens.pre_auth_screens
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,147 +52,308 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.front.R
 import com.example.front.data.ApiClient
 import com.example.front.data.request.UserRegister
-import com.example.front.data.response.Test
+import com.example.front.data.response.Token
 import com.example.front.ui.theme.Unna
+import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.lifecycle.LiveData
+import com.example.front.data.response.APIResponse
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUpScreen(navController: NavController) {
+fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel= viewModel()) {
     val context = LocalContext.current
+
+    val isLoading by viewModel.isLoading.observeAsState(false)
 
     var name by remember { mutableStateOf("") }
     var surname by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
+    var verifyPwd by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    var verify_pass by remember { mutableStateOf("") }
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
 
-
-    Column(
-        modifier = Modifier.fillMaxSize().padding(40.dp),
-        verticalArrangement = Arrangement.SpaceEvenly,
-        horizontalAlignment = Alignment.Start
-    ) {
-        IconButton(
-            onClick = {navController.navigateUp()}) {
-            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Go back")
+    val imagePickerLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            if (uri != null) {
+                imageUri = uri
+            }
         }
 
-        Text(
-            modifier = Modifier.width(250.dp),
-            text = stringResource(R.string.create_new_account),
-            fontSize = 40.sp,
-            fontFamily = Unna,
-            fontWeight = FontWeight.Bold,
-            lineHeight = 1.em
-        )
+    Box(modifier = Modifier.fillMaxSize()) {
 
-        TextField(
-            value = name, onValueChange = { newText -> name = newText },
-            label = {Text(text = stringResource(R.string.enter_name_label)) },
-            placeholder = {Text(text = stringResource(R.string.enter_name)) },
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent)
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(40.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.SpaceEvenly,
+            horizontalAlignment = Alignment.Start)
+        {
+            IconButton(
+                onClick = { navController.navigateUp() }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Go back"
+                )
+            }
 
-        TextField(
-            value = surname, onValueChange = { newText -> surname = newText },
-            label = {Text(text = stringResource(R.string.enter_surname_label)) },
-            placeholder = {Text(text = stringResource(R.string.enter_surname)) },
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent)
-        )
+            Text(
+                modifier = Modifier.width(250.dp),
+                text = stringResource(R.string.create_new_account),
+                fontSize = 40.sp,
+                fontFamily = Unna,
+                fontWeight = FontWeight.Bold,
+                lineHeight = 1.em
+            )
 
-        TextField(
-            value = email, onValueChange = { newText -> email = newText },
-            label = { Text(text = stringResource(R.string.enter_email_label)) },
-            placeholder = { Text(text = stringResource(R.string.enter_email)) },
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            TextField(
+                value = name, onValueChange = { newText -> name = newText },
+                label = { Text(text = stringResource(R.string.enter_name_label)) },
+                placeholder = { Text(text = stringResource(R.string.enter_name)) },
+                colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent)
+            )
+
+            TextField(
+                value = surname, onValueChange = { newText -> surname = newText },
+                label = { Text(text = stringResource(R.string.enter_surname_label)) },
+                placeholder = { Text(text = stringResource(R.string.enter_surname)) },
+                colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent)
+            )
+
+            TextField(
+                value = email, onValueChange = { newText -> email = newText },
+                label = { Text(text = stringResource(R.string.enter_email_label)) },
+                placeholder = { Text(text = stringResource(R.string.enter_email)) },
+                colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             )
 
 
-        TextField(
-            value = pass, onValueChange = { newText -> pass = newText },
-            label = { Text(text = stringResource(R.string.enter_password_label)) },
-            placeholder = {Text(text = stringResource(R.string.create_password)) },
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon = {
-                val image = if (passwordVisible)
-                    Icons.Filled.Face
-                else Icons.Filled.Favorite
+            TextField(
+                value = pass, onValueChange = { newText -> pass = newText },
+                label = { Text(text = stringResource(R.string.enter_password_label)) },
+                placeholder = { Text(text = stringResource(R.string.create_password)) },
+                colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    val image = if (passwordVisible)
+                        Icons.Filled.Face
+                    else Icons.Filled.Favorite
 
-                IconButton(onClick = {passwordVisible = !passwordVisible }) {
-                    Icon(imageVector = image, contentDescription = "")
-                }
-            },
-        )
-
-
-        TextField(
-            value = verify_pass,
-            onValueChange = { newText -> verify_pass = newText },
-            label = {Text(text = stringResource(R.string.verify_password_label)) },
-            singleLine = true,
-            isError = true,
-            supportingText = { Text(text = "Verify your password")},
-            placeholder = {Text(text = stringResource(R.string.verify_password)) },
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon = {
-                val image = if (passwordVisible)
-                    Icons.Filled.Face
-                else Icons.Filled.Favorite
-
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(imageVector = image, contentDescription = "")
-                }
-            },
-        )
-
-        Button(
-            onClick = {
-                val apiClient = ApiClient()
-                val newUser = UserRegister(name, surname, email, pass, "image_path")
-                val call = apiClient.getApiService(context).signUpUser(newUser)
-
-                call.enqueue(object : Callback<UserRegister> {
-                    override fun onResponse(call: Call<UserRegister>, response: Response<UserRegister>) {
-                        if (response.isSuccessful) {
-                            val res = response.body()
-                            Log.d("MYTEST", res.toString())
-                        } else {
-                            Log.d("MYTEST", "RESPONSE NOT SUCCESSFUL")
-                            // Handle error
-                        }
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(imageVector = image, contentDescription = "")
                     }
-
-                    override fun onFailure(call: Call<UserRegister>, t: Throwable) {
-                        Log.d("MYTEST", "FAILURE: "+ t.message.toString())
-
-                    }
-                })
-            },
-            Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(17, 138, 178),
-                contentColor = Color.White
+                },
             )
+
+            TextField(
+                value = verifyPwd,
+                onValueChange = { newText -> verifyPwd = newText },
+                label = { Text(text = stringResource(R.string.verify_password_label)) },
+                singleLine = true,
+                placeholder = { Text(text = stringResource(R.string.verify_password)) },
+                colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    val image = if (passwordVisible)
+                        Icons.Filled.Face
+                    else Icons.Filled.Favorite
+
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(imageVector = image, contentDescription = "")
+                    }
+                },
+            )
+
+            Row(Modifier.fillMaxHeight()) {
+
+                Button(
+                    onClick = { imagePickerLauncher.launch("image/*") },
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Black,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Upload picture")
+                }
+
+                imageUri?.let {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current).data(it).build(),
+                        contentDescription = "Selected Image",
+                        modifier = Modifier.size(50.dp),
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Button(
+                onClick = {
+                    val newUser = UserRegister(name, surname, email, pass, imageUri)
+                    viewModel.uploadUserRegistration(newUser, context)
+                },
+                Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(17, 138, 178),
+                    contentColor = Color.White
+                )
+            ) {
+                Text(text = stringResource(R.string.sign_up))
+            }
+
+        }
+
+        // Show a CircularProgressIndicator on top of the form when loading
+        LoadingIndicator(viewModel.isLoading)
+
+    }
+}
+
+@Composable
+fun LoadingIndicator(isLoading: LiveData<Boolean>) {
+    // Observe LiveData as state
+    val isLoadingState by isLoading.observeAsState(false)
+
+    if (isLoadingState) {
+        Box(
+            modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.3f)),
+            contentAlignment = Alignment.Center
         ) {
-            Text(text = stringResource(R.string.sign_up))
+            CircularProgressIndicator(
+                modifier = Modifier.size(60.dp) // Adjust size as needed
+            )
+        }
+    }
+}
+
+
+class RegisterViewModel : ViewModel() {
+
+    private val _isLoading = MutableLiveData(false)
+    val isLoading: LiveData<Boolean> = _isLoading
+
+    val isSuccessful = MutableLiveData<Boolean>()
+    val errorMessage = MutableLiveData<String?>()
+
+    fun uploadUserRegistration(user: UserRegister, context: Context) {
+        _isLoading.value = true
+
+        val nameBody = user.name.toRequestBody("text/plain".toMediaTypeOrNull())
+        val surnameBody = user.surname.toRequestBody("text/plain".toMediaTypeOrNull())
+        val emailBody = user.email.toRequestBody("text/plain".toMediaTypeOrNull())
+        val passwordBody = user.password.toRequestBody("text/plain".toMediaTypeOrNull())
+
+
+        val filePath = user.imageURI?.let { getRealPathFromURI(it, context) }
+        if (filePath != null) {
+
+            val imageFile = File(filePath)
+            val requestFile = imageFile
+                .asRequestBody(user.imageURI?.let {
+                    context.contentResolver.getType(it)?.toMediaTypeOrNull()
+                })
+            val imageBody = MultipartBody.Part.createFormData("image", imageFile.name, requestFile)
+
+
+            viewModelScope.launch {
+
+                try {
+                    val apiClient = ApiClient()
+                    val call = apiClient.getApiService(context).signUpUser(
+                        nameBody,
+                        surnameBody,
+                        emailBody,
+                        passwordBody,
+                        imageBody
+                    )
+                    call.enqueue(object : Callback<APIResponse> {
+                        override fun onResponse(call: Call<APIResponse>, response: Response<APIResponse>) {
+                            if (response.isSuccessful) {
+                                val res = response.body()
+                                Log.d("MYTEST", res.toString())
+                            } else {
+                                _isLoading.value = false
+                                Log.e("MYTEST", "RESPONSE NOT SUCCESSFUL")
+                            }
+                        }
+
+                        override fun onFailure(call: Call<APIResponse>, t: Throwable) {
+                            _isLoading.value = false
+                            Log.e("MYTEST", "FAILURE: "+ t.message.toString())
+
+                        }
+                    })
+
+                } catch (e: Exception) {
+                    // Handle network error
+                    isSuccessful.value = false
+                    _isLoading.value = false
+
+                    errorMessage.value = "Error: ${e.message}"
+                    Log.e("MYTEST", e.toString())
+
+                } finally {
+//                    _isLoading.value = false
+                }
+            }
+
+        } else {
+            Log.e("MYTEST", "FAILED TO GET REAL LIFE PATH FROM URI")
+            _isLoading.value = false
         }
 
     }
+}
+
+// Utility function to get real file path from Uri
+fun getRealPathFromURI(uri: Uri, context: android.content.Context): String {
+    var filePath = ""
+    val cursor = context.contentResolver.query(uri, null, null, null, null)
+    if (cursor != null) {
+        cursor.moveToFirst()
+        val idx = cursor.getColumnIndex("_data")
+        if (idx != -1) {
+            filePath = cursor.getString(idx)
+        } else {
+            // Fallback: Create a temporary file
+            val inputStream = context.contentResolver.openInputStream(uri)
+            val tempFile = File(context.cacheDir, "temp_image")
+            inputStream?.use { input ->
+                tempFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            filePath = tempFile.absolutePath
+        }
+        cursor.close()
+    }
+    return filePath
 }
