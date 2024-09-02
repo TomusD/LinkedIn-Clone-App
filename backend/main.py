@@ -1,22 +1,53 @@
+# FastAPI
 import uvicorn
-from fastapi import FastAPI, APIRouter, Depends, HTTPException, status
+from fastapi import FastAPI, APIRouter, Depends, HTTPException, status, File, Form, UploadFile
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
+
+from typing import Annotated
 from sqlalchemy.orm import Session
+from jose import JWTError, jwt
+
+# Project specific
 import helpers
 import crud, models, schemas
+from datetime import timedelta
 from database import SessionLocal, engine
-from typing import Annotated
-from jose import JWTError, jwt
-from datetime import datetime, timedelta, timezone
-
 import security as sec
+
+# Python built-in
+import time
+import pathlib
+import shutil
+
+# Cloud Storage
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import storage
+
+cred = credentials.Certificate("certifications/serviceAccountKey.json")
+firebase_admin.initialize_app(cred, {
+        'storageBucket': 'ergasiapp.appspot.com'
+
+})
+bucket = storage.bucket()# Get a reference to the storage bucket
 
 cert_path: str = "./certifications/cert.pem"
 key_path: str = "./certifications/key.pem"
 
-models.Base.metadata.create_all(bind=engine)
+path_public: str = "public/"
+path_images: str = "images/"
+path_profiles: str = "profiles/"
+path_videos: str = "videos/"
+path_sounds: str = "sounds/"
+
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="public/", ), name="static")
+models.Base.metadata.create_all(bind=engine)
 
 # Dependency
 def get_db():
@@ -28,7 +59,6 @@ def get_db():
 
 security_var = helpers.read_security_variables()
 
-route = APIRouter(prefix="/auth", tags=["Authentication"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # @route.post("/login")
@@ -48,12 +78,56 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 #     return {'access_token': token, 'token_type': 'bearer','refresh_token':refresh,"user_id":user.id}
 
-@app.post("/users", response_model=schemas.UserRegister, tags=["auth"])
-def create_user(user: schemas.UserRegister, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_email(db, email=user.email)
+
+import copy
+from typing import Any
+@app.post("/users", response_class=JSONResponse, tags=["auth"])
+async def create_user(    
+    nameBody: str = Form(...), surnameBody: str = Form(...), emailBody: str = Form(...), 
+    passwordBody: str = Form(...), image: UploadFile = File(...), db: Session = Depends(get_db)):
+
+
+    db_user = crud.get_user_by_email(db, email=emailBody)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    return crud.create_user(db=db, schema_user=user)
+    
+    file_name: str = (nameBody+surnameBody).lower() + str(int(time.time() * 1000)) + pathlib.Path(image.filename).suffix
+
+    # Save the file locally
+    local_image_copy = helpers.copy_upload_file(image)
+    local_save_path: str = f"{path_public}{path_images}{path_profiles}{file_name}"
+    with open(local_save_path, "wb") as buffer:
+        shutil.copyfileobj(local_image_copy.file, buffer)
+
+    # Save to Cloud Storage
+    try:
+        bucket = storage.bucket()
+        cloud_save_path: str = f"{path_images}{path_profiles}{file_name}"
+        blob = bucket.blob(cloud_save_path)
+        
+        blob.upload_from_string(
+            image.file.read(),
+            content_type=image.content_type
+        )
+        blob.make_public()
+
+        download_url = blob.public_url
+        print(f"Uploaded: {download_url}!\n")
+
+    except Exception as e:
+        print("error", str(e))
+        return JSONResponse({"error": str(e)}, status_code=500)
+    
+    user = schemas.UserRegister(name=nameBody, 
+                                surname=surnameBody, 
+                                email=emailBody, 
+                                password=passwordBody, 
+                                image_path=download_url)
+
+    
+    crud.create_user(db=db, schema_user=user)
+
+    return JSONResponse(content={"message": "Successfully registered!"}, status_code=200)
 
 
 @app.post("/token", response_model=schemas.UserLoginResponse, tags=["auth"])
