@@ -18,4 +18,4 @@ class User(Base):
     image_path = Column(String)
 
     def __repr__(self) -> None:
-        return f"<User(fullname={self.name} {self.surname}, email={self.email})"
+        return f"<User(id={self.id}, fullname={self.name} {self.surname}, email={self.email}, image_path={self.image_path})>"
