@@ -6,6 +6,8 @@ val port: String = gradleLocalProperties(rootDir, providers).getProperty("port")
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    kotlin("kapt")
+
 }
 
 android {
@@ -65,14 +67,30 @@ android {
 
 dependencies {
 
+    implementation(libs.androidx.hilt.navigation.compose)
+//    implementation(libs.hilt.android.v249)
+    kapt(libs.hilt.compiler)
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel)
+
+
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.ui.v150)
 
     implementation(libs.glide)
     implementation(libs.androidx.runtime.livedata) // Check for the latest version
     annotationProcessor(libs.compiler)
 
+
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+
+
     // Coil for Compose
     implementation(libs.converter.scalars)
     implementation(libs.coil.compose.v270)
+
+
     implementation(libs.ui)
     implementation(libs.androidx.material)
     implementation(libs.ui.tooling.preview)
