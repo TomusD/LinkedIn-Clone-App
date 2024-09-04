@@ -15,6 +15,10 @@ Operations to interact with the database
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
+def get_user_by_id(db: Session, user_id: int):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    return user.id
+
 
 def get_users(db: Session, uid: str):
     users = db.query(models.User).all()
@@ -45,3 +49,19 @@ def authenticate_user(db: Session, email: str, password: str):
     if not hashing.verify_password(password, user.hashed_password):
         return False
     return user
+
+def create_job(db: Session, schema_job: schemas.JobInDB, recruiter_id: int):
+    recruiter_id_key = get_user_by_id(db, recruiter_id)
+
+    db_job= models.Job(
+        recruiter_id=recruiter_id_key,
+        organization=schema_job.organization,
+        role=schema_job.role,
+        place=schema_job.place,
+        type=schema_job.type,
+        salary=schema_job.salary
+    )
+    db.add(db_job)
+    db.commit()
+    db.refresh(db_job)
+    return schemas.JobInDB(job_id=db_job.job_id,recruiter_id=db_job.recruiter_id, organization=db_job.organization, role=db_job.role, place=db_job.place, type=db_job.type, salary=db_job.salary)
