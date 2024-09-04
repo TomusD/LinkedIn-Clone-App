@@ -12,5 +12,6 @@ sealed class Screens(val route : String) {
     object Network: Screens("network_route")
     object Jobs: Screens("jobs_route")
     object Notifications: Screens("notifications_route")
-
+    object Profile: Screens("profile_route")
+    object Settings : Screens("settings_route")
 }

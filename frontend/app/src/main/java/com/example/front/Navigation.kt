@@ -41,7 +41,7 @@ fun Navigation() {
 
         navigation(startDestination = "home_route", route = "main") {
             composable(Screens.Home.route) {
-                BottomNavigationBar()
+                BottomNavigationBar(navController = navController)
             }
         }
     }
