@@ -299,6 +299,8 @@ class RegisterViewModel : ViewModel() {
                             if (response.isSuccessful) {
                                 val res = response.body()
                                 Log.d("MYTEST", res.toString())
+                                _isLoading.value = false
+
                             } else {
                                 _isLoading.value = false
                                 Log.e("MYTEST", "RESPONSE NOT SUCCESSFUL")

@@ -48,4 +48,8 @@ class SessionManager (context: Context) {
         editor.putString(USER_IMAGE_URL, user.imagePath)
         editor.apply()
     }
+
+    fun getUserInfo(info: String): String? {
+        return prefs.getString(info, null)
+    }
 }
