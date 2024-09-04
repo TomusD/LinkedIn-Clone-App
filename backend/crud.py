@@ -16,6 +16,12 @@ def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
 
+def get_users(db: Session, uid: str):
+    users = db.query(models.User).all()
+    print(users)
+    return users
+
+
 def create_user(db: Session, schema_user: schemas.UserRegister):
     hashed_pwd = hashing.hash_password(schema_user.password)
 

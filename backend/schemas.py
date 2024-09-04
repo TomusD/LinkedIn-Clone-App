@@ -14,13 +14,11 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     email: str | None = None
 
+
 class LoginUser(BaseModel):
     email: EmailStr
     password: str
 
-    # class Config:
-    #     orm_mode = True
-    #     use_enum_values = True
 
 class UserBase(BaseModel):
     name: str
@@ -32,10 +30,14 @@ class UserBase(BaseModel):
 class UserRegister(UserBase):
     password: str
 
-# inherits
+
 class User(UserBase):
     id: int
 
-class UserLoginResponse(Token):
-    id: str
 
+class LoginResponse(Token):
+    user: User
+
+
+class UserList(BaseModel):
+    users: list[User]

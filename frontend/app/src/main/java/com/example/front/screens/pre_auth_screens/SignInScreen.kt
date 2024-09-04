@@ -43,9 +43,7 @@ import com.example.front.R
 import com.example.front.data.ApiClient
 import com.example.front.data.SessionManager
 import com.example.front.data.request.UserLoginRequest
-import com.example.front.data.request.UserRegister
-import com.example.front.data.response.Test
-import com.example.front.data.response.UserLoginResponse
+import com.example.front.data.response.LoginResponse
 import com.example.front.ui.theme.Unna
 import retrofit2.Call
 import retrofit2.Callback
@@ -55,6 +53,7 @@ import retrofit2.Response
 @Composable
 fun SignInScreen(navController: NavController, onLoginSuccess: () -> Unit) {
     val context = LocalContext.current
+    val sessionManager = SessionManager(context)
 
     var email by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
@@ -114,23 +113,28 @@ fun SignInScreen(navController: NavController, onLoginSuccess: () -> Unit) {
             onClick = {
                 var apiClient = ApiClient()
 
-                val user = UserLoginRequest(email, pass)
-                val call = apiClient.getApiService(context).signInUser(user)
+//                val user = UserLoginRequest(email, pass)
+                val call = apiClient.getApiService(context).signInUser(email, pass)
 
-                call.enqueue(object : Callback<UserLoginResponse> {
-                    override fun onResponse(call: Call<UserLoginResponse>, response: Response<UserLoginResponse>) {
+                call.enqueue(object : Callback<LoginResponse> {
+                    override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
                         if (response.isSuccessful) {
                             val res = response.body()
+                            res?.accessToken?.let { sessionManager.saveAuthToken(it) }
+                            res?.user?.let { sessionManager.saveUserInfo(it) }
+
                             Log.d("MYTEST", res.toString())
+
+
                             onLoginSuccess()
                         } else {
-                            Log.d("MYTEST", "RESPONSE NOT SUCCESSFUL")
+                            Log.e("MYTEST", "RESPONSE NOT SUCCESSFUL")
                             // Handle error
                         }
                     }
 
-                    override fun onFailure(call: Call<UserLoginResponse>, t: Throwable) {
-                        Log.d("MYTEST", "FAILURE: "+ t.message.toString())
+                    override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                        Log.e("MYTEST", "FAILURE: "+ t.message.toString())
 
                     }
                 })

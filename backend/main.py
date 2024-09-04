@@ -58,11 +58,46 @@ def get_db():
         db.close()
 
 security_var = helpers.read_security_variables()
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-import copy
-from typing import Any
+
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"})
+    
+    try:
+        payload = jwt.decode(token, security_var["JWT_SECRET_KEY"], security_var["ALGORITHM"])
+        email = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+    
+        token_data = schemas.TokenData(email=email)
+        user = crud.get_user_by_email(db=db, email=token_data.email)
+        
+        if (user) is None:
+            raise credentials_exception
+       
+        return user
+    
+    except JWTError:
+        raise credentials_exception
+
+
+@app.get("/users")
+def get_users(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    users: list[models.User] = crud.get_users(db, current_user.id)
+    schema_users: list[schemas.User] =  [schemas.User(id =u.id, 
+                                               name = u.name, 
+                                               surname = u.surname, 
+                                               email = u.email, 
+                                               image_path = u.image_path) for u in users]
+    
+    return schemas.UserList(users=schema_users)
+
+
+
 @app.post("/users", response_class=JSONResponse, tags=["auth"])
 async def create_user(    
     nameBody: str = Form(...), surnameBody: str = Form(...), emailBody: str = Form(...), 
@@ -112,10 +147,9 @@ async def create_user(
     return JSONResponse(content={"message": "Successfully registered!"}, status_code=200)
 
 
-@app.post("/token", response_model=schemas.UserLoginResponse, tags=["auth"])
-async def login_for_access_token(form_data: schemas.LoginUser, db: Session = Depends(get_db)) -> schemas.Token:
-
-    user = crud.authenticate_user(db, form_data.email, form_data.password)
+@app.post("/token", response_model=schemas.LoginResponse, tags=["auth"])
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)) -> schemas.Token:
+    user = crud.authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -126,34 +160,20 @@ async def login_for_access_token(form_data: schemas.LoginUser, db: Session = Dep
     access_token = sec.create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
+    print(user)
 
-    return schemas.UserLoginResponse(access_token=access_token, token_type="bearer", id=str(user.id))
+    return schemas.LoginResponse(access_token=access_token, 
+                                 token_type="bearer", 
+                                 user=schemas.User(
+                                     id=user.id, 
+                                     name= user.name, 
+                                     surname= user.surname, 
+                                     email= user.email, 
+                                     image_path= user.image_path
+                                 ))
 
-
-def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
-    credentials_exception = HTTPException(
-        status_code=401,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"})
-    
-    try:
-        payload = jwt.decode(token, security_var["JWT_SECRET_KEY"], security_var["ALGORITHM"])
-        
-        if (email := payload.get("sub")) is None:
-            raise credentials_exception
-    
-        token_data = schemas.TokenData(username=email)
-        user = crud.get_user_by_email(db=db, username=token_data.email)
-        
-        if (user) is None:
-            raise credentials_exception
-       
-        return user
-    
-    except JWTError:
-        raise credentials_exception
 
 
 if __name__ == "__main__":
     ip, port = helpers.read_env_properties()
-    uvicorn.run(app, host=ip, port=port, ssl_certfile=cert_path, ssl_keyfile=key_path)
+    uvicorn.run("__main__:app", host=ip, port=port, reload=True, ssl_certfile=cert_path, ssl_keyfile=key_path)
