@@ -41,3 +41,18 @@ class LoginResponse(Token):
 
 class UserList(BaseModel):
     users: list[User]
+    
+class JobBase(BaseModel):
+    organization: str
+    role: str
+    place: str
+    type: str
+    salary: int
+
+class JobCreate(JobBase):
+    recruiter_id: int
+    
+
+class JobInDB(JobBase):
+    job_id: int
+
