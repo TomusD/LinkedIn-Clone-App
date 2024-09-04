@@ -171,29 +171,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
                                      image_path= user.image_path
                                  ))
 
-def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
-    credentials_exception = HTTPException(
-        status_code=401,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"})
-    
-    try:
-        payload = jwt.decode(token, security_var["JWT_SECRET_KEY"], security_var["ALGORITHM"])
-        email = payload.get("sub")
-        if email is None:
-            raise credentials_exception
-    
-        token_data = schemas.TokenData(email=email)
-        user = crud.get_user_by_email(db=db, email=token_data.email)
-        
-        if (user) is None:
-            raise credentials_exception
-       
-        return user
-    
-    except JWTError:
-        raise credentials_exception
-    
+
 @app.post("/job", response_class=JSONResponse, tags=["jobs"])
 async def create_job(    
     organizationBody: str = Form(...), roleBody: str = Form(...), placeBody: str = Form(...), 
@@ -211,6 +189,7 @@ async def create_job(
     crud.create_job(db=db, schema_job=job, recruiter_id=current_user.id)
 
     return JSONResponse(content={"message": "Successfully registered!"}, status_code=200)
+
 
 if __name__ == "__main__":
     ip, port = helpers.read_env_properties()
