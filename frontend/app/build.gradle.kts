@@ -6,8 +6,9 @@ val port: String = gradleLocalProperties(rootDir, providers).getProperty("port")
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    kotlin("kapt")
 
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -66,33 +67,43 @@ android {
 }
 
 dependencies {
+    implementation("androidx.compose.material3:material3-window-size-class:1.0.0")
+
+    // Coil for Compose
+    implementation(libs.converter.scalars)
+    implementation(libs.coil)
+    implementation(libs.coil.compose.v270) // Use the latest version
+
+    //Dagger - Hilt`
+    implementation(libs.hilt.android.v244)
+    implementation(libs.androidx.material3.android)
+    kapt(libs.hilt.android.compiler.v244)
+
+
+    implementation(libs.dagger)
+    kapt(libs.dagger.compiler)
+
+    // Dagger Android
+    api(libs.dagger.android)
+    api(libs.dagger.android.support)
+    kapt(libs.dagger.android.processor)
+
 
     implementation(libs.androidx.hilt.navigation.compose)
-//    implementation(libs.hilt.android.v249)
-    kapt(libs.hilt.compiler)
-    implementation(libs.hilt.android)
-    implementation(libs.androidx.hilt.lifecycle.viewmodel)
+//
+//    implementation(libs.androidx.hilt.lifecycle.viewmodel)
+//    implementation(libs.androidx.lifecycle)
+    implementation(libs.androidx.ui)
 
-
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.ui.v150)
-
-    implementation(libs.glide)
     implementation(libs.androidx.runtime.livedata) // Check for the latest version
     annotationProcessor(libs.compiler)
 
 
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.coroutines.android)
-
-
-    // Coil for Compose
-    implementation(libs.converter.scalars)
-    implementation(libs.coil.compose.v270)
+//    implementation(libs.kotlinx.coroutines.core)
+//    implementation(libs.kotlinx.coroutines.android)
 
 
     implementation(libs.ui)
-    implementation(libs.androidx.material)
     implementation(libs.ui.tooling.preview)
     debugImplementation(libs.ui.tooling)
     implementation(libs.retrofit)
@@ -108,7 +119,6 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -116,4 +126,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+
 }
