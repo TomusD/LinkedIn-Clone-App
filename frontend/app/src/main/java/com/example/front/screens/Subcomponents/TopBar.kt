@@ -94,10 +94,10 @@ fun TopBar(drawerState: DrawerState, scope: CoroutineScope) {
                             .clip(RoundedCornerShape(10.dp))
                             .background(Color.LightGray)
                             .padding(horizontal = 0.dp),
-                        colors = TextFieldDefaults.textFieldColors(
-                            containerColor = Color.LightGray,
+                        colors = TextFieldDefaults.colors(
+                            unfocusedContainerColor = Color.LightGray,
                             focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent),
 
                             )
                     )

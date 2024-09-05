@@ -132,21 +132,21 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel= vie
                 value = name, onValueChange = { newText -> name = newText },
                 label = { Text(text = stringResource(R.string.enter_name_label)) },
                 placeholder = { Text(text = stringResource(R.string.enter_name)) },
-                colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent)
+                colors = TextFieldDefaults.colors(unfocusedContainerColor = Color.Transparent),
             )
 
             TextField(
                 value = surname, onValueChange = { newText -> surname = newText },
                 label = { Text(text = stringResource(R.string.enter_surname_label)) },
                 placeholder = { Text(text = stringResource(R.string.enter_surname)) },
-                colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent)
+                colors = TextFieldDefaults.colors(unfocusedContainerColor = Color.Transparent),
             )
 
             TextField(
                 value = email, onValueChange = { newText -> email = newText },
                 label = { Text(text = stringResource(R.string.enter_email_label)) },
                 placeholder = { Text(text = stringResource(R.string.enter_email)) },
-                colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent),
+                colors = TextFieldDefaults.colors(unfocusedContainerColor = Color.Transparent),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             )
 
@@ -155,7 +155,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel= vie
                 value = pass, onValueChange = { newText -> pass = newText },
                 label = { Text(text = stringResource(R.string.enter_password_label)) },
                 placeholder = { Text(text = stringResource(R.string.create_password)) },
-                colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent),
+                colors = TextFieldDefaults.colors(unfocusedContainerColor = Color.Transparent),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
@@ -175,7 +175,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel= vie
                 label = { Text(text = stringResource(R.string.verify_password_label)) },
                 singleLine = true,
                 placeholder = { Text(text = stringResource(R.string.verify_password)) },
-                colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent),
+                colors = TextFieldDefaults.colors(unfocusedContainerColor = Color.Transparent),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {

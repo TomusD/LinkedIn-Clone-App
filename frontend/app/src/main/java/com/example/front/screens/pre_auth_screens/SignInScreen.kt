@@ -86,7 +86,7 @@ fun SignInScreen(navController: NavController, onLoginSuccess: () -> Unit) {
             onValueChange = { newText -> email = newText },
             label = { Text(text = stringResource(R.string.enter_email_label)) },
             placeholder = { Text(text = stringResource(R.string.enter_email)) },
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent),
+            colors = TextFieldDefaults.colors(unfocusedContainerColor = Color.Transparent),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             singleLine = true,
         )
@@ -96,7 +96,7 @@ fun SignInScreen(navController: NavController, onLoginSuccess: () -> Unit) {
             onValueChange = { newText -> pass = newText },
             label = { Text(text = stringResource(R.string.enter_password_label)) },
             placeholder = { Text(text = stringResource(R.string.enter_password)) },
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent),
+            colors = TextFieldDefaults.colors(unfocusedContainerColor = Color.Transparent),
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),

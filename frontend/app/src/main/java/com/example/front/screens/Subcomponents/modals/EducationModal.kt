@@ -74,7 +74,7 @@ fun EducationModal(
                     value = organization, onValueChange = { organization = it },
                     label = { Text(text = "Organization") },
                     placeholder = { Text(text = "Organization") },
-                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.LightGray)
+                    colors = TextFieldDefaults.colors(unfocusedIndicatorColor = Color.LightGray)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -83,7 +83,7 @@ fun EducationModal(
                     value = degree, onValueChange = { degree = it },
                     label = { Text(text = "Degree") },
                     placeholder = { Text(text = "Degree") },
-                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.LightGray)
+                    colors = TextFieldDefaults.colors(unfocusedIndicatorColor = Color.LightGray)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -92,7 +92,7 @@ fun EducationModal(
                     value = field, onValueChange = { field = it },
                     label = { Text(text = "Field of Study") },
                     placeholder = { Text(text = "Field of Study") },
-                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.LightGray)
+                    colors = TextFieldDefaults.colors(unfocusedIndicatorColor = Color.LightGray)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -102,7 +102,7 @@ fun EducationModal(
                     label = { Text(text = "Date Started (yyyy-MM-dd)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     placeholder = { Text(text = "Date Started (yyyy-MM-dd)") },
-                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.LightGray)
+                    colors = TextFieldDefaults.colors(unfocusedIndicatorColor = Color.LightGray)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -112,7 +112,7 @@ fun EducationModal(
                     label = { Text(text = "Date Ended (yyyy-MM-dd)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     placeholder = { Text(text = "Date Ended (yyyy-MM-dd)") },
-                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.LightGray)
+                    colors = TextFieldDefaults.colors(unfocusedIndicatorColor = Color.LightGray)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
