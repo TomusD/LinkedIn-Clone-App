@@ -18,7 +18,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
+import androidx.compose.material3.*
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -99,7 +99,6 @@ fun TopBar(drawerState: DrawerState, scope: CoroutineScope) {
                             focusedIndicatorColor = Color.Transparent,
                             unfocusedIndicatorColor = Color.Transparent),
 
-                            )
                     )
                 }
                 Spacer(modifier = Modifier.width(5.dp))
@@ -116,7 +115,7 @@ fun TopBar(drawerState: DrawerState, scope: CoroutineScope) {
                 }
             }
         },
-        colors = TopAppBarDefaults.smallTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.Transparent,
             titleContentColor = Color.Black,
             actionIconContentColor = Color.Black
