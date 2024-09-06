@@ -1,5 +1,6 @@
-from pydantic import BaseModel, EmailStr
-
+from pydantic import BaseModel, EmailStr, PastDate, PositiveFloat
+from typing import Optional
+from datetime import datetime
 """
 schemas.py
 
@@ -56,3 +57,22 @@ class JobCreate(JobBase):
 class JobInDB(JobBase):
     job_id: int
 
+
+# Profile Settings
+class Settings(BaseModel):
+    organization: str
+    date_started: PastDate
+    date_ended: Optional[PastDate] = None
+
+class Work(Settings):
+    role: str
+
+class WorkResponse(Work):
+    work_id: int
+# Responses as lists
+class UserList(BaseModel):
+    users: list[User]
+    
+class WorkList(BaseModel):
+    workList: list[WorkResponse]
+    

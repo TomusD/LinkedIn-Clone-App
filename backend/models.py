@@ -21,6 +21,36 @@ class User(Base):
     def __repr__(self) -> None:
         return f"<User(id={self.id}, fullname={self.name} {self.surname}, email={self.email}, image_path={self.image_path})>"
 
+
+class UserInfo(Base):
+    __tablename__ = "user_info"
+
+    id = Column(Integer, ForeignKey('users.id'),  primary_key=True, nullable=False)
+    education_public = Column(Boolean, default=True)
+    work_public = Column(Boolean, default=True)
+    skills_public = Column(Boolean, default=True)
+
+    works = relationship("Work", back_populates="user_info")
+    
+    def __repr__(self) -> None:
+        return f"<User(id={self.id}, works={self.work_public}>)"
+
+
+class Work(Base):
+    __tablename__ = "work"
+
+    work_id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('user_info.id'), nullable=False)
+    organization = Column(String, nullable=False)
+    role = Column(String, nullable=False)
+    date_started = Column(Date, nullable=False)
+    date_ended = Column(Date, nullable=True)
+
+    user_info = relationship("UserInfo", back_populates="works")
+    
+    def __repr__(self) -> None:
+        return f"<Work(id={self.work_id}, organization={self.organization}, role={self.role}, date_started={self.date_started}, date_ended={self.date_ended})>"
+
 class Job(Base):
     __tablename__ = "job"
 

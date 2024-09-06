@@ -36,9 +36,15 @@ def create_user(db: Session, schema_user: schemas.UserRegister):
         hashed_password=hashed_pwd,
         image_path=schema_user.image_path
         )
+    
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+
+    db_user_info = models.UserInfo(id=db_user.id)
+    db.add(db_user_info)
+    db.commit()
+
     return schemas.UserRegister(name=db_user.name, surname=db_user.surname, password=db_user.hashed_password, email=db_user.email, image_path=db_user.image_path)
 
 
@@ -49,6 +55,7 @@ def authenticate_user(db: Session, email: str, password: str):
     if not hashing.verify_password(password, user.hashed_password):
         return False
     return user
+
 
 def create_job(db: Session, schema_job: schemas.JobInDB, recruiter_id: int):
     recruiter_id_key = get_user_by_id(db, recruiter_id)
@@ -65,3 +72,35 @@ def create_job(db: Session, schema_job: schemas.JobInDB, recruiter_id: int):
     db.commit()
     db.refresh(db_job)
     return schemas.JobInDB(job_id=db_job.job_id,recruiter_id=db_job.recruiter_id, organization=db_job.organization, role=db_job.role, place=db_job.place, type=db_job.type, salary=db_job.salary)
+
+
+def add_work_experience(db: Session, user_id: int, schema_work: schemas.Work):
+    db_work = models.Work(
+        user_id= user_id,
+        organization = schema_work.organization,
+        role=schema_work.role,
+        date_started = schema_work.date_started,
+        date_ended = (None if (schema_work.date_ended == None) else schema_work.date_ended)
+    )
+    db.add(db_work)
+    db.commit()
+    return db_work
+
+
+def add_education(db: Session, user_id: int, schema_edu: schemas.Education):
+    db_work = models.Education(
+        user_id= user_id,
+        organization = schema_edu.organization,
+        degree = (None if (schema_edu.degree == None) else schema_edu.degree),
+        date_started = schema_edu.date_started,
+        date_ended = (None if (schema_edu.date_ended == None) else schema_edu.date_ended)
+    )
+
+    db.add(db_work)
+    db.commit()
+    return db_work
+
+def get_work_experience(db: Session, user_id: int):
+    print(user_id, type(user_id))
+    return db.query(models.UserInfo).filter(models.UserInfo.id==user_id).first()
+    
