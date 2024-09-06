@@ -6,6 +6,7 @@ coilKtCoilCompose = "2.7.0"
 coilKtCoilComposeVersion = "2.2.2"
 compiler = "4.16.0"
 converterGson = "2.11.0"
+converterGsonVersion = "2.5.0"
 dagger = "2.49"
 daggerAndroid = "2.27"
 daggerCompiler = "2.44"
@@ -46,6 +47,7 @@ coil-compose-v222 = { module = "io.coil-kt:coil-compose", version.ref = "coilKtC
 coil-compose-v270 = { module = "io.coil-kt:coil-compose", version.ref = "coilKtCoilCompose" }
 compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "compiler" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+converter-gson-v250 = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGsonVersion" }
 converter-scalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "converterGson" }
 dagger = { module = "com.google.dagger:dagger", version.ref = "dagger" }
 dagger-android = { module = "com.google.dagger:dagger-android", version.ref = "daggerAndroid" }
