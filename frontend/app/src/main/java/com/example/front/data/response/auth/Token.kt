@@ -1,4 +1,4 @@
-package com.example.front.data.response
+package com.example.front.data.response.auth
 
 import com.google.gson.annotations.SerializedName
 

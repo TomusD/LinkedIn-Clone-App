@@ -42,8 +42,7 @@ import androidx.navigation.NavController
 import com.example.front.R
 import com.example.front.data.ApiClient
 import com.example.front.data.SessionManager
-import com.example.front.data.request.UserLoginRequest
-import com.example.front.data.response.LoginResponse
+import com.example.front.data.response.auth.LoginResponse
 import com.example.front.ui.theme.Unna
 import retrofit2.Call
 import retrofit2.Callback

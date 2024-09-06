@@ -61,7 +61,6 @@ import coil.request.ImageRequest
 import com.example.front.R
 import com.example.front.data.ApiClient
 import com.example.front.data.request.UserRegister
-import com.example.front.data.response.Token
 import com.example.front.ui.theme.Unna
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
