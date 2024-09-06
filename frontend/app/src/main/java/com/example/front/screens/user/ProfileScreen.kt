@@ -63,10 +63,12 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.front.data.response.EducationResponse
 import com.example.front.data.response.WorkResponse
 import com.example.front.screens.Subcomponents.Chip
 import com.example.front.screens.Subcomponents.modals.EducationModal
 import com.example.front.screens.Subcomponents.modals.WorkModal
+import com.example.front.screens.Subcomponents.profile.EduInfo
 import com.example.front.screens.Subcomponents.profile.WorkInfo
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,14 +80,14 @@ fun ProfileScreen(viewModel: BasicViewModel = viewModel()) {
 
     LaunchedEffect(Unit) {
         viewModel.fetchWork(context)
+        viewModel.fetchEducation(context)
     }
-    val workList = viewModel.workList.collectAsState().value
-
+    var workList = viewModel.workList.collectAsState().value
+    var eduList = viewModel.educationList.collectAsState().value
 
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("Work", "Education", "Skills")
 
-    
     Column(modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally) {
 
@@ -161,7 +163,7 @@ fun ProfileScreen(viewModel: BasicViewModel = viewModel()) {
 
             when (selectedTab) {
                 0 -> WorkExperienceTab(workList)
-                1 -> EducationTab()
+                1 -> EducationTab(eduList)
                 2 -> SkillsTab()
             }
         }
@@ -181,8 +183,7 @@ fun WorkExperienceTab(workList: List<WorkResponse>) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
 
-    )
-    {
+    ) {
         Spacer(modifier = Modifier.height(20.dp))
 
         Button(
@@ -195,7 +196,7 @@ fun WorkExperienceTab(workList: List<WorkResponse>) {
             )
         ) {
 
-            Text("+ Work Experience")
+            Text("+ Add Work Experience")
         }
 
         if (showDialog) {
@@ -209,8 +210,7 @@ fun WorkExperienceTab(workList: List<WorkResponse>) {
         }
 
         Spacer(modifier = Modifier.height(20.dp))
-        
-//        var workList2 = mutableListOf(WorkResponse(1, "Google", "Software Engineer", "2019-03-02", "2020-05-02"), )
+
         if (workList.isNotEmpty()) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(workList) { work ->
@@ -224,9 +224,10 @@ fun WorkExperienceTab(workList: List<WorkResponse>) {
 }
 
 
-@Preview
 @Composable
-fun EducationTab() {
+fun EducationTab(eduList: List<EducationResponse> = mutableListOf()) {
+    var localEduList = eduList
+
     var showDialog by remember { mutableStateOf(false) }
     var isPublic by remember { mutableStateOf(true) }
 
@@ -251,17 +252,30 @@ fun EducationTab() {
             )
         ) {
 
-            Text("+ Education")
+            Text("+ Add Education")
         }
 
         if (showDialog) {
             EducationModal(
                 onDismiss = { showDialog = false },
                 onSave = { education ->
-                    println("Saved Education: $education")
+                    Log.d("MYTEST", "Saved Education: $education")
                     showDialog = false
                 }
             )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+//        var eduList2 = mutableListOf(EducationResponse(1, "UoA", null, "ROCKET", "2019-03-02", null), )
+        if (localEduList.isNotEmpty()) {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                items(localEduList) { edu ->
+                    EduInfo(edu)
+                }
+            }
+        } else {
+            Text("No education added")
         }
     }
 }

@@ -14,3 +14,9 @@ data class WorkList(
     @SerializedName("workList")
     var workList: List<WorkResponse>
 )
+
+
+data class EducationList(
+    @SerializedName("eduList")
+    var eduList: List<EducationResponse>
+)

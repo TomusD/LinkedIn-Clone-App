@@ -1,7 +1,10 @@
 package com.example.front.data
 
+import com.example.front.data.request.Education
 import com.example.front.data.request.Work
 import com.example.front.data.response.APIResponse
+import com.example.front.data.response.EducationList
+import com.example.front.data.response.EducationResponse
 import com.example.front.data.response.auth.LoginResponse
 import com.example.front.data.response.UsersList
 import com.example.front.data.response.WorkList
@@ -42,8 +45,13 @@ interface ApiService {
     @POST("/profile/work")
     fun updateWork(@Body work: Work): Call<APIResponse>
 
-//    @Headers("Content-Type: application/json")
     @GET("/profile/work/me")
     fun getWorkExperience(): Call<WorkList>
 
+    @Headers("Content-Type: application/json")
+    @POST("/profile/education")
+    fun updateEducation(@Body edu: Education): Call<APIResponse>
+
+    @GET("/profile/edu/me")
+    fun getEducation(): Call<EducationList>
 }

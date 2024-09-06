@@ -1,5 +1,7 @@
 package com.example.front.screens.Subcomponents.modals
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,11 +22,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.front.data.ApiClient
 import com.example.front.data.request.Education
+import com.example.front.data.response.APIResponse
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -35,32 +43,59 @@ fun EducationModal(
     onDismiss: () -> Unit,
     onSave: (Education) -> Unit
 ) {
+    val context = LocalContext.current
+
     var organization by remember { mutableStateOf("") }
+    var science_field by remember { mutableStateOf("") }
     var degree by remember { mutableStateOf("") }
-    var field by remember { mutableStateOf("") }
     var dateStarted by remember { mutableStateOf("") }
     var dateEnded by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
+    fun updateWork(education: Education) {
+        val apiClient = ApiClient()
+        Log.d("MYTEST", education.toString())
+        val call = apiClient.getApiService(context).updateEducation(education)
+
+        call.enqueue(object : Callback<APIResponse> {
+            override fun onResponse(call: Call<APIResponse>, response: Response<APIResponse>) {
+                if (response.isSuccessful) {
+                    val res = response.body()
+                    Log.d("MYTEST", "SUCCESS" + res.toString())
+                } else {
+                    Log.e("MYTEST", "RESPONSE NOT SUCCESSFUL:$response")
+                    // Handle error
+                }
+            }
+            override fun onFailure(call: Call<APIResponse>, t: Throwable) {
+                Log.e("MYTEST", "TOTAL FAILURE")
+            }
+        })
+    }
+
     fun validateAndSave() {
         try {
-            val degreeValue = degree.toFloat()
+            val degreeValue = if (degree.isNotEmpty()) degree.toFloat() else null
             val startDate = LocalDate.parse(dateStarted, formatter)
             val endDate = if (dateEnded.isNotEmpty()) LocalDate.parse(dateEnded, formatter) else null
 
-            if (organization.isBlank() || field.isBlank()) {
+            if (organization.isBlank() || science_field.isBlank()) {
                 errorMessage = "Please fill all required fields."
             } else {
                 errorMessage = null
-                onSave(Education(organization, degreeValue, field, startDate, endDate))
+
+                val education = Education(organization, science_field, degreeValue, startDate.toString(), endDate?.toString())
+                updateWork(education)
+                Toast.makeText(context, "Re-visit to see the updated list", Toast.LENGTH_SHORT).show()
+                onSave(Education(organization, science_field, degreeValue, dateStarted, dateEnded))
             }
-        } catch (e: NumberFormatException) {
-            errorMessage = "Degree must be a number."
         } catch (e: DateTimeParseException) {
             errorMessage = "Date format must be yyyy-MM-dd."
         }
+
+
     }
 
     AlertDialog(
@@ -80,18 +115,18 @@ fun EducationModal(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 TextField(
-                    value = degree, onValueChange = { degree = it },
-                    label = { Text(text = "Degree") },
-                    placeholder = { Text(text = "Degree") },
+                    value = science_field, onValueChange = { science_field = it },
+                    label = { Text(text = "Science Field") },
+                    placeholder = { Text(text = "Science Field") },
                     colors = TextFieldDefaults.colors(unfocusedIndicatorColor = Color.LightGray)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 TextField(
-                    value = field, onValueChange = { field = it },
-                    label = { Text(text = "Field of Study") },
-                    placeholder = { Text(text = "Field of Study") },
+                    value = degree, onValueChange = { degree = it },
+                    label = { Text(text = "Degree") },
+                    placeholder = { Text(text = "Degree") },
                     colors = TextFieldDefaults.colors(unfocusedIndicatorColor = Color.LightGray)
                 )
 
