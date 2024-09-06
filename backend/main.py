@@ -4,8 +4,6 @@ from fastapi import FastAPI, APIRouter, Depends, HTTPException, status, File, Fo
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 from typing import Annotated
 from sqlalchemy.orm import Session
@@ -193,21 +191,41 @@ async def create_job(
 
 @app.post("/profile/work", response_class=JSONResponse, tags=["profile"])
 async def update_work(work: schemas.Work, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
-    print("inside BRO")
     crud.add_work_experience(db, current_user.id, work)
     return JSONResponse(content={"message": "Successfully added work!"}, status_code=200)
 
+
+@app.post("/profile/education", response_class=JSONResponse, tags=["profile"])
+async def update_edu(edu: schemas.Education, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    print("inside")
+    crud.add_education(db, current_user.id, edu)
+    return JSONResponse(content={"message": "Successfully added education!"}, status_code=200)
+
+
 @app.get("/profile/work/me", response_model=schemas.WorkList, tags=["profile"])
 async def get_work(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
-    ui: models.UserInfo = crud.get_work_experience(db, current_user.id)
+    ui = crud.get_user_info(db, current_user.id)
     work_list: list[schemas.WorkResponse] = [schemas.WorkResponse(work_id=u.work_id, 
                                                         organization=u.organization,
                                                         role=u.role,
                                                         date_started=u.date_started, 
                                                         date_ended=u.date_ended) 
                                                         for u in ui.works]
-                            
     return schemas.WorkList(workList=work_list)
+
+
+@app.get("/profile/edu/me", response_model=schemas.EduList, tags=["profile"])
+async def get_education(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    ui = crud.get_user_info(db, current_user.id)
+    edu_list: list[schemas.EduResponse] = [schemas.EduResponse(edu_id=u.edu_id, 
+                                                        organization=u.organization,
+                                                        science_field=u.science_field,
+                                                        degree=u.degree,
+                                                        date_started=u.date_started, 
+                                                        date_ended=u.date_ended) 
+                                                        for u in ui.education]
+                            
+    return schemas.EduList(eduList=edu_list)
 
 
 if __name__ == "__main__":

@@ -39,10 +39,6 @@ class User(UserBase):
 class LoginResponse(Token):
     user: User
 
-
-class UserList(BaseModel):
-    users: list[User]
-    
 class JobBase(BaseModel):
     organization: str
     role: str
@@ -69,10 +65,22 @@ class Work(Settings):
 
 class WorkResponse(Work):
     work_id: int
+
+class Education(Settings):
+    science_field: str
+    degree: Optional[PositiveFloat] = None
+
+class EduResponse(Education):
+    edu_id: int
+
+
 # Responses as lists
 class UserList(BaseModel):
     users: list[User]
     
 class WorkList(BaseModel):
     workList: list[WorkResponse]
+
+class EduList(BaseModel):
+    eduList: list[EduResponse]
     

@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Date, Float
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -31,9 +31,10 @@ class UserInfo(Base):
     skills_public = Column(Boolean, default=True)
 
     works = relationship("Work", back_populates="user_info")
+    education = relationship("Education", back_populates="user_info")
     
     def __repr__(self) -> None:
-        return f"<User(id={self.id}, works={self.work_public}>)"
+        return f"<User(id={self.id}, works={self.works}, edu={self.education}>)"
 
 
 class Work(Base):
@@ -50,6 +51,25 @@ class Work(Base):
     
     def __repr__(self) -> None:
         return f"<Work(id={self.work_id}, organization={self.organization}, role={self.role}, date_started={self.date_started}, date_ended={self.date_ended})>"
+
+
+class Education(Base):
+    __tablename__ = "education"
+
+    edu_id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('user_info.id'), nullable=False)
+    organization = Column(String, nullable=False)
+    science_field = Column(String, nullable=False)
+    degree = Column(Float, nullable=True)
+    date_started = Column(Date, nullable=False)
+    date_ended = Column(Date, nullable=True)
+
+    user_info = relationship("UserInfo", back_populates="education")
+    
+    def __repr__(self) -> None:
+        return f"<Edu(id={self.edu_id}, organization={self.organization}, science_field={self.science_field}, degree={self.degree}, date_started={self.date_started}, date_ended={self.date_ended})>"
+
+
 
 class Job(Base):
     __tablename__ = "job"

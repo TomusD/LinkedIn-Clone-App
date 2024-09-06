@@ -88,19 +88,20 @@ def add_work_experience(db: Session, user_id: int, schema_work: schemas.Work):
 
 
 def add_education(db: Session, user_id: int, schema_edu: schemas.Education):
-    db_work = models.Education(
+    db_edu = models.Education(
         user_id= user_id,
         organization = schema_edu.organization,
+        science_field = schema_edu.science_field,
         degree = (None if (schema_edu.degree == None) else schema_edu.degree),
         date_started = schema_edu.date_started,
         date_ended = (None if (schema_edu.date_ended == None) else schema_edu.date_ended)
     )
 
-    db.add(db_work)
+    db.add(db_edu)
     db.commit()
-    return db_work
+    return db_edu
 
-def get_work_experience(db: Session, user_id: int):
+
+def get_user_info(db: Session, user_id: int):
     print(user_id, type(user_id))
     return db.query(models.UserInfo).filter(models.UserInfo.id==user_id).first()
-    
