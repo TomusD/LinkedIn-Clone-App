@@ -1,5 +1,6 @@
 package com.example.front.screens.Subcomponents.modals
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -11,8 +12,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.text.KeyboardOptions
-import com.example.front.data.request.Education
+import androidx.compose.ui.platform.LocalContext
+import com.example.front.data.ApiClient
 import com.example.front.data.request.Work
+import com.example.front.data.response.APIResponse
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -23,6 +29,9 @@ fun WorkModal(
     onDismiss: () -> Unit,
     onSave: (Work) -> Unit
 ) {
+
+    val context = LocalContext.current
+
     var organization by remember { mutableStateOf("") }
     var role by remember { mutableStateOf("") }
     var dateStarted by remember { mutableStateOf("") }
@@ -30,6 +39,30 @@ fun WorkModal(
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+    fun updateWork(work: Work) {
+        val apiClient = ApiClient()
+
+        Log.d("MYTEST", work.toString())
+        val call = apiClient.getApiService(context).updateWork(work)
+
+        call.enqueue(object : Callback<APIResponse> {
+            override fun onResponse(call: Call<APIResponse>, response: Response<APIResponse>) {
+                if (response.isSuccessful) {
+                    val res = response.body()
+
+                    Log.d("MYTEST", res.toString())
+
+                } else {
+                    Log.e("MYTEST", "RESPONSE NOT SUCCESSFUL:$response")
+                    // Handle error
+                }
+            }
+            override fun onFailure(call: Call<APIResponse>, t: Throwable) {
+                Log.e("MYTEST", "TOTAL FAILURE")
+            }
+        })
+    }
 
     fun validateAndSave() {
         try {
@@ -40,7 +73,11 @@ fun WorkModal(
                 errorMessage = "Please fill all required fields."
             } else {
                 errorMessage = null
-                onSave(Work(organization, role, startDate, endDate))
+
+                val work: Work = Work(organization, role, startDate.toString(), endDate?.toString())
+
+                updateWork(work)
+                onSave(work)
             }
         } catch (e: NumberFormatException) {
             errorMessage = "Degree must be a number."
@@ -48,6 +85,7 @@ fun WorkModal(
             errorMessage = "Date format must be yyyy-MM-dd."
         }
     }
+
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -60,7 +98,7 @@ fun WorkModal(
                     value = organization, onValueChange = { organization = it },
                     label = { Text(text = "Organization") },
                     placeholder = { Text(text = "Organization") },
-                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.LightGray)
+                    colors = TextFieldDefaults.colors(unfocusedContainerColor = Color.LightGray)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -69,7 +107,7 @@ fun WorkModal(
                     value = role, onValueChange = { role = it },
                     label = { Text(text = "Role") },
                     placeholder = { Text(text = "Role") },
-                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.LightGray)
+                    colors = TextFieldDefaults.colors(unfocusedContainerColor = Color.LightGray)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -79,7 +117,7 @@ fun WorkModal(
                     label = { Text(text = "Date Started (yyyy-MM-dd)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     placeholder = { Text(text = "Date Started (yyyy-MM-dd)") },
-                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.LightGray)
+                    colors = TextFieldDefaults.colors(unfocusedContainerColor = Color.LightGray)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -89,7 +127,7 @@ fun WorkModal(
                     label = { Text(text = "Date Ended (yyyy-MM-dd)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     placeholder = { Text(text = "Date Ended (yyyy-MM-dd)") },
-                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.LightGray)
+                    colors = TextFieldDefaults.colors(unfocusedContainerColor = Color.LightGray)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -106,11 +144,8 @@ fun WorkModal(
                 ButtonDefaults.buttonColors(
                     containerColor = Color(6, 214, 160),
                 ),
-
-
             ) {
-
-                Text("Save", )
+                Text("Save")
             }
         },
         dismissButton = {
