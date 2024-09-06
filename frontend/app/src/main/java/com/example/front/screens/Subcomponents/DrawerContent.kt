@@ -25,16 +25,16 @@ fun DrawerContent(onDestinationClicked: (route: String) -> Unit) {
             .width(300.dp)
             .background(Color.White)
             .padding(16.dp)
-            .clickable {
-                // Navigate to Profile
-                val intent = Intent(context, ProfileActivity::class.java)
-                context.startActivity(intent)
-            })
-    {
+    ) {
         Text(
             text = "Personal Profile",
             modifier = Modifier
                 .padding(16.dp)
+                .clickable {
+                    // Navigate to Profile
+                    val intent = Intent(context, ProfileActivity::class.java)
+                    context.startActivity(intent)
+                }
         )
         Text(
             text = "Settings",
