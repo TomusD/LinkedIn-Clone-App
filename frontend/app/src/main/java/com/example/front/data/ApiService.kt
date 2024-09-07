@@ -19,7 +19,9 @@ import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Part
+import retrofit2.http.Path
 
 interface ApiService {
     @FormUrlEncoded
@@ -54,4 +56,10 @@ interface ApiService {
 
     @GET("/profile/edu/me")
     fun getEducation(): Call<EducationList>
+
+    @GET("/profile/publicity/all/{user_id}")
+    fun getPublicity(@Path("user_id") user_id: Int): Call<Map<String, Boolean>>
+
+    @PUT("/profile/publicity/{information}")
+    fun updatePublicity(@Path("information") info: String): Call<APIResponse>
 }

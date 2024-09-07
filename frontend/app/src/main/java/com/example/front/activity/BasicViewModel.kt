@@ -1,8 +1,11 @@
 import android.content.Context
 import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import com.example.front.data.ApiClient
+import com.example.front.data.SessionManager
 import com.example.front.data.base.User
+import com.example.front.data.response.APIResponse
 import com.example.front.data.response.EducationList
 import com.example.front.data.response.EducationResponse
 import com.example.front.data.response.UsersList
@@ -15,8 +18,6 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class BasicViewModel : ViewModel() {
-    private val apiClient = ApiClient()
-
     private val _users = MutableStateFlow<List<User>>(emptyList())
     val users: StateFlow<List<User>> get() = _users
 
@@ -62,6 +63,7 @@ class BasicViewModel : ViewModel() {
     val educationList: StateFlow<List<EducationResponse>> get() = _educationList
 
     fun fetchEducation(context: Context) {
+        val apiClient = ApiClient()
         val call = apiClient.getApiService(context).getEducation()
 
         call.enqueue(object : Callback<EducationList> {
@@ -74,6 +76,57 @@ class BasicViewModel : ViewModel() {
 
             override fun onFailure(call: Call<EducationList>, t: Throwable) {
                 Log.e("MYTEST", "EDU-FAILURE: "+ t.message.toString())
+            }
+        })
+    }
+
+    private val _publicityMap = MutableStateFlow<Map<String, Boolean>>(mutableMapOf())
+    val publicityMap: StateFlow<Map<String, Boolean>> get() = _publicityMap
+
+    fun fetchPublicity(context: Context) {
+        val uid = SessionManager(context).getUserInfo(SessionManager.USER_ID)
+        Log.d("MYTEST", "UIDDDDDD       $uid")
+
+        val apiClient = ApiClient()
+        val call = apiClient.getApiService(context).getPublicity(uid!!.toInt())
+
+        call.enqueue(object : Callback<Map<String, Boolean>> {
+            override fun onResponse(call: Call<Map<String, Boolean>>, response: Response<Map<String, Boolean>>) {
+                if (response.isSuccessful) {
+                    _publicityMap.value = response.body() ?: mutableMapOf(
+                                                                Pair("work", true),
+                                                                Pair("education", true),
+                                                                Pair("skills", true))
+                    Log.d("MYTEST", "EDU-SUCCESS" + _publicityMap.value)
+                }
+            }
+
+            override fun onFailure(call: Call<Map<String, Boolean>>, t: Throwable) {
+                Log.e("MYTEST", "EDU-FAILURE: "+ t.message.toString())
+            }
+        })
+    }
+
+//    private val _publicityField = MutableStateFlow<APIResponse>(mutableMapOf())
+//    val publicityField: StateFlow<Map<String, Boolean>> get() = _publicityField
+
+    fun update_publicity(context: Context, info: String) {
+        val uid = SessionManager(context).getUserInfo(SessionManager.USER_ID)
+        Log.d("MYTEST", "UIDDDDDD       $uid")
+
+        val apiClient = ApiClient()
+        val call = apiClient.getApiService(context).updatePublicity(info)
+
+        call.enqueue(object : Callback<APIResponse> {
+            override fun onResponse(call: Call<APIResponse>, response: Response<APIResponse>) {
+                if (response.isSuccessful) {
+                    val res = response.body()
+                    Log.d("MYTEST", "TOGGLE-SUCCESS - $info: $res")
+                }
+            }
+
+            override fun onFailure(call: Call<APIResponse>, t: Throwable) {
+                Log.e("MYTEST", "TOGGLE-FAILURE - $info: "+ t.message.toString())
             }
         })
     }
