@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Date, Float, DateTime
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -67,3 +67,47 @@ class Job(Base):
     def __repr__(self):
         return f"<Job(Job ID={self.job_id}, User ID={self.recruiter_id}/{User.id}, User(fullname={User.name} {User.surname})"
 
+class Applications(Base):
+    __tablename__ = "applications"
+
+    applier_id = Column(Integer, ForeignKey('users.id'),primary_key=True, nullable=False)
+    job_id = Column(Integer, ForeignKey('job.job_id'),primary_key=True, nullable=False)
+    date_applied = Column(DateTime, nullable=False)
+
+    applier = relationship("User", backref="applications")
+    job = relationship("Job", backref="applications")
+
+    def __repr__(self):
+        return f"<Applications(Applier ID={self.applier_id}/{User.id}, Job ID={self.job_id}/{Job.job_id}, Date Applied={self.date_applied})"
+    
+class Skill(Base):
+    __tablename__ = "skills"
+
+    skill_name = Column(String, unique=True, primary_key=True)
+
+    def __repr__(self):
+        return f"<Skill(Skill Name={self.skill_name})"
+    
+class UserSkill(Base):
+    __tablename__ = "user_skills"
+
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True, nullable=False)
+    user_skill_name = Column(String, ForeignKey('skills.skill_name'), nullable=False)
+
+    user = relationship("User", backref="user_skills")
+    skill = relationship("Skill", backref="user_skills")
+
+    def __repr__(self):
+        return f"<UserSkill(User ID={self.user_id}/{User.id}, Skill Name={self.user_skill_name}/{Skill.skill_name})"
+    
+class JobSkill(Base):
+    __tablename__ = "job_skills"
+
+    job_id = Column(Integer, ForeignKey('job.job_id'), primary_key=True, nullable=False)
+    job_skill_name = Column(String, ForeignKey('skills.skill_name'), primary_key=True, nullable=False)
+
+    job = relationship("Job", backref="job_skills")
+    skill = relationship("Skill", backref="job_skills")
+
+    def __repr__(self):
+        return f"<JobSkill(Job ID={self.job_id}/{Job.job_id}, Skill Name={self.job_skill_name}/{Skill.skill_name})"

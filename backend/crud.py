@@ -15,16 +15,10 @@ Operations to interact with the database
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
-def get_user_by_id(db: Session, user_id: int):
-    user = db.query(models.User).filter(models.User.id == user_id).first()
-    return user.id
-
-
 def get_users(db: Session, uid: str):
     users = db.query(models.User).all()
     print(users)
     return users
-
 
 def create_user(db: Session, schema_user: schemas.UserRegister):
     hashed_pwd = hashing.hash_password(schema_user.password)
@@ -47,7 +41,6 @@ def create_user(db: Session, schema_user: schemas.UserRegister):
 
     return schemas.UserRegister(name=db_user.name, surname=db_user.surname, password=db_user.hashed_password, email=db_user.email, image_path=db_user.image_path)
 
-
 def authenticate_user(db: Session, email: str, password: str):
     user = get_user_by_email(db, email)
     if not user:
@@ -56,12 +49,11 @@ def authenticate_user(db: Session, email: str, password: str):
         return False
     return user
 
-
-def create_job(db: Session, schema_job: schemas.JobInDB, recruiter_id: int):
-    recruiter_id_key = get_user_by_id(db, recruiter_id)
+# Jobs 
+def create_job(db: Session, schema_job: schemas.JobCreate, recruiter_id: int):
 
     db_job= models.Job(
-        recruiter_id=recruiter_id_key,
+        recruiter_id=recruiter_id,
         organization=schema_job.organization,
         role=schema_job.role,
         place=schema_job.place,
@@ -71,8 +63,23 @@ def create_job(db: Session, schema_job: schemas.JobInDB, recruiter_id: int):
     db.add(db_job)
     db.commit()
     db.refresh(db_job)
-    return schemas.JobInDB(job_id=db_job.job_id,recruiter_id=db_job.recruiter_id, organization=db_job.organization, role=db_job.role, place=db_job.place, type=db_job.type, salary=db_job.salary)
+    return schemas.JobCreate(job_id=db_job.job_id,recruiter_id=db_job.recruiter_id, organization=db_job.organization, role=db_job.role, place=db_job.place, type=db_job.type, salary=db_job.salary)
+   
+def get_job(db: Session, job_id: int):
+    job = db.query(models.Job).filter(models.Job.job_id == job_id).first()
+    return job
 
+def apply_job(db: Session, schema_application: schemas.ApplicationCreate, applier_id: int):
+
+    db_application = models.Applications(
+        applier_id=applier_id,
+        job_id=schema_application.job_id,
+        date_applied=datetime.now()
+    )
+    db.add(db_application)
+    db.commit()
+    db.refresh(db_application)
+    return schemas.ApplicationCreate(applier_id=db_application.applier_id, job_id=db_application.job_id, date_applied=db_application.date_applied)
 
 def add_work_experience(db: Session, user_id: int, schema_work: schemas.Work):
     db_work = models.Work(
@@ -86,7 +93,7 @@ def add_work_experience(db: Session, user_id: int, schema_work: schemas.Work):
     db.commit()
     return db_work
 
-
+"""
 def add_education(db: Session, user_id: int, schema_edu: schemas.Education):
     db_work = models.Education(
         user_id= user_id,
@@ -99,8 +106,40 @@ def add_education(db: Session, user_id: int, schema_edu: schemas.Education):
     db.add(db_work)
     db.commit()
     return db_work
+"""
 
 def get_work_experience(db: Session, user_id: int):
     print(user_id, type(user_id))
     return db.query(models.UserInfo).filter(models.UserInfo.id==user_id).first()
-    
+
+# Skills
+def add_skills(db: Session, schema_skill: schemas.addSkill):
+    db_skill = models.Skill(
+        skill_name=schema_skill.skill_name
+    )
+    db.add(db_skill)
+    db.commit()
+    db.refresh(db_skill)
+    return schemas.addSkill(skill_name=db_skill.skill_name)
+
+def add_user_skills(db: Session, user_id: int, schema_user_skill: schemas.AddUserSkill):
+    db_user_skill = models.UserSkill(
+        user_id=user_id,
+        user_skill_name=schema_user_skill.user_skill_name
+    )
+    db.add(db_user_skill)
+    db.commit()
+    db.refresh(db_user_skill)
+    return schemas.AddUserSkill(user_id=db_user_skill.user_id, user_skill_name=db_user_skill.user_skill_name)
+
+def add_job_skills(db: Session, schema_job_skill: schemas.AddJobSkill):
+    db_job_skill = models.JobSkill(
+        job_id=schema_job_skill.job_id,
+        job_skill_name=schema_job_skill.job_skill_name
+    )
+    db.add(db_job_skill)
+    db.commit()
+    db.refresh(db_job_skill)
+    return schemas.AddJobSkill(job_id=db_job_skill.job_id, job_skill_name=db_job_skill.job_skill_name)
+
+
