@@ -197,7 +197,6 @@ async def update_work(work: schemas.Work, current_user: dict = Depends(get_curre
 
 @app.post("/profile/education", response_class=JSONResponse, tags=["profile"])
 async def update_edu(edu: schemas.Education, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
-    print("inside")
     crud.add_education(db, current_user.id, edu)
     return JSONResponse(content={"message": "Successfully added education!"}, status_code=200)
 
@@ -227,6 +226,16 @@ async def get_education(current_user: dict = Depends(get_current_user), db: Sess
                             
     return schemas.EduList(eduList=edu_list)
 
+@app.put("/profile/publicity/{information}/", response_class=JSONResponse, tags=["profile"])
+async def change_publicity(information: str, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    crud.change_publicity(db, current_user.id, information)
+    return JSONResponse(content={"message": f"Successfully changed {information} publicity!"}, status_code=200)
+
+
+@app.get("/profile/publicity/all/{user_id}", response_class=JSONResponse, tags=["profile"])
+async def get_publicity(user_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    obj = crud.get_publicity(db, user_id)
+    return {"work": obj.work_public, "education": obj.education_public, "skills":obj.skills_public}
 
 if __name__ == "__main__":
     ip, port = helpers.read_env_properties()

@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, load_only
 from datetime import datetime
 from uuid6 import uuid7
 from helpers import *
@@ -14,6 +14,7 @@ Operations to interact with the database
 
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
+
 
 def get_user_by_id(db: Session, user_id: int):
     user = db.query(models.User).filter(models.User.id == user_id).first()
@@ -84,7 +85,7 @@ def add_work_experience(db: Session, user_id: int, schema_work: schemas.Work):
     )
     db.add(db_work)
     db.commit()
-    return db_work
+    return "OK"
 
 
 def add_education(db: Session, user_id: int, schema_edu: schemas.Education):
@@ -99,9 +100,31 @@ def add_education(db: Session, user_id: int, schema_edu: schemas.Education):
 
     db.add(db_edu)
     db.commit()
-    return db_edu
+    return "OK"
 
 
 def get_user_info(db: Session, user_id: int):
     print(user_id, type(user_id))
     return db.query(models.UserInfo).filter(models.UserInfo.id==user_id).first()
+
+
+def change_publicity(db: Session, user_id: int, information: str):
+    mod = models.UserInfo
+
+    if information == "work":
+        columm = mod.work_public
+    elif information == "education":
+        columm = mod.education_public
+    elif information == "skills":
+        columm = mod.skills_public
+    else:
+        return "BAD"
+    
+    db.query(mod).filter(mod.id==user_id).update({columm: ~columm})
+    db.commit()
+    return "OK"
+    
+
+def get_publicity(db: Session, user_id: int):
+    res = db.query(models.UserInfo).filter(models.UserInfo.id==user_id).first()
+    return res
