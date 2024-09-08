@@ -51,7 +51,6 @@ def authenticate_user(db: Session, email: str, password: str):
 
 # Jobs 
 def create_job(db: Session, schema_job: schemas.JobCreate, recruiter_id: int):
-
     db_job= models.Job(
         recruiter_id=recruiter_id,
         organization=schema_job.organization,
@@ -64,10 +63,12 @@ def create_job(db: Session, schema_job: schemas.JobCreate, recruiter_id: int):
     db.commit()
     db.refresh(db_job)
     return schemas.JobCreate(job_id=db_job.job_id,recruiter_id=db_job.recruiter_id, organization=db_job.organization, role=db_job.role, place=db_job.place, type=db_job.type, salary=db_job.salary)
-   
+ 
+
 def get_job(db: Session, job_id: int):
     job = db.query(models.Job).filter(models.Job.job_id == job_id).first()
     return job
+
 
 def apply_job(db: Session, schema_application: schemas.ApplicationCreate, applier_id: int):
 
@@ -79,7 +80,8 @@ def apply_job(db: Session, schema_application: schemas.ApplicationCreate, applie
     db.add(db_application)
     db.commit()
     db.refresh(db_application)
-    return schemas.ApplicationCreate(applier_id=db_application.applier_id, job_id=db_application.job_id, date_applied=db_application.date_applied)
+    return schemas.ApplicationBase(applier_id=db_application.applier_id, job_id=db_application.job_id, date_applied=db_application.date_applied)
+
 
 def add_work_experience(db: Session, user_id: int, schema_work: schemas.Work):
     db_work = models.Work(
@@ -109,32 +111,24 @@ def add_education(db: Session, user_id: int, schema_edu: schemas.Education):
     return "OK"
 
 
+def add_skills(db: Session, user_id: int, updated_skills: schemas.Skills):
+    model_user = models.UserInfo
+    model_skill = models.Skill
+    
+    user_info = db.query(model_user).filter(model_user.id==user_id).first()    
+    new_skills = db.query(model_skill).filter(model_skill.skill_name.in_(updated_skills.skills)).all()
+
+    user_info.skills = new_skills
+    
+    db.commit()
+    return "OK"
+
+
 def get_user_info(db: Session, user_id: int):
-    print(user_id, type(user_id))
+    """
+    Fetch work, education and skills of a user
+    """
     return db.query(models.UserInfo).filter(models.UserInfo.id==user_id).first()
-
-# Skills
-def add_skills(db: Session, schema_skill: schemas.addSkill):
-    db_skill = models.Skill(
-        skill_name=schema_skill.skill_name
-    )
-    db.add(db_skill)
-    db.commit()
-    db.refresh(db_skill)
-    return schemas.addSkill(skill_name=db_skill.skill_name)
-
-def add_user_skills(db: Session, user_id: int, schema_user_skill: schemas.AddUserSkill):
-    db_user_skill = models.user_info_skill_association.insert().values(user_id=user_id, user_skill_name=schema_user_skill.user_skill_name)
-    db.execute(db_user_skill)
-    db.commit()
-    return schemas.AddUserSkill(user_id=user_id, user_skill_name=schema_user_skill.user_skill_name)
-
-def add_job_skills(db: Session, schema_job_skill: schemas.AddJobSkill):
-    db_job_skill = models.job_skill_association.insert().values(job_id=schema_job_skill.job_id, job_skill_name=schema_job_skill.job_skill_name)
-    db.execute(db_job_skill)
-    db.commit()
-    return schemas.AddJobSkill(job_id=schema_job_skill.job_id, job_skill_name=schema_job_skill.job_skill_name)
-
 
 
 def change_publicity(db: Session, user_id: int, information: str):

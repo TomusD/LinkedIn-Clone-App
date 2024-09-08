@@ -68,21 +68,25 @@ class Education(Settings):
 class EduResponse(Education):
     edu_id: int
 
+class Skills(BaseModel):
+    skills: list[str]
+
 # Responses as lists
 class UserList(BaseModel):
     users: list[User]
     
 class WorkList(BaseModel):
     workList: list[WorkResponse]
+
+class EduList(BaseModel):
+    eduList: list[EduResponse]
+    
     
 # Application Settings
 class ApplicationBase(BaseModel):
     job_id: int
 
-class ApplicationCreate(ApplicationBase):
-    pass
-
-class ApplicationResponse(ApplicationCreate):
+class ApplicationResponse(ApplicationBase):
     applier_id: int
     date_applied: datetime
 
@@ -92,21 +96,3 @@ class skillBase(BaseModel):
 
 class addSkill(skillBase):
     pass
-
-class UserSkillBase(BaseModel):
-    user_skill_name: str
-
-class AddUserSkill(UserSkillBase):
-    pass
-    
-class JobSkillBase(BaseModel):
-    job_id: int
-    job_skill_name: str
-
-class AddJobSkill(JobSkillBase):
-    pass
-
-
-class EduList(BaseModel):
-    eduList: list[EduResponse]
-    

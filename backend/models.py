@@ -81,7 +81,18 @@ class Education(Base):
     def __repr__(self) -> None:
         return f"<Edu(id={self.edu_id}, organization={self.organization}, science_field={self.science_field}, degree={self.degree}, date_started={self.date_started}, date_ended={self.date_ended})>"
 
+    
+class Skill(Base):
+    __tablename__ = "skills"
 
+    skill_name = Column(String, unique=True, primary_key=True)
+
+    users = relationship('UserInfo', secondary=user_info_skill_association, back_populates='skills')
+    jobs = relationship('Job', secondary=job_skill_association, back_populates='skills')
+
+    def __repr__(self):
+        return f"<Skill(Skill Name={self.skill_name})"
+    
 
 class Job(Base):
     __tablename__ = "jobs"
@@ -113,14 +124,3 @@ class Applications(Base):
 
     def __repr__(self):
         return f"<Applications(Applier ID={self.applier_id}/{User.id}, Job ID={self.job_id}/{Job.job_id}, Date Applied={self.date_applied})"
-    
-class Skill(Base):
-    __tablename__ = "skills"
-
-    skill_name = Column(String, unique=True, primary_key=True)
-
-    users = relationship('UserInfo', secondary=user_info_skill_association, back_populates='skills')
-    jobs = relationship('Job', secondary=job_skill_association, back_populates='skills')
-
-    def __repr__(self):
-        return f"<Skill(Skill Name={self.skill_name})"
