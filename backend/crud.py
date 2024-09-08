@@ -124,24 +124,16 @@ def add_skills(db: Session, schema_skill: schemas.addSkill):
     return schemas.addSkill(skill_name=db_skill.skill_name)
 
 def add_user_skills(db: Session, user_id: int, schema_user_skill: schemas.AddUserSkill):
-    db_user_skill = models.UserSkill(
-        user_id=user_id,
-        user_skill_name=schema_user_skill.user_skill_name
-    )
-    db.add(db_user_skill)
+    db_user_skill = models.user_info_skill_association.insert().values(user_id=user_id, user_skill_name=schema_user_skill.user_skill_name)
+    db.execute(db_user_skill)
     db.commit()
-    db.refresh(db_user_skill)
-    return schemas.AddUserSkill(user_id=db_user_skill.user_id, user_skill_name=db_user_skill.user_skill_name)
+    return schemas.AddUserSkill(user_id=user_id, user_skill_name=schema_user_skill.user_skill_name)
 
 def add_job_skills(db: Session, schema_job_skill: schemas.AddJobSkill):
-    db_job_skill = models.JobSkill(
-        job_id=schema_job_skill.job_id,
-        job_skill_name=schema_job_skill.job_skill_name
-    )
-    db.add(db_job_skill)
+    db_job_skill = models.job_skill_association.insert().values(job_id=schema_job_skill.job_id, job_skill_name=schema_job_skill.job_skill_name)
+    db.execute(db_job_skill)
     db.commit()
-    db.refresh(db_job_skill)
-    return schemas.AddJobSkill(job_id=db_job_skill.job_id, job_skill_name=db_job_skill.job_skill_name)
+    return schemas.AddJobSkill(job_id=schema_job_skill.job_id, job_skill_name=schema_job_skill.job_skill_name)
 
 
 

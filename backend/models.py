@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Date, Float, DateTime
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Date, Float, DateTime, Table
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -7,6 +7,17 @@ models.py
 
 These models are used for interacting with the database
 """
+user_info_skill_association = Table(
+    'user_skills', Base.metadata,
+    Column('user_id', Integer, ForeignKey('user_info.id')),
+    Column('user_skill_name', String, ForeignKey('skills.skill_name'))
+)
+
+job_skill_association = Table(
+    'job_skills', Base.metadata,
+    Column('job_id', Integer, ForeignKey('jobs.job_id')),
+    Column('job_skill_name', String, ForeignKey('skills.skill_name'))
+)
 
 class User(Base):
     __tablename__ = "users"
@@ -32,6 +43,7 @@ class UserInfo(Base):
 
     works = relationship("Work", back_populates="user_info")
     education = relationship("Education", back_populates="user_info")
+    skills = relationship('Skill', secondary=user_info_skill_association, back_populates='users')
     
     def __repr__(self) -> None:
         return f"<User(id={self.id}, works={self.works}, edu={self.education}>)"
@@ -72,7 +84,7 @@ class Education(Base):
 
 
 class Job(Base):
-    __tablename__ = "job"
+    __tablename__ = "jobs"
 
     job_id = Column(Integer, primary_key=True, autoincrement=True)
     recruiter_id = Column(Integer, ForeignKey('users.id'), nullable=False)
@@ -84,6 +96,8 @@ class Job(Base):
 
     recruiter = relationship("User", backref="jobs")
 
+    skills = relationship('Skill', secondary=job_skill_association, back_populates='jobs')
+
     def __repr__(self):
         return f"<Job(Job ID={self.job_id}, User ID={self.recruiter_id}/{User.id}, User(fullname={User.name} {User.surname})"
 
@@ -91,7 +105,7 @@ class Applications(Base):
     __tablename__ = "applications"
 
     applier_id = Column(Integer, ForeignKey('users.id'),primary_key=True, nullable=False)
-    job_id = Column(Integer, ForeignKey('job.job_id'),primary_key=True, nullable=False)
+    job_id = Column(Integer, ForeignKey('jobs.job_id'),primary_key=True, nullable=False)
     date_applied = Column(DateTime, nullable=False)
 
     applier = relationship("User", backref="applications")
@@ -105,29 +119,8 @@ class Skill(Base):
 
     skill_name = Column(String, unique=True, primary_key=True)
 
+    users = relationship('UserInfo', secondary=user_info_skill_association, back_populates='skills')
+    jobs = relationship('Job', secondary=job_skill_association, back_populates='skills')
+
     def __repr__(self):
         return f"<Skill(Skill Name={self.skill_name})"
-    
-class UserSkill(Base):
-    __tablename__ = "user_skills"
-
-    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True, nullable=False)
-    user_skill_name = Column(String, ForeignKey('skills.skill_name'), nullable=False)
-
-    user = relationship("User", backref="user_skills")
-    skill = relationship("Skill", backref="user_skills")
-
-    def __repr__(self):
-        return f"<UserSkill(User ID={self.user_id}/{User.id}, Skill Name={self.user_skill_name}/{Skill.skill_name})"
-    
-class JobSkill(Base):
-    __tablename__ = "job_skills"
-
-    job_id = Column(Integer, ForeignKey('job.job_id'), primary_key=True, nullable=False)
-    job_skill_name = Column(String, ForeignKey('skills.skill_name'), primary_key=True, nullable=False)
-
-    job = relationship("Job", backref="job_skills")
-    skill = relationship("Skill", backref="job_skills")
-
-    def __repr__(self):
-        return f"<JobSkill(Job ID={self.job_id}/{Job.job_id}, Skill Name={self.job_skill_name}/{Skill.skill_name})"
