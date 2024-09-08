@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, PastDate, PositiveFloat
 from typing import Optional
 from datetime import datetime
+
 """
 schemas.py
 
@@ -11,15 +12,12 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-
 class TokenData(BaseModel):
     email: str | None = None
-
 
 class LoginUser(BaseModel):
     email: EmailStr
     password: str
-
 
 class UserBase(BaseModel):
     name: str
@@ -31,10 +29,8 @@ class UserBase(BaseModel):
 class UserRegister(UserBase):
     password: str
 
-
 class User(UserBase):
     id: int
-
 
 class LoginResponse(Token):
     user: User
@@ -47,12 +43,11 @@ class JobBase(BaseModel):
     salary: int
 
 class JobCreate(JobBase):
-    recruiter_id: int
+    pass
     
-
-class JobInDB(JobBase):
+class JobResponse(JobCreate):
     job_id: int
-
+    recruiter_id: int
 
 # Profile Settings
 class Settings(BaseModel):
@@ -73,13 +68,44 @@ class Education(Settings):
 class EduResponse(Education):
     edu_id: int
 
-
 # Responses as lists
 class UserList(BaseModel):
     users: list[User]
     
 class WorkList(BaseModel):
     workList: list[WorkResponse]
+    
+# Application Settings
+class ApplicationBase(BaseModel):
+    job_id: int
+
+class ApplicationCreate(ApplicationBase):
+    pass
+
+class ApplicationResponse(ApplicationCreate):
+    applier_id: int
+    date_applied: datetime
+
+# Skills Settings
+class skillBase(BaseModel):
+    skill_name: str
+
+class addSkill(skillBase):
+    pass
+
+class UserSkillBase(BaseModel):
+    user_skill_name: str
+
+class AddUserSkill(UserSkillBase):
+    pass
+    
+class JobSkillBase(BaseModel):
+    job_id: int
+    job_skill_name: str
+
+class AddJobSkill(JobSkillBase):
+    pass
+
 
 class EduList(BaseModel):
     eduList: list[EduResponse]

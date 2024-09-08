@@ -12,7 +12,7 @@ from jose import JWTError, jwt
 # Project specific
 import helpers
 import crud, models, schemas
-from datetime import timedelta
+from datetime import timedelta ,datetime
 from database import SessionLocal, engine
 import security as sec
 
@@ -171,23 +171,21 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 
 @app.post("/job", response_class=JSONResponse, tags=["jobs"])
-async def create_job(    
-    organizationBody: str = Form(...), roleBody: str = Form(...), placeBody: str = Form(...), 
-    typeBody: str = Form(...), salaryBody: int = Form(...), current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)):
-
-    
-    job = schemas.JobCreate(organization=organizationBody, 
-                                role=roleBody, 
-                                place=placeBody, 
-                                type=typeBody, 
-                                salary=salaryBody,
-                                recruiter_id=current_user.id)
-    
+async def create_job(job : schemas.JobCreate, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     crud.create_job(db=db, schema_job=job, recruiter_id=current_user.id)
+    return JSONResponse(content={"message": "Job Created Successfully!"}, status_code=200)
 
-    return JSONResponse(content={"message": "Successfully registered!"}, status_code=200)
+@app.post("/jobs/{job_id}/apply", response_class=JSONResponse, tags=["applications"])
+async def create_applications(apply_schema: schemas.ApplicationCreate, current_user: dict = Depends(get_current_user), 
+                              db: Session = Depends(get_db)):
 
+    # Check if the user is trying to apply to their own job
+    current_recruiter_job = crud.get_job(db, apply_schema.job_id)
+    if current_user.id == current_recruiter_job.recruiter_id:
+        raise HTTPException(status_code=400, detail="You cannot apply to your own job")
+    
+    crud.apply_job(db=db, schema_application=apply_schema, applier_id=current_user.id)
+    return JSONResponse(content={"message": "Application Created Successfully!"}, status_code=200)
 
 @app.post("/profile/work", response_class=JSONResponse, tags=["profile"])
 async def update_work(work: schemas.Work, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -211,6 +209,22 @@ async def get_work(current_user: dict = Depends(get_current_user), db: Session =
                                                         date_ended=u.date_ended) 
                                                         for u in ui.works]
     return schemas.WorkList(workList=work_list)
+
+@app.post("/profile/skills/", response_class=JSONResponse, tags=["profile"])
+async def add_user_skill(skill: schemas.AddUserSkill, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    crud.add_user_skills(db, current_user.id, skill)
+    return JSONResponse(content={"message": "Successfully added skill!"}, status_code=200)
+
+@app.post("/job/skills/", response_class=JSONResponse, tags=["jobs"])
+async def add_job_skill(skill: schemas.AddJobSkill, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+
+    # Check if the user is trying to add skills to their own job
+    current_recruiter_job = crud.get_job(db, skill.job_id)
+    if current_user.id != current_recruiter_job.recruiter_id:
+        raise HTTPException(status_code=400, detail="You cannot add skills to a job you do not own")
+    
+    crud.add_job_skills(db, skill)
+    return JSONResponse(content={"message": "Successfully added skill!"}, status_code=200)
 
 
 @app.get("/profile/edu/me", response_model=schemas.EduList, tags=["profile"])
