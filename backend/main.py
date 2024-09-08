@@ -180,7 +180,7 @@ async def create_job(job : schemas.JobCreate, current_user: dict = Depends(get_c
 
 
 @app.post("/jobs/{job_id}/apply", response_class=JSONResponse, tags=["applications"])
-async def create_applications(apply_schema: schemas.ApplicationCreate, current_user: dict = Depends(get_current_user), 
+async def create_applications(apply_schema: schemas.ApplicationBase, current_user: dict = Depends(get_current_user), 
                               db: Session = Depends(get_db)):
 
     # Check if the user is trying to apply to their own job

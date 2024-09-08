@@ -70,7 +70,7 @@ def get_job(db: Session, job_id: int):
     return job
 
 
-def apply_job(db: Session, schema_application: schemas.ApplicationCreate, applier_id: int):
+def apply_job(db: Session, schema_application: schemas.ApplicationBase, applier_id: int):
 
     db_application = models.Applications(
         applier_id=applier_id,
