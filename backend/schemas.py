@@ -35,19 +35,6 @@ class User(UserBase):
 class LoginResponse(Token):
     user: User
 
-class JobBase(BaseModel):
-    organization: str
-    role: str
-    place: str
-    type: str
-    salary: int
-
-class JobCreate(JobBase):
-    pass
-    
-class JobResponse(JobCreate):
-    job_id: int
-    recruiter_id: int
 
 # Profile Settings
 class Settings(BaseModel):
@@ -96,3 +83,19 @@ class skillBase(BaseModel):
 
 class addSkill(skillBase):
     pass
+
+# Job
+class UserApplier(BaseModel):
+    pass
+
+class JobBase(BaseModel):
+    organization: str
+    role: str
+    place: str
+    type: str
+    salary: int
+    skills_list: Skills
+    
+class JobResponse(JobBase):
+    job_id: int
+    recruiter_id: int

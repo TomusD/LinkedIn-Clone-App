@@ -49,20 +49,31 @@ def authenticate_user(db: Session, email: str, password: str):
         return False
     return user
 
+def get_all_skills(db: Session):
+    return db.query(models.Skill).all()
+
+
+
 # Jobs 
-def create_job(db: Session, schema_job: schemas.JobCreate, recruiter_id: int):
+def create_job(db: Session, job: schemas.JobBase, recruiter_id: int):
+    model_skill = models.Skill
+    job_skills = db.query(model_skill).filter(model_skill.skill_name.in_(job.skills_list.skills)).all()
+
     db_job= models.Job(
         recruiter_id=recruiter_id,
-        organization=schema_job.organization,
-        role=schema_job.role,
-        place=schema_job.place,
-        type=schema_job.type,
-        salary=schema_job.salary
+        organization=job.organization,
+        role=job.role,
+        place=job.place,
+        type=job.type,
+        salary=job.salary
     )
+
+    db_job.skills = job_skills
+
     db.add(db_job)
     db.commit()
     db.refresh(db_job)
-    return schemas.JobCreate(job_id=db_job.job_id,recruiter_id=db_job.recruiter_id, organization=db_job.organization, role=db_job.role, place=db_job.place, type=db_job.type, salary=db_job.salary)
+    return "OK"
  
 
 def get_job(db: Session, job_id: int):
@@ -71,7 +82,6 @@ def get_job(db: Session, job_id: int):
 
 
 def apply_job(db: Session, schema_application: schemas.ApplicationBase, applier_id: int):
-
     db_application = models.Applications(
         applier_id=applier_id,
         job_id=schema_application.job_id,
@@ -83,6 +93,10 @@ def apply_job(db: Session, schema_application: schemas.ApplicationBase, applier_
     return schemas.ApplicationBase(applier_id=db_application.applier_id, job_id=db_application.job_id, date_applied=db_application.date_applied)
 
 
+
+
+
+# Profile
 def add_work_experience(db: Session, user_id: int, schema_work: schemas.Work):
     db_work = models.Work(
         user_id= user_id,

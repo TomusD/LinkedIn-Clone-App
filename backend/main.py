@@ -173,13 +173,13 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 
 # Job API's
-@app.post("/job", response_class=JSONResponse, tags=["jobs"])
-async def create_job(job : schemas.JobCreate, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
-    crud.create_job(db=db, schema_job=job, recruiter_id=current_user.id)
-    return JSONResponse(content={"message": "Job Created Successfully!"}, status_code=200)
+@app.post("/jobs", response_class=JSONResponse, tags=["jobs"])
+async def create_job(job : schemas.JobBase, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    crud.create_job(db=db, job=job, recruiter_id=current_user.id)
+    return JSONResponse(content={"message": "Job created Successfully!"}, status_code=200)
 
 
-@app.post("/jobs/{job_id}/apply", response_class=JSONResponse, tags=["applications"])
+@app.post("/jobs/{job_id}/apply", response_class=JSONResponse, tags=["jobs"])
 async def create_applications(apply_schema: schemas.ApplicationBase, current_user: dict = Depends(get_current_user), 
                               db: Session = Depends(get_db)):
 
@@ -191,8 +191,10 @@ async def create_applications(apply_schema: schemas.ApplicationBase, current_use
     crud.apply_job(db=db, schema_application=apply_schema, applier_id=current_user.id)
     return JSONResponse(content={"message": "Application Created Successfully!"}, status_code=200)
 
-
-
+@app.get("/profile/skills/available", response_model=schemas.Skills)
+async def get_all_skills(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    skills = crud.get_all_skills(db)
+    return schemas.Skills(skills=[skill.skill_name for skill in skills])
 
 # Profile APIs (Work, Education, Skills)
 @app.post("/profile/work", response_class=JSONResponse, tags=["profile"])
@@ -239,7 +241,7 @@ async def get_education(current_user: dict = Depends(get_current_user), db: Sess
     return schemas.EduList(eduList=edu_list)
 
 
-@app.get("/profile/skills/{user_id}")
+@app.get("/profile/skills/{user_id}", response_model=schemas.Skills)
 async def get_skills(user_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     ui = crud.get_user_info(db, user_id)
     return schemas.Skills(skills=[skill.skill_name for skill in ui.skills])
