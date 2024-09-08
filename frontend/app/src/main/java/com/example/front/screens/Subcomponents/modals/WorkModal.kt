@@ -1,6 +1,7 @@
 package com.example.front.screens.Subcomponents.modals
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -77,6 +78,7 @@ fun WorkModal(
                 val work: Work = Work(organization, role, startDate.toString(), endDate?.toString())
 
                 updateWork(work)
+                Toast.makeText(context, "Re-visit to see the updated list", Toast.LENGTH_SHORT).show()
                 onSave(work)
             }
         } catch (e: NumberFormatException) {

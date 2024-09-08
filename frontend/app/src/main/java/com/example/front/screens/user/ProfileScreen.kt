@@ -63,10 +63,12 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.front.data.response.EducationResponse
 import com.example.front.data.response.WorkResponse
 import com.example.front.screens.Subcomponents.Chip
 import com.example.front.screens.Subcomponents.modals.EducationModal
 import com.example.front.screens.Subcomponents.modals.WorkModal
+import com.example.front.screens.Subcomponents.profile.EduInfo
 import com.example.front.screens.Subcomponents.profile.WorkInfo
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,14 +80,17 @@ fun ProfileScreen(viewModel: BasicViewModel = viewModel()) {
 
     LaunchedEffect(Unit) {
         viewModel.fetchWork(context)
+        viewModel.fetchEducation(context)
+        viewModel.fetchPublicity(context)
     }
-    val workList = viewModel.workList.collectAsState().value
 
+    var workList = viewModel.workList.collectAsState().value
+    var eduList = viewModel.educationList.collectAsState().value
+    var publicityMap = viewModel.publicityMap.collectAsState().value
 
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("Work", "Education", "Skills")
 
-    
     Column(modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally) {
 
@@ -160,29 +165,33 @@ fun ProfileScreen(viewModel: BasicViewModel = viewModel()) {
 //        Divider(color = Color.Red, thickness = 5.dp)
 
             when (selectedTab) {
-                0 -> WorkExperienceTab(workList)
-                1 -> EducationTab()
-                2 -> SkillsTab()
+                0 -> publicityMap["work"]?.let { WorkExperienceTab(workList, viewModel, it) }
+                1 -> publicityMap["education"]?.let { EducationTab(eduList, viewModel, it) }
+                2 -> publicityMap["skills"]?.let { SkillsTab(viewModel, it) }
             }
         }
     }
 
 
 @Composable
-fun WorkExperienceTab(workList: List<WorkResponse>) {
+fun WorkExperienceTab(workList: List<WorkResponse>, viewModel: BasicViewModel, publicity: Boolean = true) {
+    val context = LocalContext.current
+
     var showDialog by remember { mutableStateOf(false) }
-    var isPublic by remember { mutableStateOf(true) }
+    var isPublic by remember { mutableStateOf(publicity) }
 
     // Padding to move the header down
     Spacer(modifier = Modifier.height(20.dp))
-    ToggleButton(isPublic) { isPublic = !isPublic }
+    ToggleButton(isPublic) {
+        viewModel.update_publicity(context, "work")
+        isPublic = !isPublic
+    }
 
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
 
-    )
-    {
+    ) {
         Spacer(modifier = Modifier.height(20.dp))
 
         Button(
@@ -195,7 +204,7 @@ fun WorkExperienceTab(workList: List<WorkResponse>) {
             )
         ) {
 
-            Text("+ Work Experience")
+            Text("+ Add Work Experience")
         }
 
         if (showDialog) {
@@ -209,8 +218,7 @@ fun WorkExperienceTab(workList: List<WorkResponse>) {
         }
 
         Spacer(modifier = Modifier.height(20.dp))
-        
-//        var workList2 = mutableListOf(WorkResponse(1, "Google", "Software Engineer", "2019-03-02", "2020-05-02"), )
+
         if (workList.isNotEmpty()) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(workList) { work ->
@@ -224,14 +232,19 @@ fun WorkExperienceTab(workList: List<WorkResponse>) {
 }
 
 
-@Preview
 @Composable
-fun EducationTab() {
+fun EducationTab(eduList: List<EducationResponse> = mutableListOf(), viewModel: BasicViewModel, publicity: Boolean = true) {
+    val context = LocalContext.current
+    var localEduList = eduList
+
     var showDialog by remember { mutableStateOf(false) }
-    var isPublic by remember { mutableStateOf(true) }
+    var isPublic by remember { mutableStateOf(publicity) }
 
     Spacer(modifier = Modifier.height(20.dp))
-    ToggleButton(isPublic) { isPublic = !isPublic }
+    ToggleButton(isPublic) {
+        viewModel.update_publicity(context, "education")
+        isPublic = !isPublic
+    }
 
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -251,27 +264,40 @@ fun EducationTab() {
             )
         ) {
 
-            Text("+ Education")
+            Text("+ Add Education")
         }
 
         if (showDialog) {
             EducationModal(
                 onDismiss = { showDialog = false },
                 onSave = { education ->
-                    println("Saved Education: $education")
+                    Log.d("MYTEST", "Saved Education: $education")
                     showDialog = false
                 }
             )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+//        var eduList2 = mutableListOf(EducationResponse(1, "UoA", null, "ROCKET", "2019-03-02", null), )
+        if (localEduList.isNotEmpty()) {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                items(localEduList) { edu ->
+                    EduInfo(edu)
+                }
+            }
+        } else {
+            Text("No education added")
         }
     }
 }
 
 
 @OptIn(ExperimentalLayoutApi::class)
-@Preview
 @Composable
-fun SkillsTab() {
-    var isPublic by remember { mutableStateOf(false) }
+fun SkillsTab(viewModel: BasicViewModel, publicity: Boolean = true) {
+    val context = LocalContext.current
+    var isPublic by remember { mutableStateOf(publicity) }
 
     var selectedSkills by remember { mutableStateOf(setOf("Kotlin", "Backend")) }
     val availableSkills  = mutableListOf("Kotlin", "Java", "Swift", "Python", "C++")
@@ -281,7 +307,10 @@ fun SkillsTab() {
     var expanded by remember { mutableStateOf(false) }
 
     Spacer(modifier = Modifier.height(20.dp))
-    ToggleButton(isPublic) { isPublic = !isPublic }
+    ToggleButton(isPublic) {
+        viewModel.update_publicity(context, "skills")
+        isPublic = !isPublic
+    }
 
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp)) {
         // Dropdown to select skills

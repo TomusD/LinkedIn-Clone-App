@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, load_only
 from datetime import datetime
 from uuid6 import uuid7
 from helpers import *
@@ -91,24 +91,25 @@ def add_work_experience(db: Session, user_id: int, schema_work: schemas.Work):
     )
     db.add(db_work)
     db.commit()
-    return db_work
+    return "OK"
 
-"""
+
 def add_education(db: Session, user_id: int, schema_edu: schemas.Education):
-    db_work = models.Education(
+    db_edu = models.Education(
         user_id= user_id,
         organization = schema_edu.organization,
+        science_field = schema_edu.science_field,
         degree = (None if (schema_edu.degree == None) else schema_edu.degree),
         date_started = schema_edu.date_started,
         date_ended = (None if (schema_edu.date_ended == None) else schema_edu.date_ended)
     )
 
-    db.add(db_work)
+    db.add(db_edu)
     db.commit()
-    return db_work
-"""
+    return "OK"
 
-def get_work_experience(db: Session, user_id: int):
+
+def get_user_info(db: Session, user_id: int):
     print(user_id, type(user_id))
     return db.query(models.UserInfo).filter(models.UserInfo.id==user_id).first()
 
@@ -143,3 +144,24 @@ def add_job_skills(db: Session, schema_job_skill: schemas.AddJobSkill):
     return schemas.AddJobSkill(job_id=db_job_skill.job_id, job_skill_name=db_job_skill.job_skill_name)
 
 
+
+def change_publicity(db: Session, user_id: int, information: str):
+    mod = models.UserInfo
+
+    if information == "work":
+        columm = mod.work_public
+    elif information == "education":
+        columm = mod.education_public
+    elif information == "skills":
+        columm = mod.skills_public
+    else:
+        return "BAD"
+    
+    db.query(mod).filter(mod.id==user_id).update({columm: ~columm})
+    db.commit()
+    return "OK"
+    
+
+def get_publicity(db: Session, user_id: int):
+    res = db.query(models.UserInfo).filter(models.UserInfo.id==user_id).first()
+    return res
