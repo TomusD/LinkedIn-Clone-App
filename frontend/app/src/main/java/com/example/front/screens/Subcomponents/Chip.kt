@@ -1,6 +1,7 @@
 package com.example.front.screens.Subcomponents
 
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -22,7 +23,7 @@ fun Chip(text: String, onDelete: () -> Unit) {
     Surface(
         shape = RoundedCornerShape(10.dp),
         color = Color(255, 209, 102),
-        modifier = Modifier.padding(4.dp)
+        modifier = Modifier.padding(4.dp).height(50.dp)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
