@@ -65,7 +65,7 @@ def add_all_skills_to_db():
     
     for skill_name in all_skills:
         skill_schema = schemas.addSkill(skill_name=skill_name)
-        crud.add_skills(db, skill_schema)
+        crud.add_predefined_skills_to_db(db, skill_schema)
     print("Skills added successfully.")
 
 add_all_skills_to_db()

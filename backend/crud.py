@@ -151,3 +151,16 @@ def change_publicity(db: Session, user_id: int, information: str):
 def get_publicity(db: Session, user_id: int):
     res = db.query(models.UserInfo).filter(models.UserInfo.id==user_id).first()
     return res
+
+
+
+# Only for generating data
+def add_predefined_skills_to_db(db: Session, schema_skill: schemas.addSkill):
+    db_skill = models.Skill(
+        skill_name=schema_skill.skill_name
+    )
+    db.add(db_skill)
+    db.commit()
+    db.refresh(db_skill)
+    return schemas.addSkill(skill_name=db_skill.skill_name)
+
