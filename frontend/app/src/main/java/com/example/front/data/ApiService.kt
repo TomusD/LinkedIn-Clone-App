@@ -5,6 +5,7 @@ import com.example.front.data.request.Work
 import com.example.front.data.response.APIResponse
 import com.example.front.data.response.EducationList
 import com.example.front.data.response.EducationResponse
+import com.example.front.data.response.SkillsList
 import com.example.front.data.response.auth.LoginResponse
 import com.example.front.data.response.UsersList
 import com.example.front.data.response.WorkList
@@ -56,6 +57,12 @@ interface ApiService {
 
     @GET("/profile/edu/me")
     fun getEducation(): Call<EducationList>
+
+    @PUT("/profile/skills")
+    fun updateSkills(@Body skills: SkillsList): Call<APIResponse>
+
+    @GET("/profile/skills/{user_id}")
+    fun getSkills(@Path("user_id") user_id: Int): Call<SkillsList>
 
     @GET("/profile/publicity/all/{user_id}")
     fun getPublicity(@Path("user_id") user_id: Int): Call<Map<String, Boolean>>

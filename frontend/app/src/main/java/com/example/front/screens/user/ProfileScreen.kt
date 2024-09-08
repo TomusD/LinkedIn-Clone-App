@@ -1,6 +1,8 @@
 package com.example.front.screens.user
 
 import BasicViewModel
+import android.app.Activity
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -18,7 +20,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -29,8 +33,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Tab
@@ -38,7 +40,6 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -56,20 +57,23 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.front.data.ApiClient
+import com.example.front.data.response.APIResponse
 import com.example.front.data.response.EducationResponse
+import com.example.front.data.response.SkillsList
 import com.example.front.data.response.WorkResponse
 import com.example.front.screens.Subcomponents.Chip
 import com.example.front.screens.Subcomponents.modals.EducationModal
 import com.example.front.screens.Subcomponents.modals.WorkModal
 import com.example.front.screens.Subcomponents.profile.EduInfo
 import com.example.front.screens.Subcomponents.profile.WorkInfo
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,11 +85,13 @@ fun ProfileScreen(viewModel: BasicViewModel = viewModel()) {
     LaunchedEffect(Unit) {
         viewModel.fetchWork(context)
         viewModel.fetchEducation(context)
+        viewModel.fetchSkills(context)
         viewModel.fetchPublicity(context)
     }
 
     var workList = viewModel.workList.collectAsState().value
     var eduList = viewModel.educationList.collectAsState().value
+    var skillsSet = viewModel.skillsList.collectAsState().value
     var publicityMap = viewModel.publicityMap.collectAsState().value
 
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -107,7 +113,11 @@ fun ProfileScreen(viewModel: BasicViewModel = viewModel()) {
                 )
             },
             navigationIcon = {
-                IconButton(onClick = { /* Handle back navigation here */ }) {
+                IconButton(onClick = {
+                    val activity = (context as? Activity)
+                    // Call this to finish the current activity
+                    activity?.finish()
+                }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back"
@@ -167,7 +177,7 @@ fun ProfileScreen(viewModel: BasicViewModel = viewModel()) {
             when (selectedTab) {
                 0 -> publicityMap["work"]?.let { WorkExperienceTab(workList, viewModel, it) }
                 1 -> publicityMap["education"]?.let { EducationTab(eduList, viewModel, it) }
-                2 -> publicityMap["skills"]?.let { SkillsTab(viewModel, it) }
+                2 -> publicityMap["skills"]?.let { SkillsTab(skillsSet, viewModel, it) }
             }
         }
     }
@@ -183,7 +193,7 @@ fun WorkExperienceTab(workList: List<WorkResponse>, viewModel: BasicViewModel, p
     // Padding to move the header down
     Spacer(modifier = Modifier.height(20.dp))
     ToggleButton(isPublic) {
-        viewModel.update_publicity(context, "work")
+        viewModel.updatePublicity(context, "work")
         isPublic = !isPublic
     }
 
@@ -242,7 +252,7 @@ fun EducationTab(eduList: List<EducationResponse> = mutableListOf(), viewModel: 
 
     Spacer(modifier = Modifier.height(20.dp))
     ToggleButton(isPublic) {
-        viewModel.update_publicity(context, "education")
+        viewModel.updatePublicity(context, "education")
         isPublic = !isPublic
     }
 
@@ -295,20 +305,27 @@ fun EducationTab(eduList: List<EducationResponse> = mutableListOf(), viewModel: 
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun SkillsTab(viewModel: BasicViewModel, publicity: Boolean = true) {
+fun SkillsTab(skillsSet: List<String>, viewModel: BasicViewModel, publicity: Boolean = true) {
     val context = LocalContext.current
     var isPublic by remember { mutableStateOf(publicity) }
 
-    var selectedSkills by remember { mutableStateOf(setOf("Kotlin", "Backend")) }
-    val availableSkills  = mutableListOf("Kotlin", "Java", "Swift", "Python", "C++")
-    var selectedSkill by remember { mutableStateOf<String?>(null) }
-//    selectedSkills = selectedSkills + "Kotlin" + "Backend"// API get all skills from DB
+//    var selectedSkills by remember { mutableStateOf(setOf("Kotlin", "Backend")) }
+    var selectedSkills by remember { mutableStateOf(skillsSet) }
+
+    val languageSkills  = mutableListOf("Python", "JavaScript", "Java", "C++", "C#", "Ruby", "Go", "Swift", "Kotlin", "PHP")
+    val softSkills  = mutableListOf("Communication", "Teamwork", "Problem Solving", "Adaptability", "Time Management", "Critical Thinking", "Leadership", "Creativity", "Emotional Intelligence", "Conflict Resolution")
+    val technicalSkills  = mutableListOf("Data Analysis", "Project Management", "Technical Writing", "SEO", "Database Management", "Cybersecurity", "UI/UX Design", "Cloud Computing", "Machine Learning", "DevOps")
+    val availableSkills = languageSkills + softSkills + technicalSkills
+
+    var selectedSkill by remember {
+        mutableStateOf<String?>(null)
+    }
 
     var expanded by remember { mutableStateOf(false) }
 
     Spacer(modifier = Modifier.height(20.dp))
     ToggleButton(isPublic) {
-        viewModel.update_publicity(context, "skills")
+        viewModel.updatePublicity(context, "skills")
         isPublic = !isPublic
     }
 
@@ -331,7 +348,9 @@ fun SkillsTab(viewModel: BasicViewModel, publicity: Boolean = true) {
                 Spacer(modifier = Modifier.width(10.dp))
 
                 Button(
-                    onClick = { /* call API */ },
+                    onClick = {
+                        updateSkills(selectedSkills, context)
+                    },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(6, 214, 160),
                         contentColor = Color.White
@@ -366,12 +385,16 @@ fun SkillsTab(viewModel: BasicViewModel, publicity: Boolean = true) {
         }
 
 
+    val scrollState = rememberScrollState()
+
     // Display selected skills as chips
     FlowRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(15.dp),
+            .padding(15.dp)
+            .verticalScroll(scrollState),
         horizontalArrangement = Arrangement.spacedBy(5.dp)
+
     ) {
         selectedSkills.forEach { skill ->
             key(skill) { // Use `key` to ensure stable identity for each skill
@@ -389,6 +412,28 @@ fun SkillsTab(viewModel: BasicViewModel, publicity: Boolean = true) {
     }
 }
 
+
+fun updateSkills(skillsSet: List<String>, context: Context) {
+        val apiClient = ApiClient()
+
+        val call = apiClient.getApiService(context).updateSkills(SkillsList(skillsSet))
+
+        call.enqueue(object : Callback<APIResponse> {
+            override fun onResponse(call: Call<APIResponse>, response: Response<APIResponse>) {
+                if (response.isSuccessful) {
+                    val res = response.body()
+                    Log.d("MYTEST", res.toString())
+
+                } else {
+                    Log.e("MYTEST", "RESPONSE NOT SUCCESSFUL: $response")
+                    // Handle error
+                }
+            }
+            override fun onFailure(call: Call<APIResponse>, t: Throwable) {
+                Log.e("MYTEST", "TOTAL FAILURE")
+            }
+        })
+}
 
 
 @Composable
@@ -429,47 +474,5 @@ fun CustomSwitch(
             ),
             modifier = Modifier.fillMaxSize() // Fills the size of the Box
         )
-    }
-}
-
-@Composable
-fun AddWorkExperienceDialog(onDismiss: () -> Unit) {
-    var company by remember { mutableStateOf(TextFieldValue()) }
-    var role by remember { mutableStateOf(TextFieldValue()) }
-
-    Dialog(onDismissRequest = { onDismiss() }, properties = DialogProperties(dismissOnClickOutside = true)) {
-        Surface(shape = MaterialTheme.shapes.medium, color = MaterialTheme.colorScheme.surface) {
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)) {
-                Text(text = "Add Work Experience")
-                TextField(value = company, onValueChange = { company = it }, label = { Text("Company") })
-                TextField(value = role, onValueChange = { role = it }, label = { Text("Role") })
-                Button(onClick = { /* Handle save */ onDismiss() }) {
-                    Text("Save")
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun AddEducationDialog(onDismiss: () -> Unit) {
-    var institution by remember { mutableStateOf(TextFieldValue()) }
-    var degree by remember { mutableStateOf(TextFieldValue()) }
-
-    Dialog(onDismissRequest = { onDismiss() }, properties = DialogProperties(dismissOnClickOutside = true)) {
-        Surface(shape = MaterialTheme.shapes.medium, color = MaterialTheme.colorScheme.surface) {
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)) {
-                Text(text = "Add Education")
-                TextField(value = institution, onValueChange = { institution = it }, label = { Text("Institution") })
-                TextField(value = degree, onValueChange = { degree = it }, label = { Text("Degree") })
-                Button(onClick = { /* Handle save */ onDismiss() }) {
-                    Text("Save")
-                }
-            }
-        }
     }
 }

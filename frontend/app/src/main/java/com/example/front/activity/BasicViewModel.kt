@@ -1,6 +1,5 @@
 import android.content.Context
 import android.util.Log
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import com.example.front.data.ApiClient
 import com.example.front.data.SessionManager
@@ -8,6 +7,7 @@ import com.example.front.data.base.User
 import com.example.front.data.response.APIResponse
 import com.example.front.data.response.EducationList
 import com.example.front.data.response.EducationResponse
+import com.example.front.data.response.SkillsList
 import com.example.front.data.response.UsersList
 import com.example.front.data.response.WorkList
 import com.example.front.data.response.WorkResponse
@@ -80,6 +80,29 @@ class BasicViewModel : ViewModel() {
         })
     }
 
+    private val _skillsList = MutableStateFlow<List<String>>(mutableListOf())
+    val skillsList: StateFlow<List<String>> get() = _skillsList
+
+    fun fetchSkills(context: Context) {
+        val uid = SessionManager(context).getUserInfo(SessionManager.USER_ID)
+
+        val apiClient = ApiClient()
+        val call = apiClient.getApiService(context).getSkills(uid!!.toInt())
+
+        call.enqueue(object : Callback<SkillsList> {
+            override fun onResponse(call: Call<SkillsList>, response: Response<SkillsList>) {
+                if (response.isSuccessful) {
+                    Log.d("MYTEST", "SKILLS-SUCCESS")
+                    _skillsList.value = response.body()?.skills ?: emptyList()
+                }
+            }
+
+            override fun onFailure(call: Call<SkillsList>, t: Throwable) {
+                Log.e("MYTEST", "SKILLS-FAILURE: "+ t.message.toString())
+            }
+        })
+    }
+
     private val _publicityMap = MutableStateFlow<Map<String, Boolean>>(mutableMapOf())
     val publicityMap: StateFlow<Map<String, Boolean>> get() = _publicityMap
 
@@ -107,10 +130,8 @@ class BasicViewModel : ViewModel() {
         })
     }
 
-//    private val _publicityField = MutableStateFlow<APIResponse>(mutableMapOf())
-//    val publicityField: StateFlow<Map<String, Boolean>> get() = _publicityField
 
-    fun update_publicity(context: Context, info: String) {
+    fun updatePublicity(context: Context, info: String) {
         val uid = SessionManager(context).getUserInfo(SessionManager.USER_ID)
         Log.d("MYTEST", "UIDDDDDD       $uid")
 

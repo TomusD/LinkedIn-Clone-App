@@ -20,3 +20,10 @@ data class EducationList(
     @SerializedName("eduList")
     var eduList: List<EducationResponse>
 )
+
+
+// This data class is used both for Requests and Responses
+data class SkillsList(
+    @SerializedName("skills")
+    var skills: List<String>
+)
