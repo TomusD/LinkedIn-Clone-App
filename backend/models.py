@@ -1,6 +1,7 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Date, Float, DateTime, Table
 from sqlalchemy.orm import relationship
 from database import Base
+from datetime import date
 
 """
 models.py
@@ -19,6 +20,13 @@ job_skill_association = Table(
     Column('job_skill_name', String, ForeignKey('skills.skill_name'))
 )
 
+job_application_association = Table(
+    'applications', Base.metadata,
+    Column('job_id', Integer, ForeignKey('jobs.job_id'), primary_key=True),
+    Column('applicant_id', Integer, ForeignKey('users.id'), primary_key=True),
+    Column("date_applied", Date, nullable=False, default=date.today())
+)
+
 class User(Base):
     __tablename__ = "users"
     
@@ -28,6 +36,8 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     image_path = Column(String)
+
+    applications = relationship("Job", secondary=job_application_association, back_populates="applicants")
 
     def __repr__(self) -> None:
         return f"<User(id={self.id}, fullname={self.name} {self.surname}, email={self.email}, image_path={self.image_path})>"
@@ -106,21 +116,10 @@ class Job(Base):
     salary = Column(Integer, nullable=False)
 
     recruiter = relationship("User", backref="jobs")
-
     skills = relationship('Skill', secondary=job_skill_association, back_populates='jobs')
+
+    applicants = relationship("User", secondary=job_application_association, back_populates="applications")
+
 
     def __repr__(self):
         return f"<Job(Job ID={self.job_id}, User ID={self.recruiter_id}/{User.id}, User(fullname={User.name} {User.surname})"
-
-class Applications(Base):
-    __tablename__ = "applications"
-
-    applier_id = Column(Integer, ForeignKey('users.id'),primary_key=True, nullable=False)
-    job_id = Column(Integer, ForeignKey('jobs.job_id'),primary_key=True, nullable=False)
-    date_applied = Column(DateTime, nullable=False)
-
-    applier = relationship("User", backref="applications")
-    job = relationship("Job", backref="applications")
-
-    def __repr__(self):
-        return f"<Applications(Applier ID={self.applier_id}/{User.id}, Job ID={self.job_id}/{Job.job_id}, Date Applied={self.date_applied})"

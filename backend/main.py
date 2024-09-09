@@ -179,16 +179,18 @@ async def create_job(job : schemas.JobBase, current_user: dict = Depends(get_cur
 
 
 @app.post("/jobs/{job_id}/apply", response_class=JSONResponse, tags=["jobs"])
-async def create_applications(apply_schema: schemas.ApplicationBase, current_user: dict = Depends(get_current_user), 
-                              db: Session = Depends(get_db)):
+async def create_applications(job_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
 
     # Check if the user is trying to apply to their own job
-    current_recruiter_job = crud.get_job(db, apply_schema.job_id)
-    if current_user.id == current_recruiter_job.recruiter_id:
-        raise HTTPException(status_code=400, detail="You cannot apply to your own job")
+    job = crud.get_job(db, job_id)
+
+    if not job:
+        return "Job does not exists"
+    if current_user.id == job.recruiter_id:
+        raise HTTPException(status_code=400, detail="You cannot apply to your own job!")
     
-    crud.apply_job(db=db, schema_application=apply_schema, applier_id=current_user.id)
-    return JSONResponse(content={"message": "Application Created Successfully!"}, status_code=200)
+    crud.apply_job(db=db, job_id=job_id, applier_id=current_user.id)
+    return JSONResponse(content={"message": "Application created Successfully!"}, status_code=200)
 
 
 

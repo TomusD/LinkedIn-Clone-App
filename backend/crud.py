@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session, load_only
 from datetime import datetime
 from uuid6 import uuid7
@@ -14,6 +15,9 @@ Operations to interact with the database
 
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
+
+def get_user_by_id(db: Session, id: int):
+    return db.query(models.User).filter(models.User.id == id).first()
 
 def get_users(db: Session, uid: str):
     users = db.query(models.User).all()
@@ -81,17 +85,17 @@ def get_job(db: Session, job_id: int):
     return job
 
 
-def apply_job(db: Session, schema_application: schemas.ApplicationBase, applier_id: int):
-    db_application = models.Applications(
-        applier_id=applier_id,
-        job_id=schema_application.job_id,
-        date_applied=datetime.now()
-    )
-    db.add(db_application)
-    db.commit()
-    db.refresh(db_application)
-    return schemas.ApplicationBase(applier_id=db_application.applier_id, job_id=db_application.job_id, date_applied=db_application.date_applied)
+def apply_job(db: Session, job_id: int, applier_id: int):    
+    user = get_user_by_id(db, applier_id)
+    job = get_job(db, job_id)
 
+    if user in job.applicants:
+        raise HTTPException(status_code=400, detail="User has already applied!")
+
+    job.applicants.append(user)
+    db.commit()
+
+    return "OK"
 
 
 
