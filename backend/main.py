@@ -95,7 +95,6 @@ def get_users(current_user: dict = Depends(get_current_user), db: Session = Depe
     return schemas.UserList(users=schema_users)
 
 
-
 @app.post("/users", response_class=JSONResponse, tags=["auth"])
 async def create_user(    
     nameBody: str = Form(...), surnameBody: str = Form(...), emailBody: str = Form(...), 
@@ -191,10 +190,8 @@ async def create_applications(apply_schema: schemas.ApplicationBase, current_use
     crud.apply_job(db=db, schema_application=apply_schema, applier_id=current_user.id)
     return JSONResponse(content={"message": "Application Created Successfully!"}, status_code=200)
 
-@app.get("/profile/skills/available", response_model=schemas.Skills)
-async def get_all_skills(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
-    skills = crud.get_all_skills(db)
-    return schemas.Skills(skills=[skill.skill_name for skill in skills])
+
+
 
 # Profile APIs (Work, Education, Skills)
 @app.post("/profile/work", response_class=JSONResponse, tags=["profile"])
@@ -257,6 +254,12 @@ async def change_publicity(information: str, current_user: dict = Depends(get_cu
 async def get_publicity(user_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     obj = crud.get_publicity(db, user_id)
     return {"work": obj.work_public, "education": obj.education_public, "skills":obj.skills_public}
+
+
+@app.get("/profile/skills/available", response_model=schemas.Skills)
+async def get_all_skills(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    skills = crud.get_all_skills(db)
+    return schemas.Skills(skills=[skill.skill_name for skill in skills])
 
 
 
