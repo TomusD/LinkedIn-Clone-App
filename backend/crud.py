@@ -57,7 +57,7 @@ def get_all_skills(db: Session):
 # Jobs 
 def create_job(db: Session, job: schemas.JobBase, recruiter_id: int):
     model_skill = models.Skill
-    job_skills = db.query(model_skill).filter(model_skill.skill_name.in_(job.skills_list.skills)).all()
+    job_skills = db.query(model_skill).filter(model_skill.skill_name.in_(job.skills.skills)).all()
 
     db_job= models.Job(
         recruiter_id=recruiter_id,

@@ -93,8 +93,8 @@ class JobBase(BaseModel):
     role: str
     place: str
     type: str
-    salary: int
-    skills_list: Skills
+    salary: str
+    skills: Skills
     
 class JobResponse(JobBase):
     job_id: int
