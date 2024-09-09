@@ -1,5 +1,6 @@
 package com.example.front.data
 
+import com.example.front.data.base.Job
 import com.example.front.data.request.Education
 import com.example.front.data.request.Work
 import com.example.front.data.response.APIResponse
@@ -40,7 +41,6 @@ interface ApiService {
         @Part image: MultipartBody.Part? = null,
     ): Call<APIResponse>
 
-
     @GET("/users")
     fun getUsers(): Call<UsersList>
 
@@ -64,9 +64,15 @@ interface ApiService {
     @GET("/profile/skills/{user_id}")
     fun getSkills(@Path("user_id") user_id: Int): Call<SkillsList>
 
+    @GET("/profile/skills/available")
+    fun getAvailableSkills(): Call<SkillsList>
+
     @GET("/profile/publicity/all/{user_id}")
     fun getPublicity(@Path("user_id") user_id: Int): Call<Map<String, Boolean>>
 
     @PUT("/profile/publicity/{information}")
     fun updatePublicity(@Path("information") info: String): Call<APIResponse>
+
+    @POST("/jobs")
+    fun uploadJob(@Body job: Job): Call<APIResponse>
 }

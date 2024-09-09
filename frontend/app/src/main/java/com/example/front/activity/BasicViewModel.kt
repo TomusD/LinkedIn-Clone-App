@@ -103,6 +103,30 @@ class BasicViewModel : ViewModel() {
         })
     }
 
+
+    private val _availableSkillsList = MutableStateFlow<List<String>>(mutableListOf())
+    val availableSkillsList: StateFlow<List<String>> get() = _availableSkillsList
+
+    fun fetchAvailableSkills(context: Context) {
+
+        val apiClient = ApiClient()
+        val call = apiClient.getApiService(context).getAvailableSkills()
+
+        call.enqueue(object : Callback<SkillsList> {
+            override fun onResponse(call: Call<SkillsList>, response: Response<SkillsList>) {
+                if (response.isSuccessful) {
+                    Log.d("MYTEST", "AVAILABLE SKILLS-SUCCESS")
+                    _availableSkillsList.value = response.body()?.skills ?: emptyList()
+                }
+            }
+
+            override fun onFailure(call: Call<SkillsList>, t: Throwable) {
+                Log.e("MYTEST", "AVAILABLE SKILLS-FAILURE: "+ t.message.toString())
+            }
+        })
+    }
+
+
     private val _publicityMap = MutableStateFlow<Map<String, Boolean>>(mutableMapOf())
     val publicityMap: StateFlow<Map<String, Boolean>> get() = _publicityMap
 

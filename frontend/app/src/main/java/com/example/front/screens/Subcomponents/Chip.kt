@@ -8,7 +8,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,29 +15,49 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.front.ui.theme.Unna
 
 
 @Composable
-fun Chip(text: String, onDelete: () -> Unit) {
-    Surface(
-        shape = RoundedCornerShape(10.dp),
-        color = Color(255, 209, 102),
-        modifier = Modifier.padding(4.dp).height(50.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
+fun Chip(text: String, onDelete: () -> Unit, jobSkill: Boolean = false) {
+    if (!jobSkill) {
+        Surface(
+            shape = RoundedCornerShape(10.dp),
+            color = Color(255, 209, 102),
+            modifier = Modifier.padding(4.dp).height(50.dp)
         ) {
-            Text(
-                text = text,
-                color = Color.Black,
-                modifier = Modifier.padding(end = 8.dp)
-            )
-            IconButton(onClick = onDelete) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Remove skill",
-                    tint = Color.Black
+            Row(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = text,
+                    color = Color.Black,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Remove skill",
+                        tint = Color.Black
+                    )
+                }
+            }
+        }
+    } else {
+        Surface(
+            shape = RoundedCornerShape(50.dp),
+            color = Color(7, 59, 76),
+            modifier = Modifier.padding(4.dp).height(30.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 5.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = text,
+                    color = Color.White,
+                    modifier = Modifier.padding(end = 8.dp)
                 )
             }
         }
