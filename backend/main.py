@@ -319,8 +319,25 @@ async def get_all_skills(current_user: dict = Depends(get_current_user), db: Ses
     skills = crud.get_all_skills(db)
     return schemas.Skills(skills=[skill.skill_name for skill in skills])
 
+# Friend requests
+@app.post("/friends/request/{friend_id}", response_class=JSONResponse, tags=["friends"])
+async def send_friend_request(friend_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    friend_req = crud.get_friend_request(db, current_user.id, friend_id)
+    if friend_id == current_user.id:
+        return JSONResponse(content={"message": "You cannot send a friend request to yourself!"}, status_code=400)
+    if friend_req:
+        return JSONResponse(content={"message": "You have a friend request from this user!"}, status_code=400)
+    crud.friend_request(db, current_user.id, friend_id)
+    return JSONResponse(content={"message": "Friend request sent!"}, status_code=200)
 
-
+@app.put("/users/connect/{requester_id}/{accept}", response_class=JSONResponse, tags=["friends"])
+async def handle_friend_request(requester_id: int, accept: bool, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    if accept:
+        crud.accept_friend_request(db, requester_id, current_user.id)
+        return JSONResponse(content={"message": "Friend request accepted!"}, status_code=200)
+    else:
+        crud.reject_friend_request(db, requester_id, current_user.id)
+        return JSONResponse(content={"message": "Friend request rejected!"}, status_code=200)
 
 # Entry point
 if __name__ == "__main__":
