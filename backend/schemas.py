@@ -67,7 +67,10 @@ class WorkList(BaseModel):
 
 class EduList(BaseModel):
     eduList: list[EduResponse]
-    
+
+class JobsList(BaseModel):
+    applications: list[str]
+
     
 # Application Settings
 class ApplicationBase(BaseModel):
@@ -86,7 +89,9 @@ class addSkill(skillBase):
 
 # Job
 class UserApplier(BaseModel):
-    pass
+    user_id: int
+    user_fullname: str
+    image_url: str
 
 class JobBase(BaseModel):
     organization: str
@@ -96,6 +101,15 @@ class JobBase(BaseModel):
     salary: str
     skills: Skills
     
-class JobResponse(JobBase):
+class JobApplied(JobBase):
     job_id: int
     recruiter_id: int
+    recruiter_fullname: str
+
+class JobUploaded(JobBase):
+    job_id: int
+    applicants_list: list[UserApplier]
+
+class AllJobs(BaseModel):
+    jobs_applied: list[JobApplied]
+    jobs_uploaded: list[JobUploaded]

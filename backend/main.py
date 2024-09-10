@@ -180,10 +180,9 @@ async def create_job(job : schemas.JobBase, current_user: dict = Depends(get_cur
 
 @app.post("/jobs/{job_id}/apply", response_class=JSONResponse, tags=["jobs"])
 async def create_applications(job_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
-
-    # Check if the user is trying to apply to their own job
     job = crud.get_job(db, job_id)
 
+    # Check if the user is trying to apply to their own job
     if not job:
         return "Job does not exists"
     if current_user.id == job.recruiter_id:
@@ -191,6 +190,42 @@ async def create_applications(job_id: int, current_user: dict = Depends(get_curr
     
     crud.apply_job(db=db, job_id=job_id, applier_id=current_user.id)
     return JSONResponse(content={"message": "Application created Successfully!"}, status_code=200)
+
+
+@app.get("/user/jobs", tags=["jobs"])
+async def get_jobs(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    db_applications = crud.get_applications(db, current_user.id)
+    applications = [schemas.JobApplied(
+                        organization=a.organization,
+                        role=a.role,
+                        place=a.place,
+                        type=a.type,
+                        salary=a.salary,
+                        skills=schemas.Skills(skills=[skill.skill_name for skill in a.skills]),
+                        job_id=a.job_id,
+                        recruiter_id=a.recruiter_id,
+                        recruiter_fullname=a.recruiter_fullname,    
+                    ) for a in db_applications]
+
+    db_my_jobs = crud.get_uploaded_jobs(db, current_user.id)
+    my_jobs = [schemas.JobUploaded(
+                    organization=a.organization,
+                    role=a.role,
+                    place=a.place,
+                    type=a.type,
+                    salary=a.salary,
+                    skills=schemas.Skills(skills=[skill.skill_name for skill in a.skills]),
+                    job_id=a.job_id,
+                    applicants_list=[schemas.UserApplier(user_id=u.id, 
+                                                    user_fullname=f"{u.name} {u.surname}",
+                                                    image_url=u.image_path)
+                                                    for u in a.applicants],
+                ) for a in db_my_jobs]
+    
+    print(my_jobs[0])
+    
+    return schemas.AllJobs(jobs_applied=applications, jobs_uploaded=my_jobs)
+    
 
 
 

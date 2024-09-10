@@ -109,11 +109,12 @@ class Job(Base):
 
     job_id = Column(Integer, primary_key=True, autoincrement=True)
     recruiter_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    recruiter_fullname = Column(String, nullable=False)
     organization = Column(String, nullable=False)
     role = Column(String, nullable=False)
     place = Column(String, nullable=False)
     type = Column(String, nullable=False)
-    salary = Column(Integer, nullable=False)
+    salary = Column(String, nullable=False)
 
     recruiter = relationship("User", backref="jobs")
     skills = relationship('Skill', secondary=job_skill_association, back_populates='jobs')

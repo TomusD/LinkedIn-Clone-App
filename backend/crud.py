@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from sqlalchemy.orm import Session, load_only
+from sqlalchemy.orm import Session
 from datetime import datetime
 from uuid6 import uuid7
 from helpers import *
@@ -63,9 +63,12 @@ def create_job(db: Session, job: schemas.JobBase, recruiter_id: int):
     model_skill = models.Skill
     job_skills = db.query(model_skill).filter(model_skill.skill_name.in_(job.skills.skills)).all()
 
+    recruiter = db.query(models.User).filter(models.User.id==recruiter_id).first()
+    
     db_job= models.Job(
         recruiter_id=recruiter_id,
         organization=job.organization,
+        recruiter_fullname=f"{recruiter.name} {recruiter.surname}",
         role=job.role,
         place=job.place,
         type=job.type,
@@ -98,6 +101,13 @@ def apply_job(db: Session, job_id: int, applier_id: int):
     return "OK"
 
 
+def get_applications(db: Session, user_id: int):
+    user = db.query(models.User).filter(models.User.id==user_id).first()
+    return user.applications
+
+def get_uploaded_jobs(db: Session, user_id: int):
+    jobs = db.query(models.Job).filter(models.Job.recruiter_id==user_id).all()
+    return jobs
 
 
 # Profile
