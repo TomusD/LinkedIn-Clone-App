@@ -5,8 +5,11 @@ import com.example.front.data.ApiClient
 import com.example.front.data.SessionManager
 import com.example.front.data.base.User
 import com.example.front.data.response.APIResponse
+import com.example.front.data.response.AllJobs
 import com.example.front.data.response.EducationList
 import com.example.front.data.response.EducationResponse
+import com.example.front.data.response.JobApplied
+import com.example.front.data.response.JobUploaded
 import com.example.front.data.response.SkillsList
 import com.example.front.data.response.UsersList
 import com.example.front.data.response.WorkList
@@ -172,6 +175,32 @@ class BasicViewModel : ViewModel() {
 
             override fun onFailure(call: Call<APIResponse>, t: Throwable) {
                 Log.e("MYTEST", "TOGGLE-FAILURE - $info: "+ t.message.toString())
+            }
+        })
+    }
+
+
+    private val _jobPair = MutableStateFlow<Pair<List<JobApplied>?, List<JobUploaded>?>>(Pair(listOf(), listOf()))
+    val jobPair: StateFlow<Pair<List<JobApplied>?, List<JobUploaded>?>> get() = _jobPair
+
+    fun fetchJobs(context: Context) {
+        val apiClient = ApiClient()
+        val call = apiClient.getApiService(context).getAllJobs()
+        Log.d("MYTEST", "HERE WE GO")
+
+        call.enqueue(object : Callback<AllJobs> {
+            override fun onResponse(call: Call<AllJobs>, response: Response<AllJobs>) {
+                if (response.isSuccessful) {
+                    _jobPair.value = Pair(response.body()?.jobs_applied,
+                        response.body()?.jobs_uploaded
+                    )
+                    Log.d("MYTEST", response.body().toString())
+                    Log.d("MYTEST", "JOBS ALL-SUCCESS")
+                }
+            }
+
+            override fun onFailure(call: Call<AllJobs>, t: Throwable) {
+                Log.e("MYTEST", "JOBS ALL-FAILURE: "+ t.message.toString())
             }
         })
     }

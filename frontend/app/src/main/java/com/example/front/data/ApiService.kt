@@ -4,6 +4,7 @@ import com.example.front.data.base.Job
 import com.example.front.data.request.Education
 import com.example.front.data.request.Work
 import com.example.front.data.response.APIResponse
+import com.example.front.data.response.AllJobs
 import com.example.front.data.response.EducationList
 import com.example.front.data.response.EducationResponse
 import com.example.front.data.response.SkillsList
@@ -64,8 +65,6 @@ interface ApiService {
     @GET("/profile/skills/{user_id}")
     fun getSkills(@Path("user_id") user_id: Int): Call<SkillsList>
 
-    @GET("/profile/skills/available")
-    fun getAvailableSkills(): Call<SkillsList>
 
     @GET("/profile/publicity/all/{user_id}")
     fun getPublicity(@Path("user_id") user_id: Int): Call<Map<String, Boolean>>
@@ -75,4 +74,10 @@ interface ApiService {
 
     @POST("/jobs")
     fun uploadJob(@Body job: Job): Call<APIResponse>
+
+    @GET("/user/jobs")
+    fun getAllJobs(): Call<AllJobs>
+
+    @GET("/skills/available")
+    fun getAvailableSkills(): Call<SkillsList>
 }

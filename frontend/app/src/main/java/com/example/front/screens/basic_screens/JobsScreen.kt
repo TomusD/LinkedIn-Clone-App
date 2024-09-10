@@ -19,6 +19,7 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +33,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.front.data.response.JobApplied
+import com.example.front.data.response.SkillsList
 import com.example.front.screens.Subcomponents.jobs_tabs.JobsTab
 import com.example.front.screens.Subcomponents.jobs_tabs.MyJobsTab
 import com.example.front.ui.theme.FrontEndTheme
@@ -46,12 +49,11 @@ fun JobsScreen(navController: NavController, viewModel: BasicViewModel = viewMod
         ) {
             val context = LocalContext.current
 
-
             LaunchedEffect(Unit) {
-                viewModel.fetchWork(context)
+                viewModel.fetchJobs(context)
             }
 
-//            var workList = viewModel.workList.collectAsState().value
+            var jobPair = viewModel.jobPair.collectAsState().value
 
             var selectedTab by remember { mutableIntStateOf(0) }
             val tabs = listOf("Jobs", "My Jobs")
@@ -135,7 +137,7 @@ fun JobsScreen(navController: NavController, viewModel: BasicViewModel = viewMod
 
                 when (selectedTab) {
                     0 -> JobsTab()
-                    1 -> MyJobsTab()
+                    1 -> MyJobsTab(appliedJobs = jobPair.first, createdJobs = jobPair.second)
                 }
             }
         }
