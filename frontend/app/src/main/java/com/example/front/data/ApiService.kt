@@ -18,6 +18,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
@@ -67,7 +68,6 @@ interface ApiService {
     @GET("/profile/skills/{user_id}")
     fun getSkills(@Path("user_id") user_id: Int): Call<SkillsList>
 
-
     @GET("/profile/publicity/all/{user_id}")
     fun getPublicity(@Path("user_id") user_id: Int): Call<Map<String, Boolean>>
 
@@ -76,6 +76,12 @@ interface ApiService {
 
     @POST("/jobs")
     fun uploadJob(@Body job: Job): Call<APIResponse>
+
+    @POST("/jobs/{job_id}/apply")
+    fun applyJob(@Path("job_id") job_id: Int): Call<APIResponse>
+
+    @DELETE("/jobs/{job_id}/revoke-apply")
+    fun revokeApplyJob(@Path("job_id") job_id: Int): Call<APIResponse>
 
     @GET("/user/jobs/recommended")
     fun getRecommendedJobs(): Call<JobsList>
