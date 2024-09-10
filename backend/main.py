@@ -293,7 +293,7 @@ async def get_publicity(user_id: int, current_user: dict = Depends(get_current_u
     return {"work": obj.work_public, "education": obj.education_public, "skills":obj.skills_public}
 
 
-@app.get("/profile/skills/available", response_model=schemas.Skills)
+@app.get("/skills/available", response_model=schemas.Skills)
 async def get_all_skills(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     skills = crud.get_all_skills(db)
     return schemas.Skills(skills=[skill.skill_name for skill in skills])
