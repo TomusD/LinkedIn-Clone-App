@@ -15,7 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.front.ui.theme.Unna
+import androidx.compose.ui.unit.em
 
 
 @Composable
@@ -46,9 +46,9 @@ fun Chip(text: String, onDelete: () -> Unit, jobSkill: Boolean = false) {
         }
     } else {
         Surface(
-            shape = RoundedCornerShape(50.dp),
+            shape = RoundedCornerShape(5.dp),
             color = Color(7, 59, 76),
-            modifier = Modifier.padding(4.dp).height(30.dp)
+            modifier = Modifier.padding(2.dp).height(30.dp)
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 5.dp, vertical = 4.dp),
@@ -57,7 +57,9 @@ fun Chip(text: String, onDelete: () -> Unit, jobSkill: Boolean = false) {
                 Text(
                     text = text,
                     color = Color.White,
-                    modifier = Modifier.padding(end = 8.dp)
+                    fontSize = 2.2.em,
+                    modifier = Modifier.padding(end = 2.dp)
+
                 )
             }
         }

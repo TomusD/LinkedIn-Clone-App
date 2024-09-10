@@ -4,9 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -15,19 +17,22 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.front.data.response.JobResponse
+import com.example.front.data.response.JobApplied
+import com.example.front.data.response.JobUploaded
 import com.example.front.screens.Subcomponents.Chip
 
 @Composable
-fun JobList(jobs: List<JobResponse>, onApplyClick: (JobResponse) -> Unit) {
+fun JobList(jobs: List<JobApplied>, onApplyClick: (JobApplied) -> Unit) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         items(jobs.size) { index ->
             JobCard(job = jobs[index], onApplyClick = { onApplyClick(jobs[index]) })
@@ -37,10 +42,11 @@ fun JobList(jobs: List<JobResponse>, onApplyClick: (JobResponse) -> Unit) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun JobCard(job: JobResponse, onApplyClick: () -> Unit) {
+fun JobCard(job: JobApplied, button_text: String = "Apply now", onApplyClick: () -> Unit) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxHeight()
+            .width(300.dp)
             .padding(10.dp),
     ) {
         Column(
@@ -60,7 +66,7 @@ fun JobCard(job: JobResponse, onApplyClick: () -> Unit) {
 
             // Organization, Place, Job Type in one line
             Text(
-                text = "${job.organization} • ${job.place} • ${job.jobType}",
+                text = "${job.organization} • ${job.place} • ${job.type}",
                 fontSize = 16.sp,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
@@ -74,7 +80,7 @@ fun JobCard(job: JobResponse, onApplyClick: () -> Unit) {
 
             // Recruiter
             Text(
-                text = "Recruiter: ${job.recruiter_name} 👨🏻‍💼",
+                text = "Recruiter: ${job.recruiter_fullname}",
                 fontSize = 16.sp,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
@@ -84,11 +90,11 @@ fun JobCard(job: JobResponse, onApplyClick: () -> Unit) {
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 10.dp),
-                horizontalArrangement = Arrangement.spacedBy(0.dp)
+                    .padding(bottom = 10.dp)
+                ,horizontalArrangement = Arrangement.spacedBy(0.dp)
 
             ) {
-                job.skillsList.skills.forEach { skill ->
+                job.skills.skills.forEach { skill ->
                     key(skill) { // Use `key` to ensure stable identity for each skill
                         Chip(
                             text = " $skill",
@@ -106,10 +112,87 @@ fun JobCard(job: JobResponse, onApplyClick: () -> Unit) {
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(17, 138, 178)
+                    containerColor =
+                        if (button_text=="Remove") Color(239, 71, 111)
+                        else Color(17, 138, 178)
                 )
             ) {
-                Text(text = "Apply now")
+                Text(text = button_text)
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun JobCard(job: JobUploaded, button_text: String = "View Applicants", onApplyClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxHeight()
+            .width(300.dp)
+            .padding(10.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+        ) {
+            // Job Title (Role)
+            Text(
+                text = job.role,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .fillMaxWidth()
+            )
+
+            // Organization, Place, Job Type in one line
+            Text(
+                text = "${job.organization} • ${job.place} • ${job.type}",
+                fontSize = 16.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            // Salary
+            Text(
+                text = "Salary: ${job.salary} 💵",
+                fontSize = 16.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+
+            // Display selected skills as chips
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp)
+                ,horizontalArrangement = Arrangement.spacedBy(0.dp)
+
+            ) {
+                job.skills.skills.forEach { skill ->
+                    key(skill) { // Use `key` to ensure stable identity for each skill
+                        Chip(
+                            text = " $skill",
+                            onDelete = { },
+                            jobSkill = true
+                        )
+                    }
+                }
+            }
+
+
+            // Apply Button (Full-width)
+            Button(
+                onClick = onApplyClick,
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black
+                )
+            ) {
+                Text(text = button_text)
             }
         }
     }
