@@ -179,7 +179,7 @@ async def create_job(job : schemas.JobBase, current_user: dict = Depends(get_cur
 
 
 @app.post("/jobs/{job_id}/apply", response_class=JSONResponse, tags=["jobs"])
-async def create_applications(job_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+async def create_application(job_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     job = crud.get_job(db, job_id)
 
     # Check if the user is trying to apply to their own job
@@ -190,6 +190,11 @@ async def create_applications(job_id: int, current_user: dict = Depends(get_curr
     
     crud.apply_job(db=db, job_id=job_id, applier_id=current_user.id)
     return JSONResponse(content={"message": "Application created Successfully!"}, status_code=200)
+
+@app.delete("/jobs/{job_id}/revoke-apply", response_class=JSONResponse, tags=["jobs"])
+async def delete_application(job_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    crud.revoke_apply_job(db=db, job_id=job_id, applier_id=current_user.id)
+    return JSONResponse(content={"message": "Application revoked!"}, status_code=200)
 
 
 @app.get("/user/jobs/recommended", response_model=schemas.JobsList, tags=["jobs"])
@@ -239,9 +244,7 @@ async def get_jobs(current_user: dict = Depends(get_current_user), db: Session =
                                                     image_url=u.image_path)
                                                     for u in a.applicants],
                 ) for a in db_my_jobs]
-    
-    print(my_jobs[0])
-    
+        
     return schemas.AllJobs(jobs_applied=applications, jobs_uploaded=my_jobs)
     
 

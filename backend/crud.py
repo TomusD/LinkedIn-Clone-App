@@ -100,6 +100,16 @@ def apply_job(db: Session, job_id: int, applier_id: int):
 
     return "OK"
 
+def revoke_apply_job(db: Session, job_id: int, applier_id: int):
+    user = get_user_by_id(db, applier_id)
+    job = get_job(db, job_id)    
+    
+    job.applicants.remove(user)
+    db.commit()
+
+    return "OK"
+
+
 def get_recommended_jobs(db: Session, user_id: int):
     # Recommendation system not yet implemented
     jobs = db.query(models.Job).filter(models.Job.recruiter_id != user_id).all()
