@@ -100,6 +100,15 @@ def apply_job(db: Session, job_id: int, applier_id: int):
 
     return "OK"
 
+def get_recommended_jobs(db: Session, user_id: int):
+    # Recommendation system not yet implemented
+    jobs = db.query(models.Job).filter(models.Job.recruiter_id != user_id).all()
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+
+    for j in user.applications.copy():
+        jobs.remove(j)
+
+    return jobs
 
 def get_applications(db: Session, user_id: int):
     user = db.query(models.User).filter(models.User.id==user_id).first()

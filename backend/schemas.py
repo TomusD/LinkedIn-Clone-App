@@ -58,20 +58,6 @@ class EduResponse(Education):
 class Skills(BaseModel):
     skills: list[str]
 
-# Responses as lists
-class UserList(BaseModel):
-    users: list[User]
-    
-class WorkList(BaseModel):
-    workList: list[WorkResponse]
-
-class EduList(BaseModel):
-    eduList: list[EduResponse]
-
-class JobsList(BaseModel):
-    applications: list[str]
-
-    
 # Application Settings
 class ApplicationBase(BaseModel):
     job_id: int
@@ -113,3 +99,16 @@ class JobUploaded(JobBase):
 class AllJobs(BaseModel):
     jobs_applied: list[JobApplied]
     jobs_uploaded: list[JobUploaded]
+
+# Responses as lists
+class UserList(BaseModel):
+    users: list[User]
+    
+class WorkList(BaseModel):
+    workList: list[WorkResponse]
+
+class EduList(BaseModel):
+    eduList: list[EduResponse]
+
+class JobsList(BaseModel):
+    recommendations: list[JobApplied]
