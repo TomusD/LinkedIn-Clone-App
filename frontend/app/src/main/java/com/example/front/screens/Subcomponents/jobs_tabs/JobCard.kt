@@ -1,15 +1,16 @@
 package com.example.front.screens.Subcomponents.jobs_tabs
 
+import android.content.Context
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -17,32 +18,27 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.front.data.ApiClient
+import com.example.front.data.base.UserApplier
+import com.example.front.data.response.APIResponse
 import com.example.front.data.response.JobApplied
 import com.example.front.data.response.JobUploaded
 import com.example.front.screens.Subcomponents.Chip
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
-@Composable
-fun JobList(jobs: List<JobApplied>, onApplyClick: (JobApplied) -> Unit) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        items(jobs.size) { index ->
-            JobCard(job = jobs[index], onApplyClick = { onApplyClick(jobs[index]) })
-        }
-    }
-}
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun JobCard(job: JobApplied, button_text: String = "Apply now", onApplyClick: () -> Unit) {
+fun JobCard(job: JobApplied, button_text: String = "Apply now", onApply: (JobApplied) -> Unit) {
+    val context = LocalContext.current
     Card(
         modifier = Modifier
             .fillMaxHeight()
@@ -108,12 +104,25 @@ fun JobCard(job: JobApplied, button_text: String = "Apply now", onApplyClick: ()
 
             // Apply Button (Full-width)
             Button(
-                onClick = onApplyClick,
+                onClick = {
+                    if (button_text == "Revoke apply request") {
+                        revokeApply(context, job.job_id)
+                        onApply(job)
+                        Toast.makeText(context, "You revoked the apply for this job!", Toast.LENGTH_SHORT)
+                            .show()
+
+                    } else {
+                        applyJob(context, job.job_id)
+                        onApply(job)
+                        Toast.makeText(context, "You applied for this job!", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                },
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor =
-                        if (button_text=="Remove") Color(239, 71, 111)
+                        if (button_text=="Revoke apply request") Color(239, 71, 111)
                         else Color(17, 138, 178)
                 )
             ) {
@@ -123,10 +132,45 @@ fun JobCard(job: JobApplied, button_text: String = "Apply now", onApplyClick: ()
     }
 }
 
+fun revokeApply(context: Context, jobId: Int) {
+    val apiClient = ApiClient()
+    val call = apiClient.getApiService(context).revokeApplyJob(jobId)
+    call.enqueue(object : Callback<APIResponse> {
+        override fun onResponse(call: Call<APIResponse>, response: Response<APIResponse>) {
+            if (response.isSuccessful) {
+                val res = response.body()
+                Log.d("MYTEST", "REVOKE APPLY-SUCCESS: $res")
+            }
+        }
+
+        override fun onFailure(call: Call<APIResponse>, t: Throwable) {
+            Log.e("MYTEST", "REVOKE APPLY-FAILURE: "+ t.message.toString())
+        }
+    })
+}
+
+fun applyJob(context: Context, jobId: Int) {
+    val apiClient = ApiClient()
+
+    val call = apiClient.getApiService(context).applyJob(jobId)
+
+    call.enqueue(object : Callback<APIResponse> {
+        override fun onResponse(call: Call<APIResponse>, response: Response<APIResponse>) {
+            if (response.isSuccessful) {
+                val res = response.body()
+                Log.d("MYTEST", "APPLY-SUCCESS: $res")
+            }
+        }
+
+        override fun onFailure(call: Call<APIResponse>, t: Throwable) {
+            Log.e("MYTEST", "APPLY-FAILURE: "+ t.message.toString())
+        }
+    })
+}
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun JobCard(job: JobUploaded, button_text: String = "View Applicants", onApplyClick: () -> Unit) {
+fun JobCard(job: JobUploaded, button_text: String = "View Applicants", onApplyClick: (List<UserApplier>) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxHeight()
@@ -185,7 +229,7 @@ fun JobCard(job: JobUploaded, button_text: String = "View Applicants", onApplyCl
 
             // Apply Button (Full-width)
             Button(
-                onClick = onApplyClick,
+                onClick = { onApplyClick(job.applicants_list) },
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(

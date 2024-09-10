@@ -136,8 +136,8 @@ fun JobsScreen(navController: NavController, viewModel: BasicViewModel = viewMod
 //        Divider(color = Color.Red, thickness = 5.dp)
 
                 when (selectedTab) {
-                    0 -> JobsTab(recommendedJobs)
-                    1 -> MyJobsTab(appliedJobs = jobPair.first, createdJobs = jobPair.second)
+                    0 -> JobsTab(recommendedJobs, onApply = viewModel::applyToRecommendedJob)
+                    1 -> MyJobsTab(appliedJobs = jobPair.first, createdJobs = jobPair.second, onRevoke = viewModel::revokeAppliance)
                 }
             }
         }
