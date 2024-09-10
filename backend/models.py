@@ -123,4 +123,4 @@ class Job(Base):
 
 
     def __repr__(self):
-        return f"<Job(Job ID={self.job_id}, User ID={self.recruiter_id}/{User.id}, User(fullname={User.name} {User.surname})"
+        return f"Job(jid={self.job_id}, uid={self.recruiter_id}, fullname={self.recruiter_fullname})"
