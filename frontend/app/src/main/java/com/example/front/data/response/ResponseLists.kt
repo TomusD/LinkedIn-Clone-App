@@ -30,6 +30,6 @@ data class SkillsList(
 
 
 data class JobsList(
-    @SerializedName("skills")
-    var skills: List<String>
+    @SerializedName("recommendations")
+    var recommendations: List<JobApplied>
 )

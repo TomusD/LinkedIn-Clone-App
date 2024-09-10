@@ -10,6 +10,7 @@ import com.example.front.data.response.EducationList
 import com.example.front.data.response.EducationResponse
 import com.example.front.data.response.JobApplied
 import com.example.front.data.response.JobUploaded
+import com.example.front.data.response.JobsList
 import com.example.front.data.response.SkillsList
 import com.example.front.data.response.UsersList
 import com.example.front.data.response.WorkList
@@ -175,6 +176,28 @@ class BasicViewModel : ViewModel() {
 
             override fun onFailure(call: Call<APIResponse>, t: Throwable) {
                 Log.e("MYTEST", "TOGGLE-FAILURE - $info: "+ t.message.toString())
+            }
+        })
+    }
+
+
+    private val _recommendedJobs = MutableStateFlow<List<JobApplied>>(mutableListOf())
+    val recommendedJobs: StateFlow<List<JobApplied>> get() = _recommendedJobs
+    fun fetchRecommendedJobs(context: Context) {
+        val apiClient = ApiClient()
+        val call = apiClient.getApiService(context).getRecommendedJobs()
+        Log.d("MYTEST", "JOBS RECOMMENDED - HERE WE GO")
+
+        call.enqueue(object : Callback<JobsList> {
+            override fun onResponse(call: Call<JobsList>, response: Response<JobsList>) {
+                if (response.isSuccessful) {
+                    _recommendedJobs.value = response.body()?.recommendations ?: emptyList()
+                    Log.d("MYTEST", "JOBS RECOMMENDED-SUCCESS")
+                }
+            }
+
+            override fun onFailure(call: Call<JobsList>, t: Throwable) {
+                Log.e("MYTEST", "JOBS RECOMMENDED-FAILURE: "+ t.message.toString())
             }
         })
     }

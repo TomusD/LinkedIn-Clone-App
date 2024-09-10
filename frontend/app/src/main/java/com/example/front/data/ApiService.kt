@@ -7,6 +7,8 @@ import com.example.front.data.response.APIResponse
 import com.example.front.data.response.AllJobs
 import com.example.front.data.response.EducationList
 import com.example.front.data.response.EducationResponse
+import com.example.front.data.response.JobApplied
+import com.example.front.data.response.JobsList
 import com.example.front.data.response.SkillsList
 import com.example.front.data.response.auth.LoginResponse
 import com.example.front.data.response.UsersList
@@ -74,6 +76,9 @@ interface ApiService {
 
     @POST("/jobs")
     fun uploadJob(@Body job: Job): Call<APIResponse>
+
+    @GET("/user/jobs/recommended")
+    fun getRecommendedJobs(): Call<JobsList>
 
     @GET("/user/jobs")
     fun getAllJobs(): Call<AllJobs>
