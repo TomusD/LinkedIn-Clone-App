@@ -17,6 +17,7 @@ import com.example.front.data.response.WorkList
 import com.example.front.data.response.WorkResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -201,6 +202,36 @@ class BasicViewModel : ViewModel() {
             }
         })
     }
+
+    fun applyToRecommendedJob(job: JobApplied) {
+        _recommendedJobs.update {
+            val notAppliedJobs = it.toMutableList()
+            notAppliedJobs.remove(job)
+            notAppliedJobs
+        }
+
+        _jobPair.update {
+            val appliedJobs = it.first?.toMutableList()
+            appliedJobs!!.add(job)
+            Pair(appliedJobs, it.second)
+        }
+    }
+
+    fun revokeAppliance(job: JobApplied) {
+        _jobPair.update {
+            val appliedJobs = it.first?.toMutableList()
+            appliedJobs!!.remove(job)
+            Pair(appliedJobs, it.second)
+        }
+
+        _recommendedJobs.update {
+            val notAppliedJobs = it.toMutableList()
+            notAppliedJobs.add(job)
+            notAppliedJobs
+        }
+
+    }
+
 
 
     private val _jobPair = MutableStateFlow<Pair<List<JobApplied>?, List<JobUploaded>?>>(Pair(listOf(), listOf()))
