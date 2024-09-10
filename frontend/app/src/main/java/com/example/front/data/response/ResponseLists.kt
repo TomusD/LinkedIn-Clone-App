@@ -27,3 +27,9 @@ data class SkillsList(
     @SerializedName("skills")
     var skills: List<String>
 )
+
+
+data class JobsList(
+    @SerializedName("skills")
+    var skills: List<String>
+)
