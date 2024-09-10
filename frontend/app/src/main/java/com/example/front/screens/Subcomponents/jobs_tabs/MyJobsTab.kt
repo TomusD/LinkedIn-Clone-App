@@ -101,9 +101,11 @@ fun MyJobsTab(appliedJobs: List<JobApplied>? = emptyList(), createdJobs: List<Jo
         ) {
             if (createdJobs!!.isNotEmpty())
                 createdJobs.forEach { job ->
-                    JobCard(job, button_text = "View Applicants", onApplyClick = {})
+                    JobCard(job, button_text = "${job.applicants_list.size} Applicants", onApplyClick = {
+                        currentAppliers = it
+                        showApplicants = true })
             } else {
-                Text(text = "You haven't uploaded any job yet")
+                Text(text = "You haven't uploaded any job yet", Modifier.padding(start=20.dp, bottom = 15.dp))
             }
         }
 
@@ -124,6 +126,13 @@ fun MyJobsTab(appliedJobs: List<JobApplied>? = emptyList(), createdJobs: List<Jo
         }
     }
 
+    if (showApplicants) {
+        ApplicantsModal(
+            applicants = currentAppliers,
+            onDismiss = { showApplicants = false },
+        )
+    }
+
     if (showDialog) {
         JobModal(
             onDismiss = { showDialog = false },
@@ -132,4 +141,62 @@ fun MyJobsTab(appliedJobs: List<JobApplied>? = emptyList(), createdJobs: List<Jo
             }
         )
     }
+}
+
+
+@Composable
+fun ApplicantsModal(
+    applicants: List<UserApplier>,
+    onDismiss: () -> Unit,
+) {
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(5.dp),
+        title = { Text(text = "Applicants") },
+        modifier = Modifier.height(300.dp),
+        text = {
+
+            if (applicants.isNotEmpty()) {
+                applicants.forEach {
+
+                    Row (horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically,) {
+                        AsyncImage(
+                            model = it.image_url,
+                            contentScale = ContentScale.Crop,
+                            contentDescription = "profile picture",
+                            modifier = Modifier.width(30.dp),
+                        )
+                        Text(text = it.user_fullname, fontSize = 3.5.em)
+                        IconButton(onClick = {},) {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Back"
+                            )
+                        }
+                    }
+                }
+            } else {
+                Text(
+                    text = "No applicants $applicants",
+                    modifier = Modifier.padding(50.dp)
+                )
+            }
+
+
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                shape = RoundedCornerShape(5.dp),
+                colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = Color(239, 71, 111),
+                ),
+            ){
+                Text("Close")
+            }
+        }
+    )
 }
