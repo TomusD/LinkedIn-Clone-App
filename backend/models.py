@@ -62,7 +62,7 @@ class User(Base):
     applications = relationship("Job", secondary=job_application_association, back_populates="applicants")
     connections = relationship(
         "User",
-        secondary=user_association_table,
+        secondary=user_user_association_table,
         primaryjoin=id == user_user_association_table.c.requester_id,
         secondaryjoin=id == user_user_association_table.c.receiver_id,
         backref="connected_to",
