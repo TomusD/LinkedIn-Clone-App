@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, PastDate, PositiveFloat
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, date
 
 """
 schemas.py
@@ -24,6 +24,12 @@ class UserBase(BaseModel):
     surname: str
     email: EmailStr
     image_path: str
+
+
+class UserLittleDetail(BaseModel):
+    user_id: int
+    user_fullname: str
+    image_url: str
 
 # Inherits from UserBase
 class UserRegister(UserBase):
@@ -64,7 +70,7 @@ class ApplicationBase(BaseModel):
 
 class ApplicationResponse(ApplicationBase):
     applier_id: int
-    date_applied: datetime
+    date_applied: date
 
 # Skills Settings
 class skillBase(BaseModel):
@@ -94,7 +100,7 @@ class JobApplied(JobBase):
 
 class JobUploaded(JobBase):
     job_id: int
-    applicants_list: list[UserApplier]
+    applicants_list: list[UserLittleDetail]
 
 class AllJobs(BaseModel):
     jobs_applied: list[JobApplied]
