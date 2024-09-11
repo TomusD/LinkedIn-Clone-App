@@ -1,7 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from datetime import datetime
-from uuid6 import uuid7
+from datetime import date
 from helpers import *
 
 import hashing
@@ -250,6 +249,21 @@ def reject_friend_request(db: Session, sender_id: int, receiver_id: int):
     return "OK"
 
 
+
+
+# Post
+def create_post(db: Session, post: schemas.Post):
+    db_post = models.Post(
+        user_id= post.user_id,
+        input_text= post.input_text,
+        media_image_url= post.image_url,
+        media_video_url= post.video_url,
+        media_sound_url= post.sound_url,
+        date_uploaded=  date.today()
+    )
+    db.add(db_post)
+    db.commit()
+    return "OK"
 
 
 # Only for generating data

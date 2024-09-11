@@ -103,7 +103,7 @@ fun BottomNavigationBar(navController: NavController) {
                         modifier = Modifier.padding(paddingValues = paddingValues))
                     {
                         composable(Screens.Home.route) { HomeScreen(navController) }
-                        composable(Screens.Upload.route) { UploadScreen(navController) }
+                        composable(Screens.Upload.route) { UploadScreen() }
                         composable(Screens.Network.route) { NetworkScreen(navController) }
                         composable(Screens.Jobs.route) { JobsScreen(navController) }
                         composable(Screens.Notifications.route) { NotificationsScreen(navController) }
