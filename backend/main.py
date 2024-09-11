@@ -31,17 +31,17 @@ firebase_admin.initialize_app(cred, {
         'storageBucket': 'ergasiapp.appspot.com'
 
 })
-bucket = storage.bucket()# Get a reference to the storage bucket
+bucket = storage.bucket() # Get a reference to the storage bucket
 
 cert_path: str = "./certifications/cert.pem"
 key_path: str = "./certifications/key.pem"
 
 path_public: str = "public/"
 path_images: str = "images/"
-path_profiles: str = "profiles/"
 path_videos: str = "videos/"
-path_posts: str = "posts/"
 path_sounds: str = "sounds/"
+path_profiles: str = "profiles/"
+path_posts: str = "posts/"
 
 
 app = FastAPI()
@@ -176,14 +176,19 @@ async def create_post(
     text_field: str = Form(...), media_image: UploadFile | None = None, 
     media_video: UploadFile | None = None, media_sound: UploadFile | None = None, 
     current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+
+    media_dict = {"image": None, "video": None, "audio": None}
     
     image_url, video_url, sound_url = None, None, None
     if media_image is not None: 
-        image_url = save_to_cloud(media_image, "image")
+        image_url, media_dict = save_to_cloud(media_image, "image", media_dict)
+
     if media_video is not None: 
-        video_url = save_to_cloud(media_video, "video")
+        video_url, media_dict = save_to_cloud(media_video, "video", media_dict)
+
     if media_sound is not None: 
-        sound_url = save_to_cloud(media_sound, "sound")
+        sound_url, media_dict = save_to_cloud(media_sound, "audio", media_dict)
+
 
     post = schemas.Post(
         user_id= current_user.id,
@@ -375,29 +380,28 @@ async def handle_friend_request(requester_id: int, accept: bool, current_user: d
 
 	
 	
-def save_to_cloud(file: UploadFile, media: str):
-    extension = pathlib.Path(file.filename).suffix
+def save_to_cloud(file: UploadFile, media_type: str, media_dict: dict):
 
-    if media == "image":
-        if extension not in (".jpg", ".png"):
-            raise HTTPException(detail="Image must be a .jpg or a .png file", status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
-        dir = path_images+path_posts
-    
-    elif media == "video":
-        if extension != ".mp4":
-            raise HTTPException(detail="Video must be an .mp4 file", status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
-        dir = path_videos+path_posts
-    else:
-        if extension != ".mp3":
-            raise HTTPException(detail="Sound must be an .mp3 file", status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
-        dir = path_sounds+path_posts
-
-
-    file_name: str = media + "_" + str(int(time.time() * 1000)) + extension
-
-    # Save to Cloud Storage
     try:
-        bucket = storage.bucket()
+        extension = pathlib.Path(file.filename).suffix
+
+        if media_type == "image":
+            if extension not in (".jpg", ".png"):
+                raise HTTPException(detail="Image must be a .jpg or a .png file", status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+            dir = path_images+path_posts
+        
+        elif media_type == "video":
+            if extension != ".mp4":
+                raise HTTPException(detail="Video must be an .mp4 file", status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+            dir = path_videos+path_posts
+        else:
+            if extension != ".mp3":
+                raise HTTPException(detail="Audio must be an .mp3 file", status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+            dir = path_sounds+path_posts
+
+        file_name: str = media_type + "_" + str(int(time.time() * 1000)) + extension
+
+        # Save to Cloud Storage
         cloud_save_path: str = dir + file_name
         blob = bucket.blob(cloud_save_path)
         
@@ -406,14 +410,25 @@ def save_to_cloud(file: UploadFile, media: str):
             content_type=file.content_type
         )
         blob.make_public()
-
         download_url = blob.public_url
+
         print(f"Uploaded {file.content_type}: {download_url}!\n")
-        return download_url
+
+        media_dict[media_type] = file_name
+
+        return download_url, media_dict
 
     except Exception as e:
-        print("error", str(e))
-        return JSONResponse({"error": str(e)}, status_code=500)
+        print("MEDIA DICT ===", media_dict)
+        for m in ["image", "video", "audio"]:
+            if media_dict[m] is not None:
+                path = f"{m}s/{path_posts}{media_dict[m]}"
+                blob = bucket.blob(path)
+                blob.delete()
+                print(f"DELETED {media_dict[m]} --> {path}")
+    
+        # print("Error -->", str(e))
+        raise HTTPException(detail=str(e), status_code=500)
 
 
 # Entry point
