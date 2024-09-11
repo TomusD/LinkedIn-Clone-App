@@ -32,6 +32,7 @@ user_user_association_table = Table(
     Column('requester_id', Integer, ForeignKey('users.id'), primary_key=True),
     Column('receiver_id', Integer, ForeignKey('users.id'), primary_key=True),
     Column('state', String)  
+)
 
 comment_post_association = Table(
     'comments', Base.metadata,
