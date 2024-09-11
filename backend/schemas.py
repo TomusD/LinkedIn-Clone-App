@@ -79,12 +79,28 @@ class skillBase(BaseModel):
 class addSkill(skillBase):
     pass
 
-# Job
-class UserApplier(BaseModel):
-    user_id: int
-    user_fullname: str
-    image_url: str
 
+
+# Posts
+class Comment(UserLittleDetail):
+    comment_text: str
+
+class Post(BaseModel):
+    user_id: int
+    input_text: str
+    image_url: Optional[str]
+    video_url: Optional[str]
+    sound_url: Optional[str]
+    date_uploaded: datetime
+
+
+class PostResponse(Post):
+    post_id: int
+    likes: int
+    comments: list[UserLittleDetail]
+
+
+# Job
 class JobBase(BaseModel):
     organization: str
     role: str

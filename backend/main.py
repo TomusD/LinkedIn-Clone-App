@@ -12,7 +12,7 @@ from jose import JWTError, jwt
 # Project specific
 import helpers
 import crud, models, schemas
-from datetime import timedelta ,datetime
+from datetime import timedelta ,datetime, date
 from database import SessionLocal, engine
 import security as sec
 
@@ -40,6 +40,7 @@ path_public: str = "public/"
 path_images: str = "images/"
 path_profiles: str = "profiles/"
 path_videos: str = "videos/"
+path_posts: str = "posts/"
 path_sounds: str = "sounds/"
 
 
@@ -169,6 +170,33 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
                                  ))
 
 
+# Posts
+@app.post("/posts", response_class=JSONResponse, tags=["posts"])
+async def create_post(    
+    text_field: str = Form(...), media_image: UploadFile | None = None, 
+    media_video: UploadFile | None = None, media_sound: UploadFile | None = None, 
+    current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    
+    image_url, video_url, sound_url = None, None, None
+    if media_image is not None: 
+        image_url = save_to_cloud(media_image, "image")
+    if media_video is not None: 
+        video_url = save_to_cloud(media_video, "video")
+    if media_sound is not None: 
+        sound_url = save_to_cloud(media_sound, "sound")
+
+    post = schemas.Post(
+        user_id= current_user.id,
+        input_text= text_field,
+        image_url= image_url,
+        video_url= video_url,
+        sound_url= sound_url,
+        date_uploaded= date.today(),
+    )
+
+    crud.create_post(db, post)
+    return JSONResponse(content={"message": "Post created Successfully!"}, status_code=200)
+
 
 
 # Job API's
@@ -239,7 +267,7 @@ async def get_jobs(current_user: dict = Depends(get_current_user), db: Session =
                     salary=a.salary,
                     skills=schemas.Skills(skills=[skill.skill_name for skill in a.skills]),
                     job_id=a.job_id,
-                    applicants_list=[schemas.UserApplier(user_id=u.id, 
+                    applicants_list=[schemas.UserLittleDetail(user_id=u.id, 
                                                     user_fullname=f"{u.name} {u.surname}",
                                                     image_url=u.image_path)
                                                     for u in a.applicants],
@@ -320,7 +348,45 @@ async def get_all_skills(current_user: dict = Depends(get_current_user), db: Ses
     return schemas.Skills(skills=[skill.skill_name for skill in skills])
 
 
+def save_to_cloud(file: UploadFile, media: str):
+    extension = pathlib.Path(file.filename).suffix
 
+    if media == "image":
+        if extension not in (".jpg", ".png"):
+            raise HTTPException(detail="Image must be a .jpg or a .png file", status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+        dir = path_images+path_posts
+    
+    elif media == "video":
+        if extension != ".mp4":
+            raise HTTPException(detail="Video must be an .mp4 file", status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+        dir = path_videos+path_posts
+    else:
+        if extension != ".mp3":
+            raise HTTPException(detail="Sound must be an .mp3 file", status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+        dir = path_sounds+path_posts
+
+
+    file_name: str = media + "_" + str(int(time.time() * 1000)) + extension
+
+    # Save to Cloud Storage
+    try:
+        bucket = storage.bucket()
+        cloud_save_path: str = dir + file_name
+        blob = bucket.blob(cloud_save_path)
+        
+        blob.upload_from_string(
+            file.file.read(),
+            content_type=file.content_type
+        )
+        blob.make_public()
+
+        download_url = blob.public_url
+        print(f"Uploaded {file.content_type}: {download_url}!\n")
+        return download_url
+
+    except Exception as e:
+        print("error", str(e))
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 # Entry point
 if __name__ == "__main__":
