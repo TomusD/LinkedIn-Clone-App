@@ -27,6 +27,12 @@ job_application_association = Table(
     Column("date_applied", Date, nullable=False, default=date.today())
 )
 
+user_user_association_table = Table(
+    'user_relationship', Base.metadata,
+    Column('requester_id', Integer, ForeignKey('users.id'), primary_key=True),
+    Column('receiver_id', Integer, ForeignKey('users.id'), primary_key=True),
+    Column('state', String)  
+
 comment_post_association = Table(
     'comments', Base.metadata,
     Column('comment_id', Integer),
@@ -53,6 +59,14 @@ class User(Base):
     image_path = Column(String)
 
     applications = relationship("Job", secondary=job_application_association, back_populates="applicants")
+    connections = relationship(
+        "User",
+        secondary=user_association_table,
+        primaryjoin=id == user_user_association_table.c.requester_id,
+        secondaryjoin=id == user_user_association_table.c.receiver_id,
+        backref="connected_to",
+        foreign_keys=[user_user_association_table.c.requester_id, user_user_association_table.c.receiver_id]
+    )
 
     def __repr__(self) -> None:
         return f"<User(id={self.id}, fullname={self.name} {self.surname}, email={self.email}, image_path={self.image_path})>"

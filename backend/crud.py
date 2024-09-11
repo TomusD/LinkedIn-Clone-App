@@ -198,6 +198,57 @@ def get_publicity(db: Session, user_id: int):
     res = db.query(models.UserInfo).filter(models.UserInfo.id==user_id).first()
     return res
 
+def friend_request(db: Session, sender_id: int, receiver_id: int):
+    model_user = models.User
+    sender = db.query(model_user).filter(model_user.id==sender_id).first()
+    receiver = db.query(model_user).filter(model_user.id==receiver_id).first()
+
+    db.execute(models.user_association_table.insert().values(
+        requester_id=sender.id,
+        receiver_id=receiver.id,
+        state="PENDING"
+    ))
+    db.commit()
+
+    return "OK"
+
+def get_friend_request(db: Session, receiver_id: int, sender_id: int):
+
+    sender = db.query(models.User).filter(models.User.id==sender_id).first()
+    receiver = db.query(models.User).filter(models.User.id==receiver_id).first()
+
+    res = db.query(models.user_association_table).filter(
+        models.user_association_table.c.requester_id==sender.id,
+        models.user_association_table.c.receiver_id==receiver.id
+    ).first()
+    return res
+
+def accept_friend_request(db: Session, sender_id: int, receiver_id: int):
+
+    sender = db.query(models.User).filter(models.User.id==sender_id).first()
+    receiver = db.query(models.User).filter(models.User.id==receiver_id).first()
+
+    db.query(models.user_association_table).filter(
+        models.user_association_table.c.requester_id==sender.id,
+        models.user_association_table.c.receiver_id==receiver.id
+    ).update({"state": "ACCEPTED"})
+
+    db.commit()
+    return "OK"
+
+def reject_friend_request(db: Session, sender_id: int, receiver_id: int):
+    sender = db.query(models.User).filter(models.User.id==sender_id).first()
+    receiver = db.query(models.User).filter(models.User.id==receiver_id).first()
+
+    db.query(models.user_association_table).filter(
+        models.user_association_table.c.requester_id==sender.id,
+        models.user_association_table.c.receiver_id==receiver.id
+    ).delete()
+
+    db.commit()
+    return "OK"
+
+
 
 
 # Post
