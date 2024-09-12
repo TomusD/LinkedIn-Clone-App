@@ -266,23 +266,19 @@ def create_post(db: Session, post: schemas.Post):
     db.commit()
     return "OK"
 
-def like_post(db: Session, user_id: int, post_id: int):
+def handle_like(db: Session, user_id: int, post_id: int):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    post = db.query(models.Post).filter(models.Post.post_id == post_id).first()
 
-    user = db.query(models.User).filter(models.User.id==user_id).first()
-    post = db.query(models.Post).filter(models.Post.post_id==post_id).first()
+    if user in post.likers:
+        post.likers.remove(user)
+        message = "Post unliked!"
+    else:
+        post.likers.append(user)
+        message = "Post liked!"
 
-    post.likers.append(user)
     db.commit()
-    return "OK"
-
-def unlike_post(db: Session, user_id: int, post_id: int):
-
-    user = db.query(models.User).filter(models.User.id==user_id).first()
-    post = db.query(models.Post).filter(models.Post.post_id==post_id).first()
-
-    post.likers.remove(user)
-    db.commit()
-    return "OK"
+    return message
 
 
 # Only for generating data
