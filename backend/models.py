@@ -27,7 +27,7 @@ job_application_association = Table(
     Column("date_applied", Date, nullable=False, default=date.today())
 )
 
-user_user_association_table = Table(
+user_connection_association = Table(
     'user_relationship', Base.metadata,
     Column('requester_id', Integer, ForeignKey('users.id'), primary_key=True),
     Column('receiver_id', Integer, ForeignKey('users.id'), primary_key=True),
@@ -62,12 +62,25 @@ class User(Base):
     applications = relationship("Job", secondary=job_application_association, back_populates="applicants")
     connections = relationship(
         "User",
-        secondary=user_user_association_table,
-        primaryjoin=id == user_user_association_table.c.requester_id,
-        secondaryjoin=id == user_user_association_table.c.receiver_id,
-        backref="connected_to",
-        foreign_keys=[user_user_association_table.c.requester_id, user_user_association_table.c.receiver_id]
+        secondary=user_connection_association,
+        primaryjoin = id == user_connection_association.c.requester_id,
+        secondaryjoin = id == user_connection_association.c.receiver_id,
+        back_populates="connected_to",
+        foreign_keys=[user_connection_association.c.requester_id, user_connection_association.c.receiver_id]
+
     )
+
+    connected_to = relationship(
+        'User',
+        secondary=user_connection_association,
+        primaryjoin = id == user_connection_association.c.receiver_id,
+        secondaryjoin = id == user_connection_association.c.requester_id,
+        foreign_keys=[user_connection_association.c.receiver_id, user_connection_association.c.requester_id],
+        back_populates='connections'
+    )
+
+    def get_connections(self):
+        return self.connections + self.connected_to
 
     def __repr__(self) -> None:
         return f"<User(id={self.id}, fullname={self.name} {self.surname}, email={self.email}, image_path={self.image_path})>"

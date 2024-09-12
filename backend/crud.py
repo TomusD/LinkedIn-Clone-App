@@ -205,7 +205,7 @@ def friend_request(db: Session, sender_id: int, receiver_id: int):
     receiver = db.query(model_user).filter(model_user.id==receiver_id).first()
 
     try :
-        db.execute(models.user_user_association_table.insert().values(
+        db.execute(models.user_connection_association.insert().values(
             requester_id=sender.id,
             receiver_id=receiver.id,
             state="PENDING"
@@ -218,13 +218,12 @@ def friend_request(db: Session, sender_id: int, receiver_id: int):
     return "OK"
 
 def get_friend_request(db: Session, receiver_id: int, sender_id: int):
-
     sender = db.query(models.User).filter(models.User.id==sender_id).first()
     receiver = db.query(models.User).filter(models.User.id==receiver_id).first()
     
-    res = db.query(models.user_user_association_table).filter(
-        models.user_user_association_table.c.requester_id==sender.id,
-        models.user_user_association_table.c.receiver_id==receiver.id
+    res = db.query(models.user_connection_association).filter(
+        models.user_connection_association.c.requester_id==sender.id,
+        models.user_connection_association.c.receiver_id==receiver.id
     ).first()
 
     return res
@@ -234,14 +233,14 @@ def handle_friend_request(db: Session, sender_id: int, receiver_id: int, accepte
     receiver = db.query(models.User).filter(models.User.id==receiver_id).first()
 
     if accepted:
-        db.query(models.user_user_association_table).filter(
-            models.user_user_association_table.c.requester_id==sender.id,
-            models.user_user_association_table.c.receiver_id==receiver.id
+        db.query(models.user_connection_association).filter(
+            models.user_connection_association.c.requester_id==sender.id,
+            models.user_connection_association.c.receiver_id==receiver.id
         ).update({"state": "ACCEPTED"})
     else: 
-        db.query(models.user_user_association_table).filter(
-            models.user_user_association_table.c.requester_id==sender.id,
-            models.user_user_association_table.c.receiver_id==receiver.id
+        db.query(models.user_connection_association).filter(
+            models.user_connection_association.c.requester_id==sender.id,
+            models.user_connection_association.c.receiver_id==receiver.id
         ).delete()
     
     db.commit()
