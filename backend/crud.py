@@ -203,7 +203,7 @@ def friend_request(db: Session, sender_id: int, receiver_id: int):
     sender = db.query(model_user).filter(model_user.id==sender_id).first()
     receiver = db.query(model_user).filter(model_user.id==receiver_id).first()
 
-    db.execute(models.user_association_table.insert().values(
+    db.execute(models.user_user_association_table.insert().values(
         requester_id=sender.id,
         receiver_id=receiver.id,
         state="PENDING"
@@ -217,9 +217,9 @@ def get_friend_request(db: Session, receiver_id: int, sender_id: int):
     sender = db.query(models.User).filter(models.User.id==sender_id).first()
     receiver = db.query(models.User).filter(models.User.id==receiver_id).first()
 
-    res = db.query(models.user_association_table).filter(
-        models.user_association_table.c.requester_id==sender.id,
-        models.user_association_table.c.receiver_id==receiver.id
+    res = db.query(models.user_user_association_table).filter(
+        models.user_user_association_table.c.requester_id==sender.id,
+        models.user_user_association_table.c.receiver_id==receiver.id
     ).first()
     return res
 
@@ -228,9 +228,9 @@ def accept_friend_request(db: Session, sender_id: int, receiver_id: int):
     sender = db.query(models.User).filter(models.User.id==sender_id).first()
     receiver = db.query(models.User).filter(models.User.id==receiver_id).first()
 
-    db.query(models.user_association_table).filter(
-        models.user_association_table.c.requester_id==sender.id,
-        models.user_association_table.c.receiver_id==receiver.id
+    db.query(models.user_user_association_table).filter(
+        models.user_user_association_table.c.requester_id==sender.id,
+        models.user_user_association_table.c.receiver_id==receiver.id
     ).update({"state": "ACCEPTED"})
 
     db.commit()
@@ -240,9 +240,9 @@ def reject_friend_request(db: Session, sender_id: int, receiver_id: int):
     sender = db.query(models.User).filter(models.User.id==sender_id).first()
     receiver = db.query(models.User).filter(models.User.id==receiver_id).first()
 
-    db.query(models.user_association_table).filter(
-        models.user_association_table.c.requester_id==sender.id,
-        models.user_association_table.c.receiver_id==receiver.id
+    db.query(models.user_user_association_table).filter(
+        models.user_user_association_table.c.requester_id==sender.id,
+        models.user_user_association_table.c.receiver_id==receiver.id
     ).delete()
 
     db.commit()
