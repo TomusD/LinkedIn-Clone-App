@@ -48,6 +48,17 @@ interface ApiService {
     @GET("/users")
     fun getUsers(): Call<UsersList>
 
+
+    @Multipart
+    @POST("/posts")
+    fun createPost(
+        @Part("text_field") text_field: RequestBody,
+        @Part media_image: MultipartBody.Part? = null,
+        @Part media_video: MultipartBody.Part? = null,
+        @Part media_audio: MultipartBody.Part? = null,
+    ): Call<APIResponse>
+
+
     @Headers("Content-Type: application/json")
     @POST("/profile/work")
     fun updateWork(@Body work: Work): Call<APIResponse>
