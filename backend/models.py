@@ -68,6 +68,7 @@ class User(Base):
         backref="connected_to",
         foreign_keys=[user_user_association_table.c.requester_id, user_user_association_table.c.receiver_id]
     )
+    liked_posts = relationship("Post", secondary=like_post_association, back_populates="likers")
 
     def __repr__(self) -> None:
         return f"<User(id={self.id}, fullname={self.name} {self.surname}, email={self.email}, image_path={self.image_path})>"
@@ -168,4 +169,4 @@ class Post(Base):
     date_uploaded = Column(DateTime)
 
     comments =  relationship("User", secondary=comment_post_association)
-    likes =  relationship("User", secondary=like_post_association)
+    likers = relationship("User", secondary=like_post_association, back_populates="liked_posts")

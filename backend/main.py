@@ -203,6 +203,17 @@ async def create_post(
     crud.create_post(db, post)
     return JSONResponse(content={"message": "Post created Successfully!"}, status_code=200)
 
+@app.put("/posts/{post_id}/like", response_class=JSONResponse, tags=["posts"])
+async def like_post(post_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == current_user.id).first()
+    post = db.query(models.Post).filter(models.Post.post_id == post_id).first()
+
+    if user in post.likers:
+        crud.unlike_post(db, current_user.id, post_id)
+        return JSONResponse(content={"message": "Post unliked!"}, status_code=200)
+    else:
+        crud.like_post(db, current_user.id, post_id)
+        return JSONResponse(content={"message": "Post liked!"}, status_code=200)
 
 
 # Job API's

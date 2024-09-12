@@ -212,6 +212,7 @@ def friend_request(db: Session, sender_id: int, receiver_id: int):
 
     return "OK"
 
+# Friend requests
 def get_friend_request(db: Session, receiver_id: int, sender_id: int):
 
     sender = db.query(models.User).filter(models.User.id==sender_id).first()
@@ -262,6 +263,24 @@ def create_post(db: Session, post: schemas.Post):
         date_uploaded=  datetime.now().isoformat(sep=" ", timespec="seconds")
     )
     db.add(db_post)
+    db.commit()
+    return "OK"
+
+def like_post(db: Session, user_id: int, post_id: int):
+
+    user = db.query(models.User).filter(models.User.id==user_id).first()
+    post = db.query(models.Post).filter(models.Post.post_id==post_id).first()
+
+    post.likers.append(user)
+    db.commit()
+    return "OK"
+
+def unlike_post(db: Session, user_id: int, post_id: int):
+
+    user = db.query(models.User).filter(models.User.id==user_id).first()
+    post = db.query(models.Post).filter(models.Post.post_id==post_id).first()
+
+    post.likers.remove(user)
     db.commit()
     return "OK"
 
