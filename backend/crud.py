@@ -217,6 +217,7 @@ def friend_request(db: Session, sender_id: int, receiver_id: int):
 
     return "OK"
 
+# Friend requests
 def get_friend_request(db: Session, receiver_id: int, sender_id: int):
 
     sender = db.query(models.User).filter(models.User.id==sender_id).first()
@@ -263,6 +264,20 @@ def create_post(db: Session, post: schemas.Post):
     db.add(db_post)
     db.commit()
     return "OK"
+
+def handle_like(db: Session, user_id: int, post_id: int):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    post = db.query(models.Post).filter(models.Post.post_id == post_id).first()
+
+    if user in post.likers:
+        post.likers.remove(user)
+        message = "Post unliked!"
+    else:
+        post.likers.append(user)
+        message = "Post liked!"
+
+    db.commit()
+    return message
 
 
 # Only for generating data
