@@ -37,7 +37,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EducationModal(
     onDismiss: () -> Unit,

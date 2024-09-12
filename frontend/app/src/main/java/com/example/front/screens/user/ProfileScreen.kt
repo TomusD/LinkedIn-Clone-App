@@ -309,7 +309,6 @@ fun SkillsTab(skillsSet: List<String>, viewModel: BasicViewModel, publicity: Boo
     val context = LocalContext.current
     var isPublic by remember { mutableStateOf(publicity) }
 
-//    var selectedSkills by remember { mutableStateOf(setOf("Kotlin", "Backend")) }
     var selectedSkills by remember { mutableStateOf(skillsSet) }
 
     val languageSkills  = mutableListOf("Python", "JavaScript", "Java", "C++", "C#", "Ruby", "Go", "Swift", "Kotlin", "PHP")
