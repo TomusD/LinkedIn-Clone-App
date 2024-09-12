@@ -39,7 +39,7 @@ key_path: str = "./certifications/key.pem"
 path_public: str = "public/"
 path_images: str = "images/"
 path_videos: str = "videos/"
-path_sounds: str = "sounds/"
+path_audios: str = "audios/"
 path_profiles: str = "profiles/"
 path_posts: str = "posts/"
 
@@ -99,17 +99,17 @@ def get_users(current_user: dict = Depends(get_current_user), db: Session = Depe
 @app.post("/users", response_class=JSONResponse, tags=["auth"])
 async def create_user(    
     nameBody: str = Form(...), surnameBody: str = Form(...), emailBody: str = Form(...), 
-    passwordBody: str = Form(...), image: UploadFile = File(...), db: Session = Depends(get_db)):
+    passwordBody: str = Form(...), media_image: UploadFile = File(...), db: Session = Depends(get_db)):
 
 
     db_user = crud.get_user_by_email(db, email=emailBody)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
-    file_name: str = (nameBody+surnameBody).lower() + str(int(time.time() * 1000)) + pathlib.Path(image.filename).suffix
+    file_name: str = (nameBody+surnameBody).lower() + str(int(time.time() * 1000)) + pathlib.Path(media_image.filename).suffix
 
     # Save the file locally
-    local_image_copy = helpers.copy_upload_file(image)
+    local_image_copy = helpers.copy_upload_file(media_image)
     local_save_path: str = f"{path_public}{path_images}{path_profiles}{file_name}"
     with open(local_save_path, "wb") as buffer:
         shutil.copyfileobj(local_image_copy.file, buffer)
@@ -121,8 +121,8 @@ async def create_user(
         blob = bucket.blob(cloud_save_path)
         
         blob.upload_from_string(
-            image.file.read(),
-            content_type=image.content_type
+            media_image.file.read(),
+            content_type=media_image.content_type
         )
         blob.make_public()
 
@@ -174,20 +174,21 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 @app.post("/posts", response_class=JSONResponse, tags=["posts"])
 async def create_post(    
     text_field: str = Form(...), media_image: UploadFile | None = None, 
-    media_video: UploadFile | None = None, media_sound: UploadFile | None = None, 
+    media_video: UploadFile | None = None, media_audio: UploadFile | None = None, 
     current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
 
     media_dict = {"image": None, "video": None, "audio": None}
     
-    image_url, video_url, sound_url = None, None, None
+    image_url, video_url, audio_url = None, None, None
     if media_image is not None: 
         image_url, media_dict = save_to_cloud(media_image, "image", media_dict)
-
+    
     if media_video is not None: 
         video_url, media_dict = save_to_cloud(media_video, "video", media_dict)
 
-    if media_sound is not None: 
-        sound_url, media_dict = save_to_cloud(media_sound, "audio", media_dict)
+    if media_audio is not None:
+        print(media_audio)
+        audio_url, media_dict = save_to_cloud(media_audio, "audio", media_dict)
 
 
     post = schemas.Post(
@@ -195,7 +196,7 @@ async def create_post(
         input_text= text_field,
         image_url= image_url,
         video_url= video_url,
-        sound_url= sound_url,
+        sound_url= audio_url,
         date_uploaded= date.today(),
     )
 
@@ -381,7 +382,6 @@ async def handle_friend_request(requester_id: int, accept: bool, current_user: d
 	
 	
 def save_to_cloud(file: UploadFile, media_type: str, media_dict: dict):
-
     try:
         extension = pathlib.Path(file.filename).suffix
 
@@ -389,15 +389,16 @@ def save_to_cloud(file: UploadFile, media_type: str, media_dict: dict):
             if extension not in (".jpg", ".png"):
                 raise HTTPException(detail="Image must be a .jpg or a .png file", status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
             dir = path_images+path_posts
-        
+
         elif media_type == "video":
             if extension != ".mp4":
                 raise HTTPException(detail="Video must be an .mp4 file", status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
             dir = path_videos+path_posts
-        else:
+
+        elif media_type == "audio":
             if extension != ".mp3":
                 raise HTTPException(detail="Audio must be an .mp3 file", status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
-            dir = path_sounds+path_posts
+            dir = path_audios+path_posts
 
         file_name: str = media_type + "_" + str(int(time.time() * 1000)) + extension
 
@@ -412,22 +413,20 @@ def save_to_cloud(file: UploadFile, media_type: str, media_dict: dict):
         blob.make_public()
         download_url = blob.public_url
 
-        print(f"Uploaded {file.content_type}: {download_url}!\n")
 
         media_dict[media_type] = file_name
+        print(f"Uploaded {file.content_type}: {download_url}!")
 
         return download_url, media_dict
 
     except Exception as e:
-        print("MEDIA DICT ===", media_dict)
         for m in ["image", "video", "audio"]:
             if media_dict[m] is not None:
                 path = f"{m}s/{path_posts}{media_dict[m]}"
                 blob = bucket.blob(path)
                 blob.delete()
-                print(f"DELETED {media_dict[m]} --> {path}")
+                print(f"Deleted {media_dict[m]}: {path}")
     
-        # print("Error -->", str(e))
         raise HTTPException(detail=str(e), status_code=500)
 
 
