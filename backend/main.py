@@ -203,6 +203,10 @@ async def create_post(
     crud.create_post(db, post)
     return JSONResponse(content={"message": "Post created Successfully!"}, status_code=200)
 
+@app.put("/posts/{post_id}/like", response_class=JSONResponse, tags=["posts"])
+async def like_post(post_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+        message = crud.handle_like(db, current_user.id, post_id) 
+        return JSONResponse(content={"message": message}, status_code=200)
 
 
 # Job API's

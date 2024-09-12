@@ -69,6 +69,7 @@ class User(Base):
         foreign_keys=[user_connection_association.c.requester_id, user_connection_association.c.receiver_id]
 
     )
+    liked_posts = relationship("Post", secondary=like_post_association, back_populates="likers")
 
     connected_to = relationship(
         'User',
@@ -181,4 +182,4 @@ class Post(Base):
     date_uploaded = Column(DateTime)
 
     comments =  relationship("User", secondary=comment_post_association)
-    likes =  relationship("User", secondary=like_post_association)
+    likers = relationship("User", secondary=like_post_association, back_populates="liked_posts")
