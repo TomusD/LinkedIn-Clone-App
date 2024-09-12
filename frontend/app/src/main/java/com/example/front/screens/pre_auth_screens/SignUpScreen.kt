@@ -1,7 +1,9 @@
 package com.example.front.screens.pre_auth_screens
 
 import android.content.Context
+import android.database.Cursor
 import android.net.Uri
+import android.provider.OpenableColumns
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -71,10 +73,10 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.io.File
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.lifecycle.LiveData
+import com.example.front.activity.fileToMedia
 import com.example.front.data.response.APIResponse
 
 
@@ -271,15 +273,8 @@ class RegisterViewModel : ViewModel() {
         val passwordBody = user.password.toRequestBody("text/plain".toMediaTypeOrNull())
 
 
-        val filePath = user.imageURI?.let { getRealPathFromURI(it, context) }
-        if (filePath != null) {
-
-            val imageFile = File(filePath)
-            val requestFile = imageFile
-                .asRequestBody(user.imageURI?.let {
-                    context.contentResolver.getType(it)?.toMediaTypeOrNull()
-                })
-            val imageBody = MultipartBody.Part.createFormData("image", imageFile.name, requestFile)
+        val imageBody =  user.imageURI?.let { fileToMedia(context, it, "image") }
+        if (imageBody != null) {
 
 
             viewModelScope.launch {
@@ -334,27 +329,13 @@ class RegisterViewModel : ViewModel() {
     }
 }
 
-// Utility function to get real file path from Uri
-fun getRealPathFromURI(uri: Uri, context: android.content.Context): String {
-    var filePath = ""
-    val cursor = context.contentResolver.query(uri, null, null, null, null)
-    if (cursor != null) {
-        cursor.moveToFirst()
-        val idx = cursor.getColumnIndex("_data")
-        if (idx != -1) {
-            filePath = cursor.getString(idx)
-        } else {
-            // Fallback: Create a temporary file
-            val inputStream = context.contentResolver.openInputStream(uri)
-            val tempFile = File(context.cacheDir, "temp_image")
-            inputStream?.use { input ->
-                tempFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
-            }
-            filePath = tempFile.absolutePath
+fun getFileNameFromUri(context: Context, uri: Uri): String {
+    var fileName = "unknown_file"
+    val cursor: Cursor? = context.contentResolver.query(uri, null, null, null, null)
+    cursor?.use {
+        if (it.moveToFirst()) {
+            fileName = it.getString(it.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME))
         }
-        cursor.close()
     }
-    return filePath
+    return fileName
 }
