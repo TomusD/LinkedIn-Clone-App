@@ -197,7 +197,7 @@ fun UploadScreen(viewModel: PostViewModel = viewModel()) {
                         Image(
                             painter = rememberAsyncImagePainter(selectedImage),
                             contentDescription = "Selected Image",
-                            modifier = Modifier.size(80.dp),
+                            modifier = Modifier.size(50.dp),
                             contentScale = ContentScale.Crop
                         )
                     }
@@ -222,7 +222,7 @@ fun UploadScreen(viewModel: PostViewModel = viewModel()) {
                                 bitmap = videoThumbnail!!.asImageBitmap(),
                                 contentDescription = "Video Thumbnail",
                                 modifier = Modifier
-                                    .size(80.dp),
+                                    .size(50.dp),
                                 contentScale = ContentScale.Crop
                             )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -244,7 +244,7 @@ fun UploadScreen(viewModel: PostViewModel = viewModel()) {
 
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+//            Spacer(modifier = Modifier.height(16.dp))
 
             // Submit button
             Button(
