@@ -365,21 +365,25 @@ async def send_friend_request(friend_id: int, current_user: dict = Depends(get_c
         return JSONResponse(content={"message": "You cannot send a friend request to yourself!"}, status_code=400)
     if friend_req:
         return JSONResponse(content={"message": "You have a friend request from this user!"}, status_code=400)
+    
     crud.friend_request(db, current_user.id, friend_id)
     return JSONResponse(content={"message": "Friend request sent!"}, status_code=200)
 
 
 @app.put("/users/connect/{requester_id}/{accept}", response_class=JSONResponse, tags=["friends"])
 async def handle_friend_request(requester_id: int, accept: bool, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
-    if accept:
-        crud.accept_friend_request(db, requester_id, current_user.id)
-        return JSONResponse(content={"message": "Friend request accepted!"}, status_code=200)
-    else:
-        crud.reject_friend_request(db, requester_id, current_user.id)
-        return JSONResponse(content={"message": "Friend request rejected!"}, status_code=200)
+    crud.handle_friend_request(db, requester_id, current_user.id, accept)
+    action = "accepted" if accept else "rejected"
+
+    return JSONResponse(content={"message": f"Friend request {action}!"}, status_code=200)
 
 
-	
+@app.put("/test-things", response_class=JSONResponse, tags=["a"])
+async def test(requester_id: int, accept: bool, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id==current_user.id).first()
+    print(user.connections)
+
+
 	
 def save_to_cloud(file: UploadFile, media_type: str, media_dict: dict):
     try:
