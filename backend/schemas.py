@@ -134,3 +134,7 @@ class EduList(BaseModel):
 
 class JobsList(BaseModel):
     recommendations: list[JobApplied]
+
+
+class PostsList(BaseModel):
+    posts: list[PostResponse]

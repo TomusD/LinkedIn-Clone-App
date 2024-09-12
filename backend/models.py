@@ -1,5 +1,5 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Date, Float, Text, Table, DateTime
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped
 from database import Base
 from datetime import date
 
@@ -69,8 +69,6 @@ class User(Base):
         foreign_keys=[user_connection_association.c.requester_id, user_connection_association.c.receiver_id]
 
     )
-    liked_posts = relationship("Post", secondary=like_post_association, back_populates="likers")
-
     connected_to = relationship(
         'User',
         secondary=user_connection_association,
@@ -79,6 +77,10 @@ class User(Base):
         foreign_keys=[user_connection_association.c.receiver_id, user_connection_association.c.requester_id],
         back_populates='connections'
     )
+    liked_posts = relationship("Post", secondary=like_post_association, back_populates="likers")
+
+    uploaded_posts = relationship("Post")
+
 
     def get_connections(self):
         return self.connections + self.connected_to

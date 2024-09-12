@@ -203,6 +203,27 @@ async def create_post(
     crud.create_post(db, post)
     return JSONResponse(content={"message": "Post created Successfully!"}, status_code=200)
 
+
+@app.get("/posts/feed", response_model=schemas.PostsList, tags=["posts"])
+async def get_posts(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    db_posts = crud.get_posts(db, current_user.id)
+    
+    posts = [schemas.PostResponse(
+        post_id= p.post_id,
+        likes= len(p.likers),
+        comments= p.comments,
+        user_id= p.user_id,
+        input_text= p.input_text,
+        image_url= p.media_image_url,
+        video_url= p.media_video_url,
+        sound_url= p.media_sound_url,
+        date_uploaded= p.date_uploaded,
+    ) for p in db_posts]
+
+    return schemas.PostsList(posts=posts)
+
+
+
 @app.put("/posts/{post_id}/like", response_class=JSONResponse, tags=["posts"])
 async def like_post(post_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
         message = crud.handle_like(db, current_user.id, post_id) 

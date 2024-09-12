@@ -264,6 +264,36 @@ def create_post(db: Session, post: schemas.Post):
     db.commit()
     return "OK"
 
+
+def get_posts(db: Session, user_id: int):
+    model_post = models.Post
+
+    user = db.query(models.User).filter(models.User.id==user_id).first()
+    connections = user.get_connections()
+    ids = [u.id for u in connections] + [user_id]
+
+# posts of friends and the user
+    users_posts = db.query(model_post). \
+        filter(model_post.user_id.in_(ids)). \
+        order_by(model_post.date_uploaded.desc()). \
+        limit(50).all()
+
+
+# posts wich friends liked
+    connections_liked_posts = []
+    for c in connections:
+        for p in c.liked_posts:
+            connections_liked_posts.append(p)
+
+
+
+    all_posts = users_posts + connections_liked_posts + user.uploaded_posts
+
+    return list(set(all_posts))
+
+
+
+
 def handle_like(db: Session, user_id: int, post_id: int):
     user = db.query(models.User).filter(models.User.id == user_id).first()
     post = db.query(models.Post).filter(models.Post.post_id == post_id).first()
