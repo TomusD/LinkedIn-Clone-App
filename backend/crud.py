@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from datetime import date
+from datetime import date, datetime
 from helpers import *
 
 import hashing
@@ -259,7 +259,7 @@ def create_post(db: Session, post: schemas.Post):
         media_image_url= post.image_url,
         media_video_url= post.video_url,
         media_sound_url= post.sound_url,
-        date_uploaded=  date.today()
+        date_uploaded=  datetime.now().isoformat(sep=" ", timespec="seconds")
     )
     db.add(db_post)
     db.commit()

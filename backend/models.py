@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Date, Float, Text, Table
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Date, Float, Text, Table, DateTime
 from sqlalchemy.orm import relationship
 from database import Base
 from datetime import date
@@ -165,7 +165,7 @@ class Post(Base):
     media_image_url = Column(String)
     media_video_url = Column(String)
     media_sound_url = Column(String)
-    date_uploaded = Column(Date)
+    date_uploaded = Column(DateTime)
 
     comments =  relationship("User", secondary=comment_post_association)
     likes =  relationship("User", secondary=like_post_association)
