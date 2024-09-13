@@ -1,6 +1,5 @@
 package com.example.front.screens.user
 
-import BasicViewModel
 import android.app.Activity
 import android.content.Context
 import android.util.Log
@@ -61,6 +60,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.front.activity.BasicViewModel
 import com.example.front.data.ApiClient
 import com.example.front.data.response.APIResponse
 import com.example.front.data.response.EducationResponse

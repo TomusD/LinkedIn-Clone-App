@@ -1,6 +1,5 @@
 package com.example.front.screens.Subcomponents.modals
 
-import BasicViewModel
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.front.activity.BasicViewModel
 import com.example.front.data.ApiClient
 import com.example.front.data.base.Job
 import com.example.front.data.response.APIResponse

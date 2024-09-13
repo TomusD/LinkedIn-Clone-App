@@ -1,6 +1,5 @@
 package com.example.front.screens.basic_screens
 
-import BasicViewModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -33,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.front.activity.BasicViewModel
 import com.example.front.screens.Subcomponents.jobs_tabs.JobsTab
 import com.example.front.screens.Subcomponents.jobs_tabs.MyJobsTab
 import com.example.front.ui.theme.FrontEndTheme
