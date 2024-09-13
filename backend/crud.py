@@ -270,20 +270,18 @@ def get_posts(db: Session, user_id: int):
     connections = user.get_connections()
     ids = [u.id for u in connections] + [user_id]
 
-# posts of friends and the user
+    # posts of friends and the user
     users_posts = db.query(model_post). \
         filter(model_post.user_id.in_(ids)). \
         order_by(model_post.date_uploaded.desc()). \
         limit(50).all()
 
 
-# posts wich friends liked
+    # posts which friends liked
     connections_liked_posts = []
     for c in connections:
         for p in c.liked_posts:
             connections_liked_posts.append(p)
-
-
 
     all_posts = users_posts + connections_liked_posts + user.uploaded_posts
 
@@ -349,6 +347,12 @@ def convert_to_comment_schema(db: Session, post_id: int, commentors):
     sorted_comments = sorted(response_list, key=lambda x: datetime.fromisoformat(str(x.date_commented)), reverse=True)
     return sorted_comments
 
+def convert_to_little_user_schema(db: Session, user: models.User):
+    return schemas.UserLittleDetail(
+        user_id=user.id,
+        user_fullname=f"{user.name} {user.surname}",
+        image_url=user.image_path
+    )
 
 # Only for generating data
 def add_predefined_skills_to_db(db: Session, schema_skill: schemas.addSkill):
