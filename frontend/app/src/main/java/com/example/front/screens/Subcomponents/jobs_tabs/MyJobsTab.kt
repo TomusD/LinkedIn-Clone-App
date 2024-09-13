@@ -39,7 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import coil.compose.AsyncImage
-import com.example.front.data.base.UserApplier
+import com.example.front.data.base.UserLittleDetail
 import com.example.front.data.response.JobApplied
 import com.example.front.data.response.JobUploaded
 import com.example.front.screens.Subcomponents.modals.JobModal
@@ -146,7 +146,7 @@ fun MyJobsTab(appliedJobs: List<JobApplied>? = emptyList(), createdJobs: List<Jo
 
 @Composable
 fun ApplicantsModal(
-    applicants: List<UserApplier>,
+    applicants: List<UserLittleDetail>,
     onDismiss: () -> Unit,
 ) {
 

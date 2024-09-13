@@ -1,6 +1,6 @@
 package com.example.front.data.response
 
-import com.example.front.data.base.UserApplier
+import com.example.front.data.base.UserLittleDetail
 import com.google.gson.annotations.SerializedName
 
 data class JobApplied(
@@ -23,7 +23,7 @@ data class JobUploaded(
     @SerializedName("type") val type: String,
     @SerializedName("salary") val salary: String,
     @SerializedName("skills") val skills: SkillsList,
-    @SerializedName("applicants_list") val applicants_list: List<UserApplier> = emptyList()
+    @SerializedName("applicants_list") val applicants_list: List<UserLittleDetail> = emptyList()
 )
 
 data class AllJobs(
