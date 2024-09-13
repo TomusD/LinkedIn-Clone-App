@@ -1,5 +1,5 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Date, Float, Text, Table, DateTime
-from sqlalchemy.orm import relationship, Mapped
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Date, Float, Text, Table, DateTime, func
+from sqlalchemy.orm import relationship
 from database import Base
 from datetime import date
 
@@ -36,11 +36,11 @@ user_connection_association = Table(
 
 comment_post_association = Table(
     'comments', Base.metadata,
-    Column('comment_id', Integer),
+    Column('comment_id', Integer, primary_key=True, autoincrement=True),
     Column('post_id', Integer, ForeignKey('posts.post_id')),
-    Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
-    Column('text', String(250), nullable=False),
-    Column("date_applied", Date, nullable=False, default=date.today())
+    Column('user_id', Integer, ForeignKey('users.id')),
+    Column('comment_text', String(250), nullable=False),
+    Column("date_commented", DateTime, nullable=False, default=func.now())
 )
 
 like_post_association = Table(
@@ -60,6 +60,7 @@ class User(Base):
     image_path = Column(String)
 
     applications = relationship("Job", secondary=job_application_association, back_populates="applicants")
+    
     connections = relationship(
         "User",
         secondary=user_connection_association,
@@ -77,6 +78,7 @@ class User(Base):
         foreign_keys=[user_connection_association.c.receiver_id, user_connection_association.c.requester_id],
         back_populates='connections'
     )
+    
     liked_posts = relationship("Post", secondary=like_post_association, back_populates="likers")
 
     uploaded_posts = relationship("Post")
@@ -183,5 +185,8 @@ class Post(Base):
     media_sound_url = Column(String)
     date_uploaded = Column(DateTime)
 
-    comments =  relationship("User", secondary=comment_post_association)
+    commentors =  relationship("User", secondary=comment_post_association)
     likers = relationship("User", secondary=like_post_association, back_populates="liked_posts")
+
+    def __repr__(self):
+        return f"PID: {self.post_id} - TEXT: {self.input_text} - COMS: {self.commentors}"

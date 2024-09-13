@@ -82,8 +82,15 @@ class addSkill(skillBase):
 
 
 # Posts
-class Comment(UserLittleDetail):
+class Comment(BaseModel):
     comment_text: str
+    date_commented: datetime
+
+
+class CommentResponse(UserLittleDetail):
+    comment_text: str
+    date_commented: datetime
+
 
 class Post(BaseModel):
     user_id: int
@@ -97,7 +104,8 @@ class Post(BaseModel):
 class PostResponse(Post):
     post_id: int
     likes: int
-    comments: list[UserLittleDetail]
+    comments: list[CommentResponse]
+    user_liked: bool
 
 
 # Job
@@ -134,7 +142,6 @@ class EduList(BaseModel):
 
 class JobsList(BaseModel):
     recommendations: list[JobApplied]
-
 
 class PostsList(BaseModel):
     posts: list[PostResponse]
