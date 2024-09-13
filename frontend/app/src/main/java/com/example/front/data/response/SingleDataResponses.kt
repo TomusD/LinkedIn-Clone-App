@@ -33,3 +33,12 @@ data class PostResponse(
     @SerializedName("likes") var likes: Int,
     @SerializedName("user_liked") var user_liked: Boolean,
 )
+
+data class Comments(
+    @SerializedName("user_id") val user_id: Int,
+    @SerializedName("user_fullname") val user_fullname: String,
+    @SerializedName("user_image_url") val user_image_url: String,
+    @SerializedName("comment_text") val comment_text: String,
+    @SerializedName("date_commented") val date_commented: String
+
+)
