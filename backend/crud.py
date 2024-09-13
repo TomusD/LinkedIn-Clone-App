@@ -199,6 +199,9 @@ def get_publicity(db: Session, user_id: int):
     res = db.query(models.UserInfo).filter(models.UserInfo.id==user_id).first()
     return res
 
+
+
+# Friend requests
 def friend_request(db: Session, sender_id: int, receiver_id: int):
     model_user = models.User
     sender = db.query(model_user).filter(model_user.id==sender_id).first()
@@ -217,7 +220,6 @@ def friend_request(db: Session, sender_id: int, receiver_id: int):
 
     return "OK"
 
-# Friend requests
 def get_friend_request(db: Session, receiver_id: int, sender_id: int):
     sender = db.query(models.User).filter(models.User.id==sender_id).first()
     receiver = db.query(models.User).filter(models.User.id==receiver_id).first()
@@ -247,9 +249,6 @@ def handle_friend_request(db: Session, sender_id: int, receiver_id: int, accepte
     db.commit()
     return "OK"
 
-
-
-
 # Post
 def create_post(db: Session, post: schemas.Post):
     db_post = models.Post(
@@ -263,7 +262,6 @@ def create_post(db: Session, post: schemas.Post):
     db.add(db_post)
     db.commit()
     return "OK"
-
 
 def get_posts(db: Session, user_id: int):
     model_post = models.Post
@@ -289,10 +287,12 @@ def get_posts(db: Session, user_id: int):
 
     all_posts = users_posts + connections_liked_posts + user.uploaded_posts
 
-    return list(set(all_posts))
+    has_liked = []
+    for p in all_posts:
+        if p in user.liked_posts:
+            has_liked.append(p.post_id)
 
-
-
+    return list(set(all_posts)), has_liked
 
 def handle_like(db: Session, user_id: int, post_id: int):
     user = db.query(models.User).filter(models.User.id == user_id).first()
@@ -307,6 +307,47 @@ def handle_like(db: Session, user_id: int, post_id: int):
 
     db.commit()
     return message
+
+
+def post_comment(db: Session, user_id, post_id: int, comment: schemas.Comment):
+    user = db.query(models.User).filter(models.User.id==user_id).first()
+
+    stmt = models.comment_post_association.insert().values(
+        post_id=post_id,
+        user_id=user_id,
+        comment_text = comment.comment_text
+    )
+
+    db.execute(stmt)
+    db.commit()
+
+def convert_to_comment_schema(db: Session, post_id: int, commentors):
+    com_model = models.comment_post_association
+    
+    # store commentors in dict for quick retrieval
+    users_dict = {}
+    for c in commentors:
+        users_dict[c.id] = c
+
+    # get all comments with the post_id
+    all_comments = db.query(com_model).filter(com_model.c.post_id == post_id).all()
+    
+    # for each comment create the schema
+    response_list = []
+    for comment in all_comments:
+        user_id = comment.user_id
+
+        current_com  = schemas.CommentResponse(
+            user_id=comment.user_id,
+            user_fullname=f"{users_dict[user_id].name} {users_dict[user_id].surname}",
+            image_url=users_dict[user_id].image_path,
+            comment_text=comment.comment_text,
+            date_commented=comment.date_commented
+        )
+        response_list.append(current_com)
+
+    sorted_comments = sorted(response_list, key=lambda x: datetime.fromisoformat(str(x.date_commented)), reverse=True)
+    return sorted_comments
 
 
 # Only for generating data

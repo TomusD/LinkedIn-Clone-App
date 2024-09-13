@@ -206,18 +206,20 @@ async def create_post(
 
 @app.get("/posts/feed", response_model=schemas.PostsList, tags=["posts"])
 async def get_posts(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
-    db_posts = crud.get_posts(db, current_user.id)
+    db_posts, has_liked = crud.get_posts(db, current_user.id)
     
+    print([p for p in db_posts])
     posts = [schemas.PostResponse(
         post_id= p.post_id,
         likes= len(p.likers),
-        comments= p.comments,
+        comments= crud.convert_to_comment_schema(db, p.post_id, p.commentors),
         user_id= p.user_id,
         input_text= p.input_text,
         image_url= p.media_image_url,
         video_url= p.media_video_url,
         sound_url= p.media_sound_url,
         date_uploaded= p.date_uploaded,
+        user_liked= (p.post_id in has_liked)
     ) for p in db_posts]
 
     return schemas.PostsList(posts=posts)
@@ -228,6 +230,12 @@ async def get_posts(current_user: dict = Depends(get_current_user), db: Session 
 async def like_post(post_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
         message = crud.handle_like(db, current_user.id, post_id) 
         return JSONResponse(content={"message": message}, status_code=200)
+
+
+@app.post("/posts/{post_id}/comment", response_class=JSONResponse, tags=["posts"])
+async def comment_post(post_id: int, comment: schemas.Comment, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+        crud.post_comment(db, current_user.id, post_id, comment) 
+        return JSONResponse(content={"message": "Your comment was uploaded!"}, status_code=200)
 
 
 # Job API's
