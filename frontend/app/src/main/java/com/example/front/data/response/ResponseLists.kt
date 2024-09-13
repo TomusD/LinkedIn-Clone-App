@@ -33,3 +33,9 @@ data class JobsList(
     @SerializedName("recommendations")
     var recommendations: List<JobApplied>
 )
+
+
+data class PostsList(
+    @SerializedName("posts")
+    var posts: List<PostResponse>
+)
