@@ -82,9 +82,8 @@ class addSkill(skillBase):
 
 
 # Posts
-class Comment(BaseModel):
+class CommentCreate(BaseModel):
     comment_text: str
-    date_commented: datetime
 
 
 class CommentResponse(UserLittleDetail):
