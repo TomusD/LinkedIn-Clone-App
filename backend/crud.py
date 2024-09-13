@@ -273,7 +273,6 @@ def get_posts(db: Session, user_id: int):
     # posts of friends and the user
     users_posts = db.query(model_post). \
         filter(model_post.user_id.in_(ids)). \
-        order_by(model_post.date_uploaded.desc()). \
         limit(50).all()
 
 
@@ -307,9 +306,7 @@ def handle_like(db: Session, user_id: int, post_id: int):
     return message
 
 
-def post_comment(db: Session, user_id, post_id: int, comment: schemas.Comment):
-    user = db.query(models.User).filter(models.User.id==user_id).first()
-
+def post_comment(db: Session, user_id, post_id: int, comment: schemas.CommentCreate):
     stmt = models.comment_post_association.insert().values(
         post_id=post_id,
         user_id=user_id,
