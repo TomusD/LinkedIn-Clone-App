@@ -2,11 +2,20 @@ package com.example.front.screens.Subcomponents
 
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
@@ -23,25 +32,28 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import coil.compose.rememberAsyncImagePainter
-import com.example.front.R
+import coil.compose.AsyncImage
 import com.example.front.activity.HomeViewModel
 import com.example.front.activity.formatDateTime
 import com.example.front.data.SessionManager
 import com.example.front.data.base.UserLittleDetail
 import com.example.front.data.request.CommentCreate
-import com.example.front.data.request.PostCreate
 import com.example.front.data.response.Comments
 import java.time.LocalDateTime
 
@@ -75,14 +87,23 @@ fun PostCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-//            SubcomposeAsyncImage(
-//                painterResource(id = R.drawable.post_icon),
-////                model = user.image_url,
-//                contentDescription = "Image",
-//            )
-            // Username
-            Text(text = user.user_fullname)
-            Text(text = formatDateTime(date_uploaded), color = Color.Gray)
+            Row(verticalAlignment = Alignment.CenterVertically){
+                AsyncImage(
+                    model = user.image_url,
+                    contentDescription = "Image",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop,
+
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                // Username
+                Column {
+                    Text(text = user.user_fullname)
+                    Text(text = formatDateTime(date_uploaded), color = Color.Gray)
+                }
+            }
 
             HorizontalDivider(
                 Modifier
@@ -94,50 +115,18 @@ fun PostCard(
 
             // Image and Video
             Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                if (image_url != null) {
-                    Box(
-                        modifier = Modifier
-                            .size(100.dp)
-                            .background(Color.Gray)
-                            .clickable {
-                                // Handle image click to view full screen
-                            }
-                    ) {
-                        Image(
-                            painter = rememberAsyncImagePainter(image_url),
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                }
-                if (video_url != null) {
-                    Box(
-                        modifier = Modifier
-                            .size(100.dp)
-                            .background(Color.Gray)
-                            .clickable {
-                                // Handle video click to view full screen
-                            }
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.networking_icon), // Replace with your video icon
-                            contentDescription = "Video Icon",
-                            modifier = Modifier.fillMaxSize(),
-                            tint = Color.White
-                        )
-                    }
-                }
+
+            if (image_url != null) {
+                AsyncImage(model = image_url, contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.size(150.dp))
+            }
+
+            if (video_url != null) {
+                VideoPlayerWithControls(video_url)
             }
 
             // Audio
             if (audio_url != null) {
-                Spacer(modifier = Modifier.height(8.dp))
-                AudioPlayer(audioUrl = audio_url)
+                AudioPlayerWithProgressBar(audio_url)
             }
 
             // Like and Comment Buttons
@@ -196,7 +185,6 @@ fun PostCard(
 
 
         if (showComments) {
-
             CommentModal(
                 post_id = post_id,
                 postText = input_text,
@@ -260,8 +248,6 @@ fun CommentModal(
                 ) {
                     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                         if (comments.isNotEmpty()) {
-
-
                             comments.forEach { comment ->
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Column(
@@ -289,11 +275,15 @@ fun CommentModal(
                                 }
                             }
                         } else {
-                            Text(text = "Post the first comment!")
+                            Text(text = "Post the first comment!", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
                         }
                     }
                 }
 
+                if (!errorMessage.isNullOrEmpty()) {
+                    Text(text = errorMessage!!, color = Color.Red, fontSize = 14.sp,
+                        modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                }
                 // Comment Input Field
                 Row(
                     modifier = Modifier
@@ -303,14 +293,7 @@ fun CommentModal(
                 ) {
                     BasicTextField(
                         value = commentText,
-                        onValueChange = {
-                            if (commentText.text == "" ) {
-                                errorMessage = "Comment can't be empty"
-                            } else {
-                                commentText = it
-                                errorMessage = ""
-                            } },
-
+                        onValueChange = { commentText = it },
                         modifier = Modifier
                             .weight(1f)
                             .height(50.dp)
@@ -318,7 +301,7 @@ fun CommentModal(
                             .padding(8.dp)
                     )
                     IconButton(onClick = {
-                        if (commentText.text == "" ) {
+                        if (commentText.text == "") {
                             errorMessage = "Comment can't be empty"
                         } else {
 
@@ -326,15 +309,12 @@ fun CommentModal(
                             onSendComment(commentText.text)
                             viewModel.postComment(context, post_id, CommentCreate(commentText.text))
                             commentText = TextFieldValue("")
+                            errorMessage = ""
 
                         }
                     }) {
                         Icon(imageVector = Icons.Default.Send, contentDescription = "Send Comment")
                     }
-                }
-
-                if (!errorMessage.isNullOrEmpty()) {
-                    Text(text = errorMessage!!, color = Color.Red, fontSize = 14.sp)
                 }
 
             }
