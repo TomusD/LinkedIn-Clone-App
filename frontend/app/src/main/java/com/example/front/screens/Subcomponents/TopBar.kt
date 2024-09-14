@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -36,11 +37,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.front.data.SessionManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import com.example.front.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,6 +51,8 @@ import kotlinx.coroutines.launch
 fun TopBar(drawerState: DrawerState, scope: CoroutineScope) {
     TopAppBar(
         title = {
+            Spacer(modifier = Modifier.height(30.dp))
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
@@ -80,6 +85,7 @@ fun TopBar(drawerState: DrawerState, scope: CoroutineScope) {
                     Spacer(modifier = Modifier.width(16.dp))
                     TextField(
                         value = searchText,
+                        singleLine = true,
                         onValueChange = {newText -> searchText = newText},
                         placeholder = {
                             Text(text = "Search...",
@@ -109,8 +115,9 @@ fun TopBar(drawerState: DrawerState, scope: CoroutineScope) {
                     }
                 ) {
                     Icon(
-                        Icons.Default.Home,
-                        contentDescription = "Settings"
+                        painter = painterResource(id = R.drawable.chat_icon_2),
+                        contentDescription = "Settings",
+                        modifier = Modifier.size(25.dp)
                     )
                 }
             }
