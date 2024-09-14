@@ -20,11 +20,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,11 +32,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import coil.compose.AsyncImage
-import coil.compose.SubcomposeAsyncImage
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
 import com.example.front.R
 import com.example.front.activity.HomeViewModel
 import com.example.front.activity.formatDateTime
@@ -235,6 +231,7 @@ fun CommentModal(
 
     val context = LocalContext.current
     var commentText by remember { mutableStateOf(TextFieldValue("")) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     comments.sortedBy { it.date_commented }
     Dialog(onDismissRequest = onDismiss) {
@@ -285,7 +282,7 @@ fun CommentModal(
                                         modifier = Modifier.padding(2.dp)
                                     )
                                     Text(
-                                        text = (comment.date_commented),
+                                        text = formatDateTime(comment.date_commented.replace(regex = Regex("\\.\\d*"), replacement = "")),
                                         modifier = Modifier.padding(2.dp),
                                         color = Color.Gray
                                     )
@@ -306,7 +303,14 @@ fun CommentModal(
                 ) {
                     BasicTextField(
                         value = commentText,
-                        onValueChange = { commentText = it },
+                        onValueChange = {
+                            if (commentText.text == "" ) {
+                                errorMessage = "Comment can't be empty"
+                            } else {
+                                commentText = it
+                                errorMessage = ""
+                            } },
+
                         modifier = Modifier
                             .weight(1f)
                             .height(50.dp)
@@ -314,16 +318,24 @@ fun CommentModal(
                             .padding(8.dp)
                     )
                     IconButton(onClick = {
-                        Log.d("MYTEST", "COMMENTING")
-                        onSendComment(commentText.text)
-                        viewModel.postComment(context, post_id, CommentCreate(commentText.text))
-                        commentText = TextFieldValue("")
+                        if (commentText.text == "" ) {
+                            errorMessage = "Comment can't be empty"
+                        } else {
 
+                            Log.d("MYTEST", "COMMENTING")
+                            onSendComment(commentText.text)
+                            viewModel.postComment(context, post_id, CommentCreate(commentText.text))
+                            commentText = TextFieldValue("")
+
+                        }
                     }) {
                         Icon(imageVector = Icons.Default.Send, contentDescription = "Send Comment")
                     }
                 }
 
+                if (!errorMessage.isNullOrEmpty()) {
+                    Text(text = errorMessage!!, color = Color.Red, fontSize = 14.sp)
+                }
 
             }
         }

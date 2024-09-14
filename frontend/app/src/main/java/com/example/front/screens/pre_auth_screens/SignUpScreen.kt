@@ -26,8 +26,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -75,7 +73,11 @@ import retrofit2.Callback
 import retrofit2.Response
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.LiveData
+import coil.compose.rememberAsyncImagePainter
 import com.example.front.activity.fileToMedia
 import com.example.front.data.response.APIResponse
 
@@ -161,11 +163,14 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel= vie
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     val image = if (passwordVisible)
-                        Icons.Filled.Face
-                    else Icons.Filled.Favorite
+                        painterResource(id = R.drawable.view_icon)
+                    else
+                        painterResource(id = R.drawable.hide_icon)
+
 
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(imageVector = image, contentDescription = "")
+                        Icon(painter = image, contentDescription = "", Modifier.size(25.dp))
+
                     }
                 },
             )
@@ -181,11 +186,14 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel= vie
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     val image = if (passwordVisible)
-                        Icons.Filled.Face
-                    else Icons.Filled.Favorite
+                        painterResource(id = R.drawable.view_icon)
+                    else
+                        painterResource(id = R.drawable.hide_icon)
+
 
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(imageVector = image, contentDescription = "")
+                        Icon(painter = image, contentDescription = "", Modifier.size(25.dp))
+
                     }
                 },
             )
