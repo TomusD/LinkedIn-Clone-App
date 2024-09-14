@@ -13,14 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-\import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-\import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.front.FriendProfileActivity
-\import com.example.front.data.base.User
+import com.example.front.data.base.User
 
 @Composable
 fun UserCard(user: User) {
