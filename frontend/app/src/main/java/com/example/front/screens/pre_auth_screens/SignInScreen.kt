@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -30,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -101,11 +103,13 @@ fun SignInScreen(navController: NavController, onLoginSuccess: () -> Unit) {
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 val image = if (passwordVisible)
-                    Icons.Filled.FavoriteBorder
-                else Icons.Filled.Favorite
+                    painterResource(id = R.drawable.view_icon)
+                else
+                    painterResource(id = R.drawable.hide_icon)
 
-                IconButton(onClick = {passwordVisible = !passwordVisible }) { Icon(imageVector = image, contentDescription = "") }
-            }
+                IconButton(onClick = {passwordVisible = !passwordVisible }) { Icon(painter = image, contentDescription = "", Modifier.size(25.dp)) }
+
+            },
         )
 
         Button(
