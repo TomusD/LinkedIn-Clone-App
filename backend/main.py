@@ -196,16 +196,14 @@ async def create_post(
         video_url, media_dict = save_to_cloud(media_video, "video", media_dict)
 
     if media_audio is not None:
-        print(media_audio)
         audio_url, media_dict = save_to_cloud(media_audio, "audio", media_dict)
-
 
     post = schemas.PostCreate(
         user_id= current_user.id,
         input_text= text_field,
         image_url= image_url,
         video_url= video_url,
-        sound_url= audio_url,
+        audio_url= audio_url,
         date_uploaded= date.today(),
     )
 
@@ -223,13 +221,13 @@ async def get_posts(current_user: dict = Depends(get_current_user), db: Session 
         input_text= p.input_text,
         image_url= p.media_image_url,
         video_url= p.media_video_url,
-        sound_url= p.media_sound_url,
+        audio_url= p.media_audio_url,
         date_uploaded= p.date_uploaded,
         comments= crud.convert_to_comment_schema(db, p.post_id, p.commentors),
         likes= len(p.likers),
         user_liked= (p.post_id in has_liked)
     ) for p in db_posts]
-
+    
     return schemas.PostsList(posts=posts)
 
 

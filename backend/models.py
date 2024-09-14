@@ -182,7 +182,7 @@ class Post(Base):
     input_text = Column(Text, nullable=False)
     media_image_url = Column(String)
     media_video_url = Column(String)
-    media_sound_url = Column(String)
+    media_audio_url = Column(String)
     date_uploaded = Column(DateTime)
 
     commentors =  relationship("User", secondary=comment_post_association)

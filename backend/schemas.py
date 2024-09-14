@@ -99,7 +99,7 @@ class Post(BaseModel):
     input_text: str
     image_url: Optional[str]
     video_url: Optional[str]
-    sound_url: Optional[str]
+    audio_url: Optional[str]
     date_uploaded: datetime
 
 
@@ -114,7 +114,7 @@ class PostCreate(BaseModel):
     input_text: str
     image_url: Optional[str]
     video_url: Optional[str]
-    sound_url: Optional[str]
+    audio_url: Optional[str]
     date_uploaded: datetime
 
 # Job

@@ -262,7 +262,7 @@ def create_post(db: Session, post: schemas.Post):
         input_text= post.input_text,
         media_image_url= post.image_url,
         media_video_url= post.video_url,
-        media_sound_url= post.sound_url,
+        media_audio_url= post.audio_url,
         date_uploaded=  datetime.now().isoformat(sep=" ", timespec="seconds")
     )
     db.add(db_post)
