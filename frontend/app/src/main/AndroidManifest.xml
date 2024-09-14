@@ -30,6 +30,11 @@
         </activity>
 
         <activity
+            android:name=".FriendProfileActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Front" />
+
+        <activity
             android:name=".ProfileActivity"
             android:exported="true"
             android:theme="@style/Theme.Front" />
