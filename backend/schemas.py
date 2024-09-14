@@ -82,9 +82,8 @@ class addSkill(skillBase):
 
 
 # Posts
-class Comment(BaseModel):
+class CommentCreate(BaseModel):
     comment_text: str
-    date_commented: datetime
 
 
 class CommentResponse(UserLittleDetail):
@@ -93,7 +92,7 @@ class CommentResponse(UserLittleDetail):
 
 
 class Post(BaseModel):
-    user_id: int
+    user: UserLittleDetail
     input_text: str
     image_url: Optional[str]
     video_url: Optional[str]
@@ -107,6 +106,13 @@ class PostResponse(Post):
     comments: list[CommentResponse]
     user_liked: bool
 
+class PostCreate(BaseModel):
+    user_id: int
+    input_text: str
+    image_url: Optional[str]
+    video_url: Optional[str]
+    sound_url: Optional[str]
+    date_uploaded: datetime
 
 # Job
 class JobBase(BaseModel):

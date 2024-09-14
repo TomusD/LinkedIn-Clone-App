@@ -25,7 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.front.data.ApiClient
-import com.example.front.data.base.UserApplier
+import com.example.front.data.base.UserLittleDetail
 import com.example.front.data.response.APIResponse
 import com.example.front.data.response.JobApplied
 import com.example.front.data.response.JobUploaded
@@ -170,7 +170,7 @@ fun applyJob(context: Context, jobId: Int) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun JobCard(job: JobUploaded, button_text: String = "View Applicants", onApplyClick: (List<UserApplier>) -> Unit) {
+fun JobCard(job: JobUploaded, button_text: String = "View Applicants", onApplyClick: (List<UserLittleDetail>) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxHeight()

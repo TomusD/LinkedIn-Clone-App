@@ -1,14 +1,14 @@
 package com.example.front.data
 
 import com.example.front.data.base.Job
+import com.example.front.data.request.CommentCreate
 import com.example.front.data.request.Education
 import com.example.front.data.request.Work
 import com.example.front.data.response.APIResponse
 import com.example.front.data.response.AllJobs
 import com.example.front.data.response.EducationList
-import com.example.front.data.response.EducationResponse
-import com.example.front.data.response.JobApplied
 import com.example.front.data.response.JobsList
+import com.example.front.data.response.PostsList
 import com.example.front.data.response.SkillsList
 import com.example.front.data.response.auth.LoginResponse
 import com.example.front.data.response.UsersList
@@ -58,6 +58,14 @@ interface ApiService {
         @Part media_audio: MultipartBody.Part? = null,
     ): Call<APIResponse>
 
+    @GET("/posts")
+    fun getPosts(): Call<PostsList>
+
+    @PUT("/posts/{post_id}/like")
+    fun likePost(@Path("post_id") post_id: Int): Call<APIResponse>
+
+    @POST("/posts/{post_id}/comment")
+    fun commentPost(@Path("post_id") post_id: Int, @Body comment: CommentCreate): Call<APIResponse>
 
     @Headers("Content-Type: application/json")
     @POST("/profile/work")

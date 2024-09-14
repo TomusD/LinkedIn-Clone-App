@@ -200,7 +200,7 @@ async def create_post(
         audio_url, media_dict = save_to_cloud(media_audio, "audio", media_dict)
 
 
-    post = schemas.Post(
+    post = schemas.PostCreate(
         user_id= current_user.id,
         input_text= text_field,
         image_url= image_url,
@@ -213,21 +213,21 @@ async def create_post(
     return JSONResponse(content={"message": "Post created Successfully!"}, status_code=200)
 
 
-@app.get("/posts/feed", response_model=schemas.PostsList, tags=["posts"])
+@app.get("/posts", response_model=schemas.PostsList, tags=["posts"])
 async def get_posts(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     db_posts, has_liked = crud.get_posts(db, current_user.id)
     
     print([p for p in db_posts])
     posts = [schemas.PostResponse(
         post_id= p.post_id,
-        likes= len(p.likers),
-        comments= crud.convert_to_comment_schema(db, p.post_id, p.commentors),
-        user_id= p.user_id,
+        user= crud.convert_to_little_user_schema(db, crud.get_user_by_id(db, p.user_id)),
         input_text= p.input_text,
         image_url= p.media_image_url,
         video_url= p.media_video_url,
         sound_url= p.media_sound_url,
         date_uploaded= p.date_uploaded,
+        comments= crud.convert_to_comment_schema(db, p.post_id, p.commentors),
+        likes= len(p.likers),
         user_liked= (p.post_id in has_liked)
     ) for p in db_posts]
 

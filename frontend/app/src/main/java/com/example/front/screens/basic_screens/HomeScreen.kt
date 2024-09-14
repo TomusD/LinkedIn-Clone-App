@@ -1,42 +1,66 @@
 package com.example.front.screens.basic_screens
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.front.activity.HomeViewModel
+import com.example.front.screens.Subcomponents.PostCard
 
 @Composable
-fun HomeScreen(navController: NavController) {
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
+fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
+    val context = LocalContext.current
 
-    Scaffold(
-        content = { paddingValues ->
-//                        if (data != null) {
-//                            // Display your UI with the fetched data
-//
-//                        } else {
-                // Show a loading indicator
-                Box(
+    LaunchedEffect(Unit) {
+        viewModel.fetchPosts(context)
+    }
 
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                ) {
-                    Text("Home Screen Content", fontSize = 24.sp, modifier = Modifier.align(Alignment.Center))
+    var posts = viewModel.posts.collectAsState().value
+    posts = posts.sortedByDescending { it.date_uploaded }
+
+
+    Surface {
+
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+        )
+        {
+            if (posts.isNotEmpty()) {
+                itemsIndexed(posts) { index, post ->
+                    PostCard(
+                        post_id = post.post_id,
+                        user = post.user,
+                        input_text = post.input_text,
+                        image_url = post.image_url,
+                        video_url = post.video_url,
+                        audio_url = post.audio_url,
+                        date_uploaded = post.date_uploaded,
+                        comments = post.comments,
+                        likes = post.likes,
+                        user_liked = post.user_liked,
+                        onCommentClicked = viewModel::updateComment,
+                        onLikeClicked = viewModel::updateLike,
+                        viewModel = viewModel,
+                    )
+                    Spacer(modifier = Modifier.height(16.dp)) // Space between posts
                 }
-//                        }
+            } else {
+//                Text("No posts yet. Make connections! 🌐🌍", Modifier.padding(5.dp)
+            }
         }
-    )
+    }
 }
+
+
 
 
