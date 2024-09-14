@@ -28,6 +28,15 @@ data class SkillsList(
     var skills: List<String>
 )
 
+data class UserInfo(
+    @SerializedName("work") val work: WorkList?,
+    @SerializedName("education") val education: EducationList?,
+    @SerializedName("skills") val skills: SkillsList?,
+    @SerializedName("is_friend") val is_friend: Boolean?
+
+)
+
+
 
 data class JobsList(
     @SerializedName("recommendations")

@@ -1,6 +1,7 @@
 package com.example.front.data
 
 import com.example.front.data.base.Job
+import com.example.front.data.base.User
 import com.example.front.data.request.CommentCreate
 import com.example.front.data.request.Education
 import com.example.front.data.request.Work
@@ -10,6 +11,7 @@ import com.example.front.data.response.EducationList
 import com.example.front.data.response.JobsList
 import com.example.front.data.response.PostsList
 import com.example.front.data.response.SkillsList
+import com.example.front.data.response.UserInfo
 import com.example.front.data.response.auth.LoginResponse
 import com.example.front.data.response.UsersList
 import com.example.front.data.response.WorkList
@@ -45,8 +47,19 @@ interface ApiService {
         @Part image: MultipartBody.Part? = null,
     ): Call<APIResponse>
 
-    @GET("/users")
+    @GET("/users/")
     fun getUsers(): Call<UsersList>
+
+
+    @GET("/user/{user_id}")
+    fun getUser(@Path("user_id") user_id: Int): Call<User>
+
+    @GET("/friends/profile/{friend_id}")
+    fun getFriendInfo(@Path("friend_id") friend_id: Int): Call<UserInfo>
+
+    @PUT("/friends/request/{friend_id}")
+    fun addFriend(@Path("friend_id") friend_id: Int): Call<APIResponse>
+
 
 
     @Multipart
