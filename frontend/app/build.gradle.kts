@@ -67,6 +67,11 @@ android {
 }
 
 dependencies {
+
+    implementation (libs.androidx.media3.exoplayer) // ExoPlayer
+    implementation (libs.androidx.media3.ui)
+
+
     implementation("androidx.compose.material3:material3-window-size-class:1.0.0")
     implementation(libs.converter.gson.v250)
 
