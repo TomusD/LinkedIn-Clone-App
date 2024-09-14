@@ -84,9 +84,18 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raise credentials_exception
 
 
+@app.get("/users/{user_id}", response_model=schemas.User)
+def get_user(user_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    user = crud.get_user_by_id(user_id)
+    return schemas.User(id =user.id, 
+                        name = user.name, 
+                        surname = user.surname, 
+                        email = user.email, 
+                        image_path = user.image_path)
+
 @app.get("/users")
 def get_users(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
-    users: list[models.User] = crud.get_users(db, current_user.id)
+    users: list[models.User] = crud.get_connections(db, current_user.id)
     schema_users: list[schemas.User] =  [schemas.User(id =u.id, 
                                                name = u.name, 
                                                surname = u.surname, 
@@ -207,8 +216,7 @@ async def create_post(
 @app.get("/posts", response_model=schemas.PostsList, tags=["posts"])
 async def get_posts(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     db_posts, has_liked = crud.get_posts(db, current_user.id)
-    
-    print([p for p in db_posts])
+
     posts = [schemas.PostResponse(
         post_id= p.post_id,
         user= crud.convert_to_little_user_schema(db, crud.get_user_by_id(db, p.user_id)),
@@ -233,7 +241,7 @@ async def like_post(post_id: int, current_user: dict = Depends(get_current_user)
 
 
 @app.post("/posts/{post_id}/comment", response_class=JSONResponse, tags=["posts"])
-async def comment_post(post_id: int, comment: schemas.Comment, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+async def comment_post(post_id: int, comment: schemas.CommentCreate, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
         crud.post_comment(db, current_user.id, post_id, comment) 
         return JSONResponse(content={"message": "Your comment was uploaded!"}, status_code=200)
 
@@ -388,9 +396,51 @@ async def get_all_skills(current_user: dict = Depends(get_current_user), db: Ses
 
 
 
-
-
 # Friend requests
+@app.get("/friends/profile/{friend_id}", response_model=schemas.UserInfo, tags=["friends"])
+async def get_friend_info(friend_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    is_friend = crud.check_friend(db, friend_id, current_user.id)
+    friend_info = crud.get_user_info(db, friend_id)
+    public_info = {"work": schemas.WorkList(workList=[]), "education": schemas.EduList(eduList=[]), "skills": schemas.Skills(skills=[]), is_friend: is_friend}
+
+    if is_friend:
+        work_is_public = True
+        education_is_public = True
+        skills_are_public = True
+    else:
+        work_is_public = friend_info.work_public
+        education_is_public = friend_info.education_public
+        skills_are_public = friend_info.skills_public
+
+
+    if work_is_public: 
+        public_info["work"] = schemas.WorkList(workList=
+                                               [schemas.WorkResponse(
+                                                   work_id=u.work_id, 
+                                                   organization=u.organization,
+                                                   role=u.role,
+                                                   date_started=u.date_started, 
+                                                   date_ended=u.date_ended) 
+                                                   for u in friend_info.works])
+
+    if education_is_public:
+        public_info["education"] = schemas.EduList(eduList=
+                                                   [schemas.EduResponse(edu_id=u.edu_id, 
+                                                        organization=u.organization,
+                                                        science_field=u.science_field,
+                                                        degree=u.degree,
+                                                        date_started=u.date_started, 
+                                                        date_ended=u.date_ended) 
+                                                        for u in friend_info.education])
+
+    if skills_are_public:
+        public_info["skills"] = schemas.Skills(skills=[skill.skill_name for skill in friend_info.skills])
+
+    return schemas.UserInfo(work=public_info["work"],
+                            education=public_info["education"],
+                            skills=public_info["skills"],
+                            is_friend=is_friend)
+
 @app.post("/friends/request/{friend_id}", response_class=JSONResponse, tags=["friends"])
 async def send_friend_request(friend_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     friend_req = crud.get_friend_request(db, current_user.id, friend_id)

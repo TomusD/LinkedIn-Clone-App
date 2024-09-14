@@ -64,6 +64,7 @@ class EduResponse(Education):
 class Skills(BaseModel):
     skills: list[str]
 
+
 # Application Settings
 class ApplicationBase(BaseModel):
     job_id: int
@@ -71,6 +72,8 @@ class ApplicationBase(BaseModel):
 class ApplicationResponse(ApplicationBase):
     applier_id: int
     date_applied: date
+
+
 
 # Skills Settings
 class skillBase(BaseModel):
@@ -136,6 +139,7 @@ class AllJobs(BaseModel):
     jobs_applied: list[JobApplied]
     jobs_uploaded: list[JobUploaded]
 
+
 # Responses as lists
 class UserList(BaseModel):
     users: list[User]
@@ -151,3 +155,10 @@ class JobsList(BaseModel):
 
 class PostsList(BaseModel):
     posts: list[PostResponse]
+
+
+class UserInfo(BaseModel):
+    work: Optional[WorkList]
+    education: Optional[EduList]
+    skills: Optional[Skills]
+    is_friend: bool

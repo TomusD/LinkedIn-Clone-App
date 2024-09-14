@@ -19,10 +19,9 @@ def get_user_by_email(db: Session, email: str):
 def get_user_by_id(db: Session, id: int):
     return db.query(models.User).filter(models.User.id == id).first()
 
-def get_users(db: Session, uid: str):
-    users = db.query(models.User).all()
-    print(users)
-    return users
+def get_connections(db: Session, user_id: str):
+    users = db.query(models.User).filter(models.User.id==user_id).first()
+    return users.get_connections()
 
 def create_user(db: Session, schema_user: schemas.UserRegister):
     hashed_pwd = hashing.hash_password(schema_user.password)
@@ -248,6 +247,13 @@ def handle_friend_request(db: Session, sender_id: int, receiver_id: int, accepte
     
     db.commit()
     return "OK"
+
+def check_friend(db: Session, friend_id: int, user_id: int):
+    user = db.query(models.User).filter(models.User.id==user_id).first()
+    friend = db.query(models.User).filter(models.User.id==friend_id).first()
+
+    return True if friend in user.get_connections() else False
+
 
 # Post
 def create_post(db: Session, post: schemas.Post):
