@@ -57,10 +57,10 @@ class ApiClient {
         val client: OkHttpClient.Builder = HttpClient.getRetrofitInstance(inputStream, IP)
         val clientBuilt: OkHttpClient = client
             .addInterceptor(AuthInterceptor(context))
-            .connectTimeout(60L, java.util.concurrent.TimeUnit.SECONDS)
-            .callTimeout(60L, java.util.concurrent.TimeUnit.SECONDS)
-            .readTimeout(60L, java.util.concurrent.TimeUnit.SECONDS)
-            .writeTimeout(60L, java.util.concurrent.TimeUnit.SECONDS)
+            .connectTimeout(150L, java.util.concurrent.TimeUnit.SECONDS)
+            .callTimeout(150L, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(150L, java.util.concurrent.TimeUnit.SECONDS)
+            .writeTimeout(150L, java.util.concurrent.TimeUnit.SECONDS)
             .build()
 
         // Initialize ApiService if not initialized yet
