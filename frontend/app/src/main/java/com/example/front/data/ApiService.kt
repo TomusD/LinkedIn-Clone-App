@@ -119,6 +119,10 @@ interface ApiService {
     @GET("/user/jobs/recommended")
     fun getRecommendedJobs(): Call<JobsList>
 
+
+    @PUT("/jobs/{job_id}/seen")
+    fun increaseView(@Path("job_id") job_id: Int): Call<APIResponse>
+
     @GET("/user/jobs")
     fun getAllJobs(): Call<AllJobs>
 
