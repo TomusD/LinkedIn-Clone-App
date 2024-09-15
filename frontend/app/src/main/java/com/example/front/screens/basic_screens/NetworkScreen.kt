@@ -55,21 +55,11 @@ fun NetworkScreen(navController: NavController, viewModel: BasicViewModel = view
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(15.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                            .padding(horizontal = 15.dp, vertical = 10.dp)
-                            .clip(MaterialTheme.shapes.large)
-                    )
 
                     Text(
                         "Network Screen",
                         style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(vertical = 20.dp)
                     )
                 }
             }

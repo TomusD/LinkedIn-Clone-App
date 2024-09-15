@@ -164,7 +164,6 @@ class BasicViewModel : ViewModel() {
 
     fun updatePublicity(context: Context, info: String) {
         val uid = SessionManager(context).getUserInfo(SessionManager.USER_ID)
-        Log.d("MYTEST", "UIDDDDDD       $uid")
 
         val apiClient = ApiClient()
         val call = apiClient.getApiService(context).updatePublicity(info)

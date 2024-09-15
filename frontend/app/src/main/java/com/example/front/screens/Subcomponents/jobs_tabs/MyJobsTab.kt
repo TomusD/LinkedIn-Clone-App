@@ -1,11 +1,11 @@
 package com.example.front.screens.Subcomponents.jobs_tabs
 
-import android.util.Log
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,7 +36,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import coil.compose.AsyncImage
@@ -50,7 +50,7 @@ fun MyJobsTab(appliedJobs: List<JobApplied>? = emptyList(), createdJobs: List<Jo
 
     var showDialog by remember { mutableStateOf(false) }
     var showApplicants by remember { mutableStateOf(false) }
-    var currentAppliers by remember { mutableStateOf<List<UserApplier>>(listOf()) }
+    var currentAppliers by remember { mutableStateOf<List<UserLittleDetail>>(listOf()) }
 
     // Padding to move the header down
     Spacer(modifier = Modifier.height(20.dp))
@@ -156,23 +156,29 @@ fun ApplicantsModal(
         title = { Text(text = "Applicants") },
         modifier = Modifier.height(300.dp),
         text = {
-
             if (applicants.isNotEmpty()) {
-                applicants.forEach {
-
-                    Row (horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically,) {
-                        AsyncImage(
-                            model = it.image_url,
-                            contentScale = ContentScale.Crop,
-                            contentDescription = "profile picture",
-                            modifier = Modifier.width(30.dp),
-                        )
-                        Text(text = it.user_fullname, fontSize = 3.5.em)
-                        IconButton(onClick = {},) {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "Back"
-                            )
+                Column(modifier = Modifier.fillMaxHeight()) {
+                    applicants.forEach { applicant ->
+                        key(applicant) {
+//                            TODO: More than 1 applicant is covered
+                            Row(
+                                horizontalArrangement = Arrangement.Start,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                AsyncImage(
+                                    model = applicant.image_url,
+                                    contentScale = ContentScale.Crop,
+                                    contentDescription = "profile picture",
+                                    modifier = Modifier.width(30.dp),
+                                )
+                                Text(text = applicant.user_fullname, fontSize = 3.5.em)
+                                IconButton(onClick = {},) {
+                                    Icon(
+                                        imageVector = Icons.Default.Person,
+                                        contentDescription = "Back"
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -182,6 +188,7 @@ fun ApplicantsModal(
                     modifier = Modifier.padding(50.dp)
                 )
             }
+
 
 
         },
