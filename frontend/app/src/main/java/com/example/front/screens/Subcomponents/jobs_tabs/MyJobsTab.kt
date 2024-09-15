@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -162,16 +164,19 @@ fun ApplicantsModal(
                         key(applicant) {
 //                            TODO: More than 1 applicant is covered
                             Row(
-                                horizontalArrangement = Arrangement.Start,
+                                horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 AsyncImage(
                                     model = applicant.image_url,
                                     contentScale = ContentScale.Crop,
                                     contentDescription = "profile picture",
-                                    modifier = Modifier.width(30.dp),
+                                    modifier = Modifier
+                                        .size(30.dp)
+                                        .clip(CircleShape),
                                 )
-                                Text(text = applicant.user_fullname, fontSize = 3.5.em)
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(text = applicant.user_fullname, fontSize = 4.em)
                                 IconButton(onClick = {},) {
                                     Icon(
                                         imageVector = Icons.Default.Person,
