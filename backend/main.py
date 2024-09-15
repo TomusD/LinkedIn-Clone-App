@@ -1,6 +1,6 @@
 # FastAPI
 import uvicorn
-from fastapi import FastAPI, APIRouter, Depends, HTTPException, status, File, Form, UploadFile
+from fastapi import FastAPI, APIRouter, Depends, HTTPException, Query, status, File, Form, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
@@ -179,8 +179,17 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
                                      image_path= user.image_path
                                  ))
 
+#Change mail and password
+@app.put("/user/profile/settings/", response_class=JSONResponse, tags=["profile"])
+async def change_mail_password(
+    old_password: str, new_email: str | None = None, new_password: str | None = None,
+    current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    message = crud.change_mail_password(db, current_user.id, new_email, new_password, old_password)
+    return JSONResponse(content={"message": message}, status_code=200)
 
-# Posts
+
+
+# Posts API'S
 @app.post("/posts", response_class=JSONResponse, tags=["posts"])
 async def create_post(    
     text_field: str = Form(...), media_image: UploadFile | None = None, 
