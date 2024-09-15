@@ -1,9 +1,9 @@
 package com.example.front
 
+import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBar
@@ -18,12 +18,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.em
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.front.activity.SearchViewModel
 import com.example.front.screens.Subcomponents.DrawerContent
 import com.example.front.screens.Subcomponents.TopBar
 import com.example.front.screens.basic_screens.HomeScreen
@@ -33,10 +36,11 @@ import com.example.front.screens.basic_screens.NotificationsScreen
 import com.example.front.screens.basic_screens.UploadScreen
 import com.example.front.ui.theme.FrontEndTheme
 import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomNavigationBar(navController: NavController) {
+fun BottomNavigationBar(navController: NavController, viewModel: SearchViewModel = viewModel()) {
+    val context = LocalContext.current
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -61,7 +65,17 @@ fun BottomNavigationBar(navController: NavController) {
             content = {
 
                 Scaffold(
-                    topBar = { TopBar(drawerState = drawerState, scope = scope) },
+                    topBar = { TopBar(drawerState = drawerState, scope = scope, onSearch = {
+                        when (navController.currentDestination?.route) {
+                            Screens.Home.route -> {
+
+                                performSearch(context, it, "posts", viewModel)
+                            }
+                            else -> {
+                                performSearch(context, it, "users", viewModel)
+                            }
+                        }
+                    }) },
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
                         NavigationBar {
@@ -112,5 +126,11 @@ fun BottomNavigationBar(navController: NavController) {
             }
         )
     }
+}
+
+fun performSearch(context: Context, query: String, searchEntity: String, vm: ViewModel) {
+    // Search logic goes here, e.g., search in posts, users, etc.
+    println("Searching for: $query in $searchEntity")
+
 
 }

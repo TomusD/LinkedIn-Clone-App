@@ -13,9 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.front.data.SessionManager
@@ -48,71 +47,58 @@ import com.example.front.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(drawerState: DrawerState, scope: CoroutineScope) {
+fun TopBar(drawerState: DrawerState, scope: CoroutineScope, onSearch: (String) -> Unit,) {
+    var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
+
+    Spacer(modifier = Modifier.height(30.dp))
     TopAppBar(
         title = {
-            Spacer(modifier = Modifier.height(30.dp))
-
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
+                    verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)
                 ) {
                     AsyncImage(
                         model = SessionManager(LocalContext.current).getUserInfo(SessionManager.USER_IMAGE_URL),
                         contentDescription = "image",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .size(50.dp)
-                            .clip(CircleShape)
-                            .border(
-                                BorderStroke(2.dp, Color.Blue),
-                                CircleShape
-                            )
-                            .background(Color.LightGray)
+                            .size(50.dp).clip(CircleShape).border(BorderStroke(2.dp, Color.Blue), CircleShape).background(Color.LightGray)
                             .clickable {
                                 scope.launch {
                                     drawerState.open()
-                                }
-                            },
-                    )
+                                } })
 
-                    var searchText by remember { mutableStateOf("") }
                     Spacer(modifier = Modifier.width(16.dp))
+                    // Search input field
                     TextField(
-                        value = searchText,
-                        singleLine = true,
-                        onValueChange = {newText -> searchText = newText},
-                        placeholder = {
-                            Text(text = "Search...",
-                                Modifier
-                                    .fillMaxWidth()
-                                    .size(20.dp)) },
-                        leadingIcon = {
-                            Icon(Icons.Default.Search, contentDescription = "Search")
+                        value = searchQuery,
+                        onValueChange = { newQuery ->
+                            searchQuery = newQuery
                         },
+                        placeholder = { Text("Search...") },
+                        singleLine = true,
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(Color.LightGray)
-                            .padding(horizontal = 0.dp),
-                        colors = TextFieldDefaults.colors(
-                            unfocusedContainerColor = Color.LightGray,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent),
-
+                            .weight(1f) // This makes the TextField take up all the available space
                     )
+
+                    // Search button (when clicked, perform search)
+                    IconButton(
+                        onClick = {
+                            onSearch(searchQuery.text) // Trigger search only on button click
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search Button"
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.width(5.dp))
 
                 IconButton(
-                    onClick = {
-                        // Handle settings click
-                    }
+                    onClick = {}
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.chat_icon_2),
@@ -126,6 +112,6 @@ fun TopBar(drawerState: DrawerState, scope: CoroutineScope) {
             containerColor = Color.Transparent,
             titleContentColor = Color.Black,
             actionIconContentColor = Color.Black
-        )
+        ),
     )
 }
