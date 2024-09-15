@@ -321,6 +321,11 @@ async def get_jobs(current_user: dict = Depends(get_current_user), db: Session =
     return schemas.AllJobs(jobs_applied=applications, jobs_uploaded=my_jobs)
     
 
+@app.put("/jobs/{job_id}/seen", response_class=JSONResponse, tags=["jobs"])
+async def view_job(job_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    crud.increment_job_view(db, current_user.id, job_id)
+    return JSONResponse(content={"message": "Views increased"}, status_code=200)
+
 
 
 

@@ -174,6 +174,14 @@ class Job(Base):
         return f"Job(jid={self.job_id}, uid={self.recruiter_id}, fullname={self.recruiter_fullname})"
 
 
+class JobViews(Base):
+    __tablename__ = "job_views"
+
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    job_id = Column(Integer, ForeignKey('jobs.job_id'), primary_key=True)
+    view_count = Column(Integer, default=0, nullable=False)
+
+
 class Post(Base):
     __tablename__ = "posts"
 

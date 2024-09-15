@@ -81,11 +81,9 @@ def create_job(db: Session, job: schemas.JobBase, recruiter_id: int):
     db.refresh(db_job)
     return "OK"
  
-
 def get_job(db: Session, job_id: int):
     job = db.query(models.Job).filter(models.Job.job_id == job_id).first()
     return job
-
 
 def apply_job(db: Session, job_id: int, applier_id: int):    
     user = get_user_by_id(db, applier_id)
@@ -107,7 +105,23 @@ def revoke_apply_job(db: Session, job_id: int, applier_id: int):
     db.commit()
 
     return "OK"
+from sqlalchemy.dialects.postgresql import insert
+def increment_job_view(db: Session, user_id: int, job_id: int):
+    model = models.JobViews
 
+    exists = db.query(model).filter(model.user_id==user_id).filter(model.job_id==job_id).first()
+
+    if exists is None:
+        job_view = models.JobViews(user_id=user_id, job_id=job_id, view_count=1)
+        db.add(job_view)
+    else :
+        db.query(model) \
+            .filter(model.user_id==user_id) \
+            .filter(model.job_id==job_id) \
+            .update({model.view_count: model.view_count + 1})
+
+    db.commit()
+    return "OK"
 
 def get_recommended_jobs(db: Session, user_id: int):
     # Recommendation system not yet implemented
