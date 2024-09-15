@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.front.ProfileActivity
 import com.example.front.Screens
+import com.example.front.SettingsActivity
 
 @Composable
 fun DrawerContent(onDestinationClicked: (route: String) -> Unit) {
@@ -41,7 +42,9 @@ fun DrawerContent(onDestinationClicked: (route: String) -> Unit) {
             modifier = Modifier
                 .padding(16.dp)
                 .clickable {
-                    onDestinationClicked(Screens.Settings.route)
+                    // Navigate to Profile
+                    val intent = Intent(context, SettingsActivity::class.java)
+                    context.startActivity(intent)
                 }
         )
     }
