@@ -12,12 +12,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -37,19 +42,31 @@ import retrofit2.Response
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun JobCard(job: JobApplied, button_text: String = "Apply now", onApply: (JobApplied) -> Unit) {
+fun JobCard(job: JobApplied, button_text: String = "Apply now", onApply: (JobApplied) -> Unit, onDismiss: () -> Unit,) {
     val context = LocalContext.current
+
     Card(
         modifier = Modifier
-            .fillMaxHeight()
             .width(300.dp)
             .padding(10.dp),
     ) {
+
         Column(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(15.dp)
                 .fillMaxWidth()
         ) {
+
+            if (button_text == "Apply now") {
+                // Close Modal Button
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.End).padding(3.dp)
+                ) {
+                    Icon(imageVector = Icons.Default.Close, contentDescription = "Close")
+                }
+            }
+
             // Job Title (Role)
             Text(
                 text = job.role,
@@ -112,13 +129,14 @@ fun JobCard(job: JobApplied, button_text: String = "Apply now", onApply: (JobApp
                             .show()
 
                     } else {
+                        onDismiss()
                         applyJob(context, job.job_id)
                         onApply(job)
                         Toast.makeText(context, "You applied for this job!", Toast.LENGTH_SHORT)
                             .show()
                     }
                 },
-                shape = RoundedCornerShape(10.dp),
+                shape = RoundedCornerShape(8.dp),
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor =

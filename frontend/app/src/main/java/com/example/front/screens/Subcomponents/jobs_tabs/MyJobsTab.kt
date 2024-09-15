@@ -1,5 +1,6 @@
 package com.example.front.screens.Subcomponents.jobs_tabs
 
+import android.content.Intent
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -41,6 +42,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import coil.compose.AsyncImage
+import com.example.front.FriendProfileActivity
+import com.example.front.data.base.User
 import com.example.front.data.base.UserLittleDetail
 import com.example.front.data.response.JobApplied
 import com.example.front.data.response.JobUploaded
@@ -81,7 +84,7 @@ fun MyJobsTab(appliedJobs: List<JobApplied>? = emptyList(), createdJobs: List<Jo
         ) {
             if (appliedJobs!!.isNotEmpty())
                 appliedJobs.forEach { job ->
-                    JobCard(job, "Revoke apply request", onApply = { onRevoke(it) })
+                    JobCard(job, "Revoke apply request", onApply = { onRevoke(it) }, onDismiss = {})
             } else {
                 Text(text = "You haven't applied to any job yet", Modifier.padding(start = 20.dp, bottom = 15.dp))
             }
@@ -151,7 +154,7 @@ fun ApplicantsModal(
     applicants: List<UserLittleDetail>,
     onDismiss: () -> Unit,
 ) {
-
+    val context = LocalContext.current
     AlertDialog(
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(5.dp),
@@ -162,7 +165,6 @@ fun ApplicantsModal(
                 Column(modifier = Modifier.fillMaxHeight()) {
                     applicants.forEach { applicant ->
                         key(applicant) {
-//                            TODO: More than 1 applicant is covered
                             Row(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically,
@@ -177,7 +179,15 @@ fun ApplicantsModal(
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Text(text = applicant.user_fullname, fontSize = 4.em)
-                                IconButton(onClick = {},) {
+                                IconButton(onClick = {
+                                    val name = applicant.user_fullname.split(" ")[0]
+                                    val surname = applicant.user_fullname.split(" ")[1]
+                                    val user = User(id=applicant.user_id.toString(), name=name, surname=surname, email="", imagePath = applicant.image_url)
+
+                                    val intent = Intent(context, FriendProfileActivity::class.java)
+                                    intent.putExtra("user", user)
+                                    context.startActivity(intent)
+                                }) {
                                     Icon(
                                         imageVector = Icons.Default.Person,
                                         contentDescription = "Back"
