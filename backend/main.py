@@ -93,6 +93,7 @@ def get_user(user_id: int, current_user: dict = Depends(get_current_user), db: S
                         email = user.email, 
                         image_path = user.image_path)
 
+
 @app.get("/users")
 def get_users(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     users: list[models.User] = crud.get_connections(db, current_user.id)
@@ -231,7 +232,6 @@ async def get_posts(current_user: dict = Depends(get_current_user), db: Session 
     return schemas.PostsList(posts=posts)
 
 
-
 @app.put("/posts/{post_id}/like", response_class=JSONResponse, tags=["posts"])
 async def like_post(post_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
         message = crud.handle_like(db, current_user.id, post_id) 
@@ -263,6 +263,7 @@ async def create_application(job_id: int, current_user: dict = Depends(get_curre
     
     crud.apply_job(db=db, job_id=job_id, applier_id=current_user.id)
     return JSONResponse(content={"message": "Application created Successfully!"}, status_code=200)
+
 
 @app.delete("/jobs/{job_id}/revoke-apply", response_class=JSONResponse, tags=["jobs"])
 async def delete_application(job_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -436,7 +437,7 @@ async def get_friend_info(friend_id: int, current_user: dict = Depends(get_curre
                                                         date_ended=u.date_ended) 
                                                         for u in friend_info.education])
 
-    if skills_are_public:
+    if skills_are_public and friend_info.skills is not None:
         public_info["skills"] = schemas.Skills(skills=[skill.skill_name for skill in friend_info.skills])
 
     return schemas.UserInfo(work=public_info["work"],
@@ -464,11 +465,25 @@ async def handle_friend_request(requester_id: int, accept: bool, current_user: d
     return JSONResponse(content={"message": f"Friend request {action}!"}, status_code=200)
 
 
+
+# Search bar
 @app.put("/test-things", response_class=JSONResponse, tags=["a"])
 async def test(requester_id: int, accept: bool, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id==current_user.id).first()
     print(user.connections)
 
+
+
+@app.get("/search/users", response_model=schemas.UserList, tags=["search"])
+def search_users(query: str, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    users: list[models.User] = crud.search_users(db, query)
+    schema_users: list[schemas.User] =  [schemas.User(id =u.id, 
+                                               name = u.name, 
+                                               surname = u.surname, 
+                                               email = u.email, 
+                                               image_path = u.image_path) for u in users]
+    
+    return schemas.UserList(users=schema_users)
 
 	
 def save_to_cloud(file: UploadFile, media_type: str, media_dict: dict):

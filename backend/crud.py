@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import or_
 from datetime import date, datetime
 from helpers import *
 
@@ -370,6 +371,26 @@ def convert_to_little_user_schema(db: Session, user: models.User):
         user_fullname=f"{user.name} {user.surname}",
         image_url=user.image_path
     )
+
+
+
+# Search
+def search_users(db: Session, query: str):
+    model = models.User
+    splitted = query.split()
+    matched_list = []
+    for s in splitted:
+        matched = db.query(model).filter(
+            or_(
+                model.name.ilike(f"%{s}%"),
+                model.surname.ilike(f"%{s}%")
+            )).all()
+        matched_list.extend(matched)
+    
+    return list(set(matched_list))
+
+
+
 
 # Only for generating data
 def add_predefined_skills_to_db(db: Session, schema_skill: schemas.addSkill):
