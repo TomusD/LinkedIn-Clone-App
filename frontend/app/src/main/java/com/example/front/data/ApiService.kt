@@ -4,6 +4,7 @@ import com.example.front.data.base.Job
 import com.example.front.data.base.User
 import com.example.front.data.request.CommentCreate
 import com.example.front.data.request.Education
+import com.example.front.data.request.UserSettings
 import com.example.front.data.request.Work
 import com.example.front.data.response.APIResponse
 import com.example.front.data.response.AllJobs
@@ -15,7 +16,6 @@ import com.example.front.data.response.UserInfo
 import com.example.front.data.response.auth.LoginResponse
 import com.example.front.data.response.UsersList
 import com.example.front.data.response.WorkList
-import com.example.front.data.response.WorkResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
@@ -60,8 +60,6 @@ interface ApiService {
     @PUT("/friends/request/{friend_id}")
     fun addFriend(@Path("friend_id") friend_id: Int): Call<APIResponse>
 
-
-
     @Multipart
     @POST("/posts")
     fun createPost(
@@ -79,6 +77,9 @@ interface ApiService {
 
     @POST("/posts/{post_id}/comment")
     fun commentPost(@Path("post_id") post_id: Int, @Body comment: CommentCreate): Call<APIResponse>
+
+    @PUT("/settings")
+    fun updateSettings(@Body userSettings: UserSettings): Call<APIResponse>
 
     @Headers("Content-Type: application/json")
     @POST("/profile/work")
