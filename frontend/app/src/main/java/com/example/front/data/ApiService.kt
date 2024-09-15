@@ -30,6 +30,7 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
     @FormUrlEncoded
@@ -49,7 +50,6 @@ interface ApiService {
 
     @GET("/users/")
     fun getUsers(): Call<UsersList>
-
 
     @GET("/user/{user_id}")
     fun getUser(@Path("user_id") user_id: Int): Call<User>
@@ -128,4 +128,10 @@ interface ApiService {
 
     @GET("/skills/available")
     fun getAvailableSkills(): Call<SkillsList>
+
+    @GET("/search/users")
+    fun searchUsers(@Query("query") query: String): Call<UsersList>
+
+    @GET("/search/posts")
+    fun searchPosts(@Query("query") query: String): Call<PostsList>
 }
