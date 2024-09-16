@@ -198,3 +198,17 @@ class Post(Base):
 
     def __repr__(self):
         return f"PID: {self.post_id} - TEXT: {self.input_text} - COMS: {self.commentors}"
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    notification_id = Column(Integer, primary_key=True, autoincrement=True)
+    receiver_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    notifier_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    post_id = Column(Integer, ForeignKey('posts.post_id'), nullable=True)
+    notification_type = Column(String, nullable=False)
+    is_resolved = Column(Boolean, default=False)
+    date_created = Column(DateTime, default=func.now(), nullable=False)
+
+    def __repr__(self):
+        return f"Notification(id={self.notification_id}, receiver={self.receiver_id}, notifier={self.notifier_id}, type={self.notification_type}, resolved={self.is_resolved})"

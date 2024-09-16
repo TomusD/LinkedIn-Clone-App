@@ -24,6 +24,10 @@ def get_connections(db: Session, user_id: str):
     users = db.query(models.User).filter(models.User.id==user_id).first()
     return users.get_connections()
 
+def get_post_owner_id(db: Session, post_id: int):
+    post = db.query(models.Post).filter(models.Post.post_id == post_id).first()
+    return post.user_id
+
 def create_user(db: Session, schema_user: schemas.UserRegister):
     hashed_pwd = hashing.hash_password(schema_user.password)
 
@@ -293,11 +297,19 @@ def handle_friend_request(db: Session, sender_id: int, receiver_id: int, accepte
             models.user_connection_association.c.requester_id==sender.id,
             models.user_connection_association.c.receiver_id==receiver.id
         ).update({"state": "ACCEPTED"})
+        db.query(models.Notification).filter(models.Notification.notifier_id == sender_id,
+                                                models.Notification.receiver_id == receiver_id,
+                                                models.Notification.notification_type == "friend_request",
+                                                models.Notification.is_resolved == False).update({"is_resolved": True})
     else: 
         db.query(models.user_connection_association).filter(
             models.user_connection_association.c.requester_id==sender.id,
             models.user_connection_association.c.receiver_id==receiver.id
         ).delete()
+        db.query(models.Notification).filter(models.Notification.notifier_id == sender_id,
+                                                models.Notification.receiver_id == receiver_id,
+                                                models.Notification.notification_type == "friend_request",
+                                                models.Notification.is_resolved == False).delete()
     
     db.commit()
     return "OK"
@@ -358,6 +370,9 @@ def handle_like(db: Session, user_id: int, post_id: int):
     if user in post.likers:
         post.likers.remove(user)
         message = "Post unliked!"
+        db.query(models.Notification).filter(models.Notification.post_id == post_id,
+                                             models.Notification.notification_type == "like_post",
+                                             models.Notification.is_resolved == False).delete()
     else:
         post.likers.append(user)
         message = "Post liked!"
@@ -412,7 +427,6 @@ def convert_to_little_user_schema(db: Session, user: models.User):
     )
 
 
-
 # Search
 def search_users(db: Session, query: str):
     model = models.User
@@ -429,6 +443,33 @@ def search_users(db: Session, query: str):
     return list(set(matched_list))
 
 
+# Notifications
+def create_notification(db: Session, notifier_id: int, receiver_id: int, post_id: int, notification_type: str):
+    if notifier_id != receiver_id:
+        db_notif = models.Notification(
+            notifier_id=notifier_id,
+            receiver_id=receiver_id,
+            post_id=post_id,
+            notification_type=notification_type,
+            is_resolved=False
+        )
+        db.add(db_notif)
+        db.commit()
+        db.refresh(db_notif)
+    return "OK"
+
+def read_notifications(db: Session, user_id: int):
+    notifications = db.query(models.Notification).filter(models.Notification.receiver_id == user_id,
+                                                         models.Notification.is_resolved == False,
+                                                        models.Notification.receiver_id != models.Notification.notifier_id ).all()
+    return notifications
+
+def resolve_notifications(db: Session, user_id: int):
+    db.query(models.Notification).filter(models.Notification.receiver_id == user_id,
+                                         models.Notification.notification_type != "friend_request").update({"is_resolved": True})
+    db.commit()
+    return "OK"
+  
 
 
 # Only for generating data
