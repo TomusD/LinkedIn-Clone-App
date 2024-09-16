@@ -1,9 +1,10 @@
 # FastAPI
 import uvicorn
-from fastapi import FastAPI, APIRouter, Depends, HTTPException, Query, status, File, Form, UploadFile
+from fastapi import FastAPI, APIRouter, Depends, HTTPException, Query, status, File, Form, UploadFile, BackgroundTasks
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
+from fastapi.encoders import jsonable_encoder
 
 from typing import Annotated
 from sqlalchemy.orm import Session
@@ -243,14 +244,23 @@ async def get_posts(current_user: dict = Depends(get_current_user), db: Session 
 
 
 @app.put("/posts/{post_id}/like", response_class=JSONResponse, tags=["posts"])
-async def like_post(post_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
-        message = crud.handle_like(db, current_user.id, post_id) 
+async def like_post(background_tasks: BackgroundTasks, post_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+        message = crud.handle_like(db, current_user.id, post_id)
+
+        # Create notification
+        if message == "Post liked!":
+            post_owner_id = crud.get_post_owner_id(db, post_id)
+            background_tasks.add_task(crud.create_notification, db, current_user.id, post_owner_id, post_id, "like_post")
         return JSONResponse(content={"message": message}, status_code=200)
 
 
 @app.post("/posts/{post_id}/comment", response_class=JSONResponse, tags=["posts"])
-async def comment_post(post_id: int, comment: schemas.CommentCreate, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
-        crud.post_comment(db, current_user.id, post_id, comment) 
+async def comment_post(background_tasks: BackgroundTasks, post_id: int, comment: schemas.CommentCreate, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+        crud.post_comment(db, current_user.id, post_id, comment)
+
+        # Create notification
+        post_owner_id = crud.get_post_owner_id(db, post_id)
+        background_tasks.add_task(crud.create_notification, db, current_user.id, post_owner_id, post_id, "comment_post")
         return JSONResponse(content={"message": "Your comment was uploaded!"}, status_code=200)
 
 
@@ -456,7 +466,7 @@ async def get_friend_info(friend_id: int, current_user: dict = Depends(get_curre
                             is_friend=is_friend)
 
 @app.post("/friends/request/{friend_id}", response_class=JSONResponse, tags=["friends"])
-async def send_friend_request(friend_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+async def send_friend_request(background_tasks: BackgroundTasks, friend_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     friend_req = crud.get_friend_request(db, current_user.id, friend_id)
     if friend_id == current_user.id:
         return JSONResponse(content={"message": "You cannot send a friend request to yourself!"}, status_code=400)
@@ -464,6 +474,9 @@ async def send_friend_request(friend_id: int, current_user: dict = Depends(get_c
         return JSONResponse(content={"message": "You have a friend request from this user!"}, status_code=400)
     
     crud.friend_request(db, current_user.id, friend_id)
+
+    # Create notification
+    background_tasks.add_task(crud.create_notification, db, current_user.id, friend_id, None, "friend_request")
     return JSONResponse(content={"message": "Friend request sent!"}, status_code=200)
 
 
@@ -473,6 +486,19 @@ async def handle_friend_request(requester_id: int, accept: bool, current_user: d
     action = "accepted" if accept else "rejected"
 
     return JSONResponse(content={"message": f"Friend request {action}!"}, status_code=200)
+
+# Notifications
+@app.get("/user/notification/", response_class=JSONResponse, tags=["notifications"])
+async def read_notifications(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    notifications = crud.read_notifications(db, current_user.id)
+    serialized_notifications = jsonable_encoder(notifications)
+    return JSONResponse(content=serialized_notifications, status_code=200)
+
+@app.put("/user/notification/", response_class=JSONResponse, tags=["notifications"])
+async def resolve_notifications(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    crud.resolve_notifications(db, current_user.id)
+    return JSONResponse(content={"message": "Notifications resolved!"}, status_code=200)
+
 
 
 
