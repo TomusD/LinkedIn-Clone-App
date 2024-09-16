@@ -184,6 +184,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 async def change_mail_password(
     old_password: str, new_email: str | None = None, new_password: str | None = None,
     current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    
     message = crud.change_mail_password(db, current_user.id, new_email, new_password, old_password)
     return JSONResponse(content={"message": message}, status_code=200)
 
@@ -493,6 +494,26 @@ def search_users(query: str, current_user: dict = Depends(get_current_user), db:
                                                image_path = u.image_path) for u in users]
     
     return schemas.UserList(users=schema_users)
+
+
+@app.get("/search/posts", response_model=schemas.PostsList, tags=["search"])
+def search_posts(query: str = "", current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    db_posts, has_liked = crud.search_posts(db, query, current_user.id)
+    print(db_posts)
+    posts = [schemas.PostResponse(
+        post_id= p.post_id,
+        user= crud.convert_to_little_user_schema(db, crud.get_user_by_id(db, p.user_id)),
+        input_text= p.input_text,
+        image_url= p.media_image_url,
+        video_url= p.media_video_url,
+        audio_url= p.media_audio_url,
+        date_uploaded= p.date_uploaded,
+        comments= crud.convert_to_comment_schema(db, p.post_id, p.commentors),
+        likes= len(p.likers),
+        user_liked= (p.post_id in has_liked)
+    ) for p in db_posts]
+    
+    return schemas.PostsList(posts=posts)
 
 	
 def save_to_cloud(file: UploadFile, media_type: str, media_dict: dict):

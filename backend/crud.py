@@ -429,7 +429,27 @@ def search_users(db: Session, query: str):
     return list(set(matched_list))
 
 
+def search_posts(db: Session, query: str, user_id):
+    model_post = models.Post
+    model_user = models.User
 
+    user = db.query(model_user).filter(model_user.id==user_id).first()
+
+
+    splitted = query.split()
+    matched_list = []
+
+    for s in splitted:
+        matched = db.query(model_post).filter(model_post.input_text.ilike(f"%{s}%")).all()
+        matched_list.extend(matched)
+
+
+    has_liked = []
+    for p in matched:
+        if p in user.liked_posts:
+            has_liked.append(p.post_id)
+
+    return list(set(matched_list)), has_liked
 
 # Only for generating data
 def add_predefined_skills_to_db(db: Session, schema_skill: schemas.addSkill):
