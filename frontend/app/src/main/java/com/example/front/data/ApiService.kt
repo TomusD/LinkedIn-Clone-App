@@ -8,8 +8,10 @@ import com.example.front.data.request.UserSettings
 import com.example.front.data.request.Work
 import com.example.front.data.response.APIResponse
 import com.example.front.data.response.AllJobs
+import com.example.front.data.response.ChatsList
 import com.example.front.data.response.EducationList
 import com.example.front.data.response.JobsList
+import com.example.front.data.response.MessagesList
 import com.example.front.data.response.PostsList
 import com.example.front.data.response.SkillsList
 import com.example.front.data.response.UserInfo
@@ -51,7 +53,7 @@ interface ApiService {
     @GET("/users/")
     fun getUsers(): Call<UsersList>
 
-    @GET("/user/{user_id}")
+    @GET("/users/{user_id}")
     fun getUser(@Path("user_id") user_id: Int): Call<User>
 
     @GET("/friends/profile/{friend_id}")
@@ -134,4 +136,10 @@ interface ApiService {
 
     @GET("/search/posts")
     fun searchPosts(@Query("query") query: String): Call<PostsList>
+
+    @GET("/chats")
+    fun getChats(): Call<ChatsList>
+
+    @GET("/messages/{chat_id}")
+    fun getMessages(@Path("chat_id") chat_id: Int): Call<MessagesList>
 }
