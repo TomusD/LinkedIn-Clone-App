@@ -1,6 +1,8 @@
 package com.example.front.data.response
 
+import com.example.front.data.base.ChatPreview
 import com.example.front.data.base.User
+import com.example.front.data.base.UserMessage
 import com.google.gson.annotations.SerializedName
 
 
@@ -47,4 +49,14 @@ data class JobsList(
 data class PostsList(
     @SerializedName("posts")
     var posts: List<PostResponse>
+)
+
+data class ChatsList(
+    @SerializedName("chatsPreviews")
+    var chatsPreviews: List<ChatPreview>
+)
+
+data class MessagesList(
+    @SerializedName("messages")
+    var messages: List<UserMessage>?
 )
