@@ -15,3 +15,8 @@ sealed class Screens(val route : String) {
     object Profile: Screens("profile_route")
     object Settings : Screens("settings_route")
 }
+
+sealed class ChatScreens(val route : String) {
+    object Chat: Screens("chat_route")
+    object PersonalChat: Screens("personal_chat_route/{userId}")
+}
