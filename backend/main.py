@@ -315,7 +315,6 @@ async def delete_application(job_id: int, current_user: dict = Depends(get_curre
     crud.revoke_apply_job(db=db, job_id=job_id, applier_id=current_user.id)
     return JSONResponse(content={"message": "Application revoked!"}, status_code=200)
 
-
 @app.get("/user/jobs/recommended", response_model=schemas.JobsList, tags=["jobs"])
 async def get_recommended_jobs(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     db_recommendations = crud.get_recommended_jobs(db, current_user.id)

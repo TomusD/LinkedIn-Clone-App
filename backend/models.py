@@ -216,6 +216,9 @@ class JobViews(Base):
     job_id = Column(Integer, ForeignKey('jobs.job_id'), primary_key=True)
     view_count = Column(Integer, default=0, nullable=False)
 
+    def __repr__(self):
+        return f"{self.user_id}, {self.job_id}, {self.view_count}"
+
 
 class Post(Base):
     __tablename__ = "posts"
