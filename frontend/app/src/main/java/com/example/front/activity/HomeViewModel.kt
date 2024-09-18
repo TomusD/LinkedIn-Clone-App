@@ -22,6 +22,27 @@ import java.time.format.DateTimeFormatter
 
 class HomeViewModel : ViewModel() {
 
+    private val _searchPosts = MutableStateFlow<List<PostResponse>>(emptyList())
+    val searchPosts: StateFlow<List<PostResponse>> get() = _searchPosts
+
+    fun searchPosts(context: Context, query: String) {
+        val apiClient = ApiClient()
+        val call = apiClient.getApiService(context).searchPosts(query)
+
+        call.enqueue(object : Callback<PostsList> {
+            override fun onResponse(call: Call<PostsList>, response: Response<PostsList>) {
+                if (response.isSuccessful) {
+                    Log.d("MYTEST", "SEARCH POSTS - SUCCESS")
+                    _searchPosts.value = response.body()?.posts ?: emptyList()
+                }
+            }
+
+            override fun onFailure(call: Call<PostsList>, t: Throwable) {
+                Log.e("MYTEST", "SEARCH POSTS - FAILURE: "+ t.message.toString())
+            }
+        })
+    }
+
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 

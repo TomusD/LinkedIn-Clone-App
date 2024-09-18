@@ -1,9 +1,12 @@
 package com.example.front
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBar
@@ -14,12 +17,14 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.em
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -37,9 +42,12 @@ import com.example.front.screens.basic_screens.UploadScreen
 import com.example.front.ui.theme.FrontEndTheme
 import kotlinx.coroutines.launch
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.front.screens.Subcomponents.modals.SearchPostsModal
+import com.example.front.screens.Subcomponents.modals.SearchUsersModal
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomNavigationBar(navController: NavController, viewModel: SearchViewModel = viewModel()) {
+fun BottomNavigationBar(navController: NavController, viewModel: SearchViewModel = viewModel(), onChatClick: () -> Unit) {
     val context = LocalContext.current
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -49,6 +57,10 @@ fun BottomNavigationBar(navController: NavController, viewModel: SearchViewModel
     }
 
     val navController = rememberNavController()
+
+    var queryText by remember { mutableStateOf("") }
+    var showPosts by remember { mutableStateOf(false) }
+    var showUsers by remember { mutableStateOf(false) }
 
     FrontEndTheme {
 
@@ -65,17 +77,22 @@ fun BottomNavigationBar(navController: NavController, viewModel: SearchViewModel
             content = {
 
                 Scaffold(
-                    topBar = { TopBar(drawerState = drawerState, scope = scope, onSearch = {
+                    topBar = { TopBar(navController, drawerState = drawerState, scope = scope, onSearch = { it, it1 ->
                         when (navController.currentDestination?.route) {
                             Screens.Home.route -> {
-
-                                performSearch(context, it, "posts", viewModel)
+                                showPosts = it1
+                                queryText = it
+                                performSearch(context, queryText, "posts", viewModel)
                             }
                             else -> {
-                                performSearch(context, it, "users", viewModel)
+                                showUsers = true
+                                queryText = it
+                                performSearch(context, queryText, "users", viewModel)
                             }
                         }
-                    }) },
+                    },
+                        onChatClick = onChatClick
+                        ) },
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
                         NavigationBar {
@@ -109,8 +126,26 @@ fun BottomNavigationBar(navController: NavController, viewModel: SearchViewModel
                                 )
                             }
                         }
+                        if (showUsers) {
+                            BasicAlertDialog(onDismissRequest = {}) {
+                                SearchUsersModal(
+                                    query = queryText,
+                                    onDismiss = {showUsers = false},
+                                )
+                            }
+                        }
+
+                        if (showPosts) {
+                            BasicAlertDialog(onDismissRequest = {}) {
+                                SearchPostsModal(
+                                    query = queryText,
+                                    onDismiss = {showPosts = false},
+                                )
+                            }
+                        }
                     }
                 ) { paddingValues ->
+
                     NavHost(
                         navController = navController,
                         startDestination = Screens.Home.route,
@@ -128,9 +163,3 @@ fun BottomNavigationBar(navController: NavController, viewModel: SearchViewModel
     }
 }
 
-fun performSearch(context: Context, query: String, searchEntity: String, vm: ViewModel) {
-    // Search logic goes here, e.g., search in posts, users, etc.
-    println("Searching for: $query in $searchEntity")
-
-
-}

@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.front.data.SessionManager
 import kotlinx.coroutines.CoroutineScope
@@ -47,9 +48,9 @@ import com.example.front.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(drawerState: DrawerState, scope: CoroutineScope, onSearch: (String) -> Unit,) {
+fun TopBar(navController: NavController, drawerState: DrawerState, scope: CoroutineScope, onSearch: (String, Boolean) -> Unit, onChatClick: () -> Unit) {
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
-
+    var error by remember { mutableStateOf(" ") }
     Spacer(modifier = Modifier.height(30.dp))
     TopAppBar(
         title = {
@@ -86,7 +87,11 @@ fun TopBar(drawerState: DrawerState, scope: CoroutineScope, onSearch: (String) -
                     // Search button (when clicked, perform search)
                     IconButton(
                         onClick = {
-                            onSearch(searchQuery.text) // Trigger search only on button click
+                            if (searchQuery.text.isEmpty()) {
+                                error = "Search can't be empty"
+                            } else {
+                                onSearch(searchQuery.text, true) // Trigger search only on button click
+                            }
                         }
                     ) {
                         Icon(
@@ -98,7 +103,7 @@ fun TopBar(drawerState: DrawerState, scope: CoroutineScope, onSearch: (String) -
                 Spacer(modifier = Modifier.width(5.dp))
 
                 IconButton(
-                    onClick = {}
+                    onClick = onChatClick
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.chat_icon_2),
