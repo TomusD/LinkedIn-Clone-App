@@ -82,12 +82,10 @@ fun BottomNavigationBar(navController: NavController, viewModel: SearchViewModel
                             Screens.Home.route -> {
                                 showPosts = it1
                                 queryText = it
-                                performSearch(context, queryText, "posts", viewModel)
                             }
                             else -> {
                                 showUsers = true
                                 queryText = it
-                                performSearch(context, queryText, "users", viewModel)
                             }
                         }
                     },
