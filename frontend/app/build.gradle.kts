@@ -68,6 +68,8 @@ android {
 
 dependencies {
 
+    implementation(libs.java.websocket)
+
     implementation (libs.androidx.media3.exoplayer) // ExoPlayer
     implementation (libs.androidx.media3.ui)
 
