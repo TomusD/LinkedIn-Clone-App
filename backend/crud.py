@@ -149,7 +149,7 @@ def revoke_apply_job(db: Session, job_id: int, applier_id: int):
     db.commit()
 
     return "OK"
-from sqlalchemy.dialects.postgresql import insert
+
 def increment_job_view(db: Session, user_id: int, job_id: int):
     model = models.JobViews
 
@@ -462,6 +462,38 @@ def search_posts(db: Session, query: str, user_id):
             has_liked.append(p.post_id)
 
     return list(set(matched_list)), has_liked
+
+
+
+# Chat
+def get_chats(db: Session, user_id: int):
+    user = get_user_by_id(db, user_id)
+
+    all_chats = []
+    for c in user.chats:
+        chat = db.query(models.user_chat_association) \
+            .filter(models.user_chat_association.c.chat_id==c.chat_id) \
+            .filter(models.user_chat_association.c.user_id!=user_id) \
+            .first()
+        
+        print(chat)
+        other_user = get_user_by_id(db, chat[0])
+
+        all_chats.append({"user": other_user, "cid": c.chat_id, 
+                          "dc":c.date_created, "lu":c.last_updated})
+    return all_chats
+
+
+def create_chat(db: Session, user_id1: int, user_id2: int):
+    user1 = get_user_by_id(db, user_id1)
+    user2 = get_user_by_id(db, user_id2)
+    
+    chat = models.Chat(users=[user1, user2])
+    db.add(chat)
+    db.commit()
+    return "OK"
+
+
 
 
 # Notifications

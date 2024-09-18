@@ -87,7 +87,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
 @app.get("/users/{user_id}", response_model=schemas.User)
 def get_user(user_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
-    user = crud.get_user_by_id(user_id)
+    user = crud.get_user_by_id(db, user_id)
     return schemas.User(id =user.id, 
                         name = user.name, 
                         surname = user.surname, 
@@ -188,6 +188,31 @@ async def change_mail_password(
     
     message = crud.change_mail_password(db, current_user.id, new_email, new_password, old_password)
     return JSONResponse(content={"message": message}, status_code=200)
+
+
+
+# Chat
+@app.get("/chats", response_model=schemas.ChatsList, tags=["chat"])
+async def get_chats(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    db_chats = crud.get_chats(db, current_user.id)
+    
+    chats = [schemas.ChatPreview(
+            chat_id=c["cid"],
+            other_user=schemas.UserLittleDetail(
+                user_id=c["user"].id,
+                user_fullname=f"{c['user'].name} {c['user'].surname}",
+                image_url=c["user"].image_path,
+            ),
+            date_created=c["dc"],
+            last_updated=c["lu"],
+    ) for c in db_chats]
+
+    return schemas.ChatsList(chatsPreviews=chats)
+
+@app.post("/chats", response_class=JSONResponse, tags=["chat"])
+async def create_chat(user_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    crud.create_chat(db, current_user.id, user_id)
+    return JSONResponse(content={"message": "Chat room created!"}, status_code=200)
 
 
 
@@ -486,6 +511,7 @@ async def handle_friend_request(requester_id: int, accept: bool, current_user: d
     action = "accepted" if accept else "rejected"
 
     return JSONResponse(content={"message": f"Friend request {action}!"}, status_code=200)
+
 
 # Notifications
 @app.get("/user/notification/", response_class=JSONResponse, tags=["notifications"])
