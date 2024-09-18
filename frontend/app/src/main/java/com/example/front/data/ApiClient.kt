@@ -3,7 +3,10 @@ package com.example.front.data
 import android.content.Context
 import android.icu.util.TimeUnit
 import com.example.front.BuildConfig
+import com.example.front.ChatWebSocketListener
 import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.WebSocket
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.ByteArrayInputStream
@@ -13,6 +16,7 @@ class ApiClient {
     private val IP = BuildConfig.ip
     private val PORT = BuildConfig.port
     private val BASE_URL = "https://$IP:$PORT"
+    private val BASE_WS_URL = "ws://$IP:$PORT"
 
     private lateinit var apiService: ApiService
 
@@ -75,6 +79,20 @@ class ApiClient {
         }
 
         return apiService
+    }
+
+
+    fun createWebSocket(listener: ChatWebSocketListener, context: Context, user_id: Int): WebSocket {
+        val client = OkHttpClient.Builder()
+            .addInterceptor(AuthInterceptor(context))
+            .pingInterval(10, java.util.concurrent.TimeUnit.SECONDS)
+            .build()
+
+        val request = Request.Builder()
+            .url("$BASE_WS_URL/ws/chat/$user_id") // Replace with your FastAPI server URL
+            .build()
+
+        return client.newWebSocket(request, listener)
     }
 }
 
