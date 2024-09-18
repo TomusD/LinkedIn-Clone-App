@@ -42,6 +42,24 @@ class LoginResponse(Token):
     user: User
 
 
+
+# Chat
+class ChatPreview(BaseModel):
+    chat_id: int
+    other_user: UserLittleDetail
+    date_created: date
+    last_updated: datetime
+
+class Message(BaseModel):
+    message: str
+    sender_id: int
+    datetime_sent: datetime
+
+class MessageCreate(Message):
+    chat_id: int
+
+
+
 # Profile Settings
 class Settings(BaseModel):
     organization: str
@@ -155,6 +173,9 @@ class JobsList(BaseModel):
 
 class PostsList(BaseModel):
     posts: list[PostResponse]
+
+class ChatsList(BaseModel):
+    chatsPreviews: list[ChatPreview]
 
 
 class UserInfo(BaseModel):
