@@ -49,6 +49,40 @@ like_post_association = Table(
     Column('user_id', Integer, ForeignKey('users.id'), primary_key=True)
 )
 
+user_chat_association = Table(
+    'user_chat', Base.metadata,
+    Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
+    Column('chat_id', Integer, ForeignKey('chats.chat_id'), primary_key=True),
+)
+
+class Message(Base):
+    __tablename__ = "message"
+
+    message_id = Column(Integer, primary_key=True, autoincrement=True)
+    chat_id = Column(Integer, ForeignKey('chats.chat_id'))
+    sender_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    content = Column(String, nullable=False)
+    datetime_sent = Column(DateTime, default=func.now())
+    
+    chat = relationship('Chat', back_populates='messages')
+
+    def __repr__(self):
+        return f"<Message(id={self.message_id}, content={self.content}, sender_id={self.sender_id})>"
+
+
+class Chat(Base):
+    __tablename__ = 'chats'
+    
+    chat_id = Column(Integer, primary_key=True)
+    date_created = Column(Date, default=date.today())
+    last_updated = Column(DateTime, default=func.now())
+    
+    users = relationship('User', secondary=user_chat_association, back_populates='chats', lazy='selectin')
+    messages = relationship('Message', back_populates='chat')
+
+    def __repr__(self):
+        return f"<Chat(id={self.chat_id})>"
+    
 class User(Base):
     __tablename__ = "users"
     
@@ -79,8 +113,9 @@ class User(Base):
         back_populates='connections'
     )
     
-    liked_posts = relationship("Post", secondary=like_post_association, back_populates="likers")
+    chats = relationship('Chat', secondary=user_chat_association, back_populates='users', lazy='selectin')
 
+    liked_posts = relationship("Post", secondary=like_post_association, back_populates="likers")
     uploaded_posts = relationship("Post")
 
 
