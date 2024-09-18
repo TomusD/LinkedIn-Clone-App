@@ -29,13 +29,12 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
 
     Surface {
 
+        if (posts.isNotEmpty()) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(8.dp)
-        )
-        {
-            if (posts.isNotEmpty()) {
+        ) {
                 itemsIndexed(posts) { index, post ->
                     PostCard(
                         post_id = post.post_id,
@@ -54,10 +53,11 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
                     )
                     Spacer(modifier = Modifier.height(16.dp)) // Space between posts
                 }
-            } else {
-//                Text("No posts yet. Make connections! 🌐🌍", Modifier.padding(5.dp)
             }
+        } else {
+            Text("No posts yet. Make connections! 🌐🌍", Modifier.padding(5.dp))
         }
+
     }
 }
 

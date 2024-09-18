@@ -221,7 +221,7 @@ fun CommentModal(
     var commentText by remember { mutableStateOf(TextFieldValue("")) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    comments.sortedBy { it.date_commented }
+//    comments.sortedBy { it.date_commented }
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(8.dp),

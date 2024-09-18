@@ -65,13 +65,12 @@ fun SignInScreen(navController: NavController, onLoginSuccess: () -> Unit) {
         verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.Start,
     ) {
-        IconButton(
-            onClick = {navController.navigateUp()}) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Go back"
-            )
-        }
+        IconButton(onClick = {navController.navigateUp()}) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Go back"
+                )
+            }
 
         Text(
             modifier = Modifier.width(200.dp),
@@ -127,7 +126,6 @@ fun SignInScreen(navController: NavController, onLoginSuccess: () -> Unit) {
                             res?.user?.let { sessionManager.saveUserInfo(it) }
 
                             Log.d("MYTEST", res.toString())
-
 
                             onLoginSuccess()
                         } else {
