@@ -59,7 +59,7 @@ interface ApiService {
     @GET("/friends/profile/{friend_id}")
     fun getFriendInfo(@Path("friend_id") friend_id: Int): Call<UserInfo>
 
-    @PUT("/friends/request/{friend_id}")
+    @POST("/friends/request/{friend_id}")
     fun addFriend(@Path("friend_id") friend_id: Int): Call<APIResponse>
 
     @Multipart
