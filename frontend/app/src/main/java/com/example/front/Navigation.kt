@@ -1,8 +1,9 @@
 package com.example.front
 
-import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
@@ -19,17 +20,18 @@ import com.example.front.screens.pre_auth_screens.WelcomeScreen
 import com.example.front.screens.user.ChatScreen
 import com.example.front.screens.user.PersonalChatScreen
 
-class SampleViewModel : ViewModel() {}
-
 
 @Composable
 fun Navigation() {
+    val context = LocalContext.current
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = PreAuthScreens.Welcome.route) {
-        composable(route = PreAuthScreens.Welcome.route) {
-            WelcomeScreen(navController)
-        }
+    NavHost(navController = navController, startDestination = "auth") {
+
         navigation(startDestination = "welcome_route", route = "auth") {
+            composable(route = PreAuthScreens.Welcome.route) {
+                WelcomeScreen(navController)
+            }
+
             composable(route = PreAuthScreens.Signin.route) {
                 SignInScreen(navController,
                     onLoginSuccess ={
@@ -46,11 +48,24 @@ fun Navigation() {
 
         navigation(startDestination = "home_route", route = "main") {
             composable(Screens.Home.route) {
-                BottomNavigationBar(navController = navController, onChatClick = {
+                BottomNavigationBar(navController = navController,
+                    onChatClick = {
                         navController.navigate("chat") {
                             popUpTo("main") { inclusive = true }
-                    }
-                })
+                        }
+                    },
+                    onSettingsUpdate = {
+                        Toast.makeText(context, "Settings updated. Log in again!", Toast.LENGTH_LONG).show()
+                        navController.navigate("auth") {
+                            popUpTo("main") { inclusive = true }
+                        }
+                    },
+                    onLogoutClick = {
+                        Toast.makeText(context, "Bye bye!", Toast.LENGTH_SHORT).show()
+                        navController.navigate("auth") {
+                            popUpTo("main") { inclusive = true }
+                        }
+                    })
             }
         }
 

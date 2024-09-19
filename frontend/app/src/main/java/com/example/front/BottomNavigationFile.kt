@@ -1,7 +1,5 @@
 package com.example.front
 
-import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BasicAlertDialog
@@ -47,7 +45,7 @@ import com.example.front.screens.Subcomponents.modals.SearchUsersModal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomNavigationBar(navController: NavController, viewModel: SearchViewModel = viewModel(), onChatClick: () -> Unit) {
+fun BottomNavigationBar(navController: NavController, viewModel: SearchViewModel = viewModel(), onChatClick: () -> Unit, onSettingsUpdate: () -> Unit, onLogoutClick: () -> Unit) {
     val context = LocalContext.current
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -67,12 +65,17 @@ fun BottomNavigationBar(navController: NavController, viewModel: SearchViewModel
         ModalNavigationDrawer(
             drawerState = drawerState,
             drawerContent = {
-                DrawerContent { route ->
-                    scope.launch {
-                        drawerState.close()
-                    }
-                    navController.navigate(route)
-                }
+                DrawerContent(
+                    navController,
+                    { route ->
+                        scope.launch {
+                            drawerState.close()
+                        }
+                        navController.navigate(route)
+                    },
+                    onLogout = onLogoutClick,
+                    onSettingsUpdate = onSettingsUpdate
+                    )
             },
             content = {
 
@@ -89,7 +92,7 @@ fun BottomNavigationBar(navController: NavController, viewModel: SearchViewModel
                             }
                         }
                     },
-                        onChatClick = onChatClick
+                        onChatClick = onChatClick,
                         ) },
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {

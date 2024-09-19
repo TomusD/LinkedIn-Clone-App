@@ -69,7 +69,7 @@ fun ChatScreen(navController: NavController, viewModel: FriendsViewModel = viewM
             TopAppBar(
                 title = {
                     Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = Arrangement.SpaceAround,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(

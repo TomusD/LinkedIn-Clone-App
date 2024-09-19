@@ -80,7 +80,7 @@ interface ApiService {
     @POST("/posts/{post_id}/comment")
     fun commentPost(@Path("post_id") post_id: Int, @Body comment: CommentCreate): Call<APIResponse>
 
-    @PUT("/settings")
+    @PUT("/profile/settings")
     fun updateSettings(@Body userSettings: UserSettings): Call<APIResponse>
 
     @Headers("Content-Type: application/json")

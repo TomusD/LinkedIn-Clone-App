@@ -2,6 +2,7 @@ package com.example.front.screens.user
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -34,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -41,7 +44,9 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
+import com.example.front.R
 import com.example.front.data.ApiClient
 import com.example.front.data.request.UserSettings
 import com.example.front.data.response.APIResponse
@@ -65,6 +70,20 @@ fun SettingsScreen() {
         call.enqueue(object : Callback<APIResponse> {
             override fun onResponse(call: Call<APIResponse>, response: Response<APIResponse>) {
                 if (response.isSuccessful) {
+                    if (response.body()?.message in listOf("New email can't be the same as the old one!", "Wrong old password!", "Email already exists!", "New password can't be the same as the old one!", "Email already exists!")){
+                        serverError.value = response.body()?.message
+                    } else {
+                        Toast.makeText(context, response.body()?.message, Toast.LENGTH_SHORT).show()
+
+
+
+                        val activity = (context as Activity)
+
+                        val returnIntent = Intent()
+                        returnIntent.putExtra("exit", true)
+                        activity.setResult(Activity.RESULT_OK, returnIntent)
+                        activity.finish()
+                    }
                     Log.d("MYTEST", "SETTINGS - SUCCESS: ${response.body()}")
                 } else {
                     Log.d("MYTEST", "SETTINGS - NOT SUCCESS: ${response.body()}")
@@ -121,8 +140,7 @@ fun SettingsScreen() {
         var newPassword by remember { mutableStateOf("") }
         var confirmPassword by remember { mutableStateOf("") }
         var newEmail by remember { mutableStateOf("") }
-        var isPasswordVisible by remember { mutableStateOf(false) }
-        var showNewPasswordFields by remember { mutableStateOf(false) }
+        var passwordVisible by remember { mutableStateOf(false) }
         var errorMessage by remember { mutableStateOf<String?>(null) }
 
 
@@ -130,9 +148,18 @@ fun SettingsScreen() {
             value = oldPassword,
             onValueChange = { oldPassword = it },
             label = { Text("Old Password") },
-            visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                val image = if (passwordVisible)
+                    painterResource(id = R.drawable.view_icon)
+                else
+                    painterResource(id = R.drawable.hide_icon)
+
+                IconButton(onClick = {passwordVisible = !passwordVisible }) { Icon(painter = image, contentDescription = "", Modifier.size(25.dp)) }
+
+            },
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -140,13 +167,22 @@ fun SettingsScreen() {
             value = newPassword,
             onValueChange = { newPassword = it },
             label = { Text("New Password (Optional") },
-            visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color(17, 138, 178),
                 focusedTextColor = Color.Black,
                 cursorColor = Color.Black),
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                val image = if (passwordVisible)
+                    painterResource(id = R.drawable.view_icon)
+                else
+                    painterResource(id = R.drawable.hide_icon)
+
+                IconButton(onClick = {passwordVisible = !passwordVisible }) { Icon(painter = image, contentDescription = "", Modifier.size(25.dp)) }
+
+            },
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -155,9 +191,18 @@ fun SettingsScreen() {
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
             label = { Text("Confirm New Password") },
-            visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                val image = if (passwordVisible)
+                    painterResource(id = R.drawable.view_icon)
+                else
+                    painterResource(id = R.drawable.hide_icon)
+
+                IconButton(onClick = {passwordVisible = !passwordVisible }) { Icon(painter = image, contentDescription = "", Modifier.size(25.dp)) }
+
+            },
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -174,10 +219,12 @@ fun SettingsScreen() {
             Spacer(modifier = Modifier.height(16.dp))
 
             // Show validation error message if any
-            errorMessage?.let {
-                Text(text = it, color = Color.Red)
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+        if (errorMessage != null) {
+            Text(text = errorMessage!!, color = Color.Red, fontSize = 14.sp)
+        }
+        if (!serverError.value.isNullOrEmpty()) {
+            Text(text = serverError.value!!, color = Color.Red, fontSize = 14.sp)
+        }
 
             // Save button
             Button(
@@ -186,22 +233,20 @@ fun SettingsScreen() {
                 onClick = {
                     // Validation logic before calling the callback
                     if (oldPassword.isEmpty()) {
-                        errorMessage = "Current password is required"
-                    } else if (showNewPasswordFields && newPassword != confirmPassword) {
+                        errorMessage = "Old password is required"
+                    } else if (newPassword != confirmPassword) {
                         errorMessage = "Passwords do not match"
-                    } else if (showNewPasswordFields && newPassword.length < 6) {
-                        errorMessage = "New password must be at least 6 characters long"
+                    } else if (newPassword.isEmpty() and newEmail.isEmpty()) {
+                        errorMessage = "You must change the password and/or email"
+                    } else if (!serverError.value.isNullOrEmpty()) {
+                        errorMessage = serverError.value
                     } else {
+                        serverError.value = ""
                         errorMessage = null
                         saveSettings(context, oldPassword, newPassword, newEmail)
-                        errorMessage = serverError.value
-                        if (errorMessage.isNullOrEmpty()) {
-                            Toast.makeText(context, "Settings updated!", Toast.LENGTH_SHORT)
-                        }
-
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Save Changes")
             }
