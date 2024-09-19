@@ -8,6 +8,12 @@ schemas.py
 These schemas are used for validating the schema of the classes
 """
 
+
+class APIResponse(BaseModel):
+    status_code: int
+    message: str
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -81,6 +87,11 @@ class EduResponse(Education):
 
 class Skills(BaseModel):
     skills: list[str]
+
+class UserSettings(BaseModel):
+    old_password: str
+    new_password: Optional[str]
+    new_email: Optional[str]
 
 
 # Application Settings

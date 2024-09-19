@@ -61,41 +61,37 @@ def get_all_skills(db: Session):
     return db.query(models.Skill).all()
 
 def change_mail_password(db: Session, user_id: int, new_email: str, new_password: str, old_password: str):
-    old_email = get_user_by_id(db, user_id).email
-    user = authenticate_user(db, old_email, old_password)
-    if not user:
-        raise HTTPException(status_code=400, detail="Wrong password!")
+    user = get_user_by_id(db, user_id)
+
+    old_email = user.email
+    if not authenticate_user(db, user.email, old_password):
+        return "Wrong old password!"
+
+    if not new_email and not new_password:
+        raise HTTPException(status_code=400, detail="You must provide a new email or password to change.")
     
     if new_email is not None:
         if new_email == old_email:
-            raise HTTPException(status_code=400, detail="New email can't be the same as the old one!")
+             return "New email can't be the same as the old one!"
         email_exists = db.query(models.User).filter(models.User.email == new_email).first()
         if email_exists:
-            raise HTTPException(status_code=400, detail="Email already exists!")
+            return "Email already exists!"
+            # raise HTTPException(status_code=400, detail="Email already exists!")
         message = "Email changed!"
         user.email = new_email
 
     if new_password is not None:
-        if new_password == old_password:
-            raise HTTPException(status_code=400, detail="New password can't be the same as the old one!")
-        all_passwords = db.query(models.User.hashed_password).all()
-        for pswd in all_passwords:
-            if hashing.verify_password(new_password, pswd[0]):
-                password_exists = True
-                break
-            else:
-                password_exists = False
-        if password_exists:
-            raise HTTPException(status_code=400, detail="Password already exists!")
+        if hashing.verify_password(new_password, user.hashed_password):
+            return "New password can't be the same as the old one!"
+            # raise HTTPException(status_code=400, detail="New password can't be the same as the old one!")
+        
         message = "Password changed!"
         user.hashed_password = hashing.hash_password(new_password)
 
-    if not new_email and not new_password:
-        raise HTTPException(status_code=400, detail="You must provide a new email or password to change.")
 
     if new_email is not None and new_password is not None:
         message = "Email and Password changed!"
-
+    print(message)
     db.commit()
     return message
 

@@ -181,12 +181,14 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
                                  ))
 
 #Change mail and password
-@app.put("/user/profile/settings/", response_class=JSONResponse, tags=["profile"])
-async def change_mail_password(
-    old_password: str, new_email: str | None = None, new_password: str | None = None,
-    current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+@app.put("/profile/settings/", response_class=JSONResponse, tags=["profile"])
+async def change_mail_password(settings: schemas.UserSettings, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    print(settings)
+    message = crud.change_mail_password(db, current_user.id, settings.new_email or None, settings.new_password or None, settings.old_password)
     
-    message = crud.change_mail_password(db, current_user.id, new_email, new_password, old_password)
+    if message in ("New email can't be the same as the old one!", "Wrong old password!", "Email already exists!", "New password can't be the same as the old one!", "Email already exists!"):
+        return schemas.APIResponse(message=message, status_code=400)
+    
     return JSONResponse(content={"message": message}, status_code=200)
 
 
