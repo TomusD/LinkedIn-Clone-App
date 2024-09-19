@@ -5,6 +5,7 @@ import android.database.Cursor
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -218,7 +219,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel= vie
             Button(
                 onClick = {
                     val newUser = UserRegister(name, surname, email, pass, imageUri)
-                    viewModel.uploadUserRegistration(newUser, context)
+                    viewModel.uploadUserRegistration(navController, newUser, context)
                 },
                 Modifier
                     .fillMaxWidth()
@@ -265,7 +266,7 @@ class RegisterViewModel : ViewModel() {
     val isSuccessful = MutableLiveData<Boolean>()
     val errorMessage = MutableLiveData<String?>()
 
-    fun uploadUserRegistration(user: UserRegister, context: Context) {
+    fun uploadUserRegistration(navController: NavController, user: UserRegister, context: Context) {
         _isLoading.value = true
 
         val nameBody = user.name.toRequestBody("text/plain".toMediaTypeOrNull())
@@ -295,8 +296,9 @@ class RegisterViewModel : ViewModel() {
                                 val res = response.body()
                                 Log.d("MYTEST", res.toString())
                                 _isLoading.value = false
-
-                            } else {
+                                navController.navigate("welcome_route")
+                                Toast.makeText(context, "Succesfully registered!", Toast.LENGTH_SHORT).show()
+                                } else {
                                 _isLoading.value = false
                                 Log.e("MYTEST", "RESPONSE NOT SUCCESSFUL")
                             }
