@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import or_
 from datetime import date, datetime
 from helpers import *
+import recommendation_system as rs
 
 import hashing
 import schemas, models
@@ -27,6 +28,35 @@ def get_connections(db: Session, user_id: str):
 def get_post_owner_id(db: Session, post_id: int):
     post = db.query(models.Post).filter(models.Post.post_id == post_id).first()
     return post.user_id
+
+def get_user_skills(db: Session, user_id: int):
+    user_skills = db.query(models.user_info_skill_association.c.user_skill_name).filter(models.user_info_skill_association.c.user_id==user_id).all()
+    return user_skills
+
+def get_job_skills(db: Session, job_id: int):
+    job_skills = db.query(models.job_skill_association.c.job_skill_name).filter(models.job_skill_association.c.job_id==job_id).all()
+    return job_skills
+
+def get_all_jobs(db: Session, user_id: int):
+    all_jobs = db.query(models.Job).outerjoin(models.job_application_association, models.Job.job_id == models.job_application_association.c.job_id)\
+                                   .filter(models.Job.recruiter_id != user_id)\
+                                   .filter((models.job_application_association.c.applicant_id != user_id) | (models.job_application_association.c.applicant_id == None))\
+                                   .all()
+    return all_jobs
+
+def get_user_created_jobs(db: Session, user_id: int):
+    created_jobs = db.query(models.Job.job_id).filter(models.Job.recruiter_id == user_id).all()
+    return created_jobs
+
+def get_user_applied_jobs(db: Session, user_id: int):
+    applied_jobs = db.query(models.job_application_association.c.job_id).filter(models.job_application_association.c.applicant_id == user_id).all()
+    return applied_jobs
+
+def get_user_job_matrix(db: Session):
+    users = db.query(models.JobViews.user_id).distinct().all()
+    jobs = db.query(models.JobViews.job_id).distinct().all()
+    job_views = db.query(models.JobViews).all()
+    return users, jobs, job_views
 
 def create_user(db: Session, schema_user: schemas.UserRegister):
     hashed_pwd = hashing.hash_password(schema_user.password)
@@ -164,14 +194,14 @@ def increment_job_view(db: Session, user_id: int, job_id: int):
     return "OK"
 
 def get_recommended_jobs(db: Session, user_id: int):
-    # Recommendation system not yet implemented
-    jobs = db.query(models.Job).filter(models.Job.recruiter_id != user_id).all()
-    user = db.query(models.User).filter(models.User.id == user_id).first()
+    recommended_jobs = rs.hybrid_algorithm(db, user_id)
+    recommended_job_ids = [job[0] for job in recommended_jobs]
+    jobs = db.query(models.Job).filter(models.Job.job_id.in_(recommended_job_ids)).all()
 
-    for j in user.applications.copy():
-        jobs.remove(j)
-
-    return jobs
+    job_map = {job.job_id: job for job in jobs}
+    ordered_jobs = [job_map[job_id] for job_id in recommended_job_ids if job_id in job_map]
+    
+    return ordered_jobs
 
 def get_applications(db: Session, user_id: int):
     user = db.query(models.User).filter(models.User.id==user_id).first()
