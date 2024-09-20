@@ -27,8 +27,11 @@ def dot_product(vector1, vector2):
     return sum(x * y for x, y in zip(vector1, vector2))
 
 # Create the user-job matrix
-def create_user_job_matrix(db: Session):
+def create_user_job_matrix(db: Session, uid: int):
     users, jobs, job_views = crud.get_user_job_matrix(db)
+    if uid not in users:
+        users.append([uid])
+
     user_ids = sorted([user[0] for user in users])
     job_ids = sorted([job[0] for job in jobs])
     matrix = [[0 for _ in range(len(job_ids))] for _ in range(len(user_ids))]
@@ -45,7 +48,7 @@ def create_user_job_matrix(db: Session):
 
 # Matrix factorization recommendations algorithm
 def matrix_factorization_recommendations(db: Session, user_id: int, latent_factors=2, learning_rate=0.01, epochs=5000, reg_param=0.02):
-    matrix, user_ids, job_ids = create_user_job_matrix(db)
+    matrix, user_ids, job_ids = create_user_job_matrix(db, user_id)
     num_users = len(user_ids)
     num_jobs = len(job_ids)
     
