@@ -96,23 +96,34 @@ def matrix_factorization_recommendations(db: Session, user_id: int, latent_facto
     return filtered_recommendations
 
 # Hybrid recommendations algorithm
-def hybrid_algorithm (db: Session, user_id: int):
+def hybrid_algorithm(db: Session, user_id: int):
     sr = skill_recommendations(db, user_id)
     mfr = matrix_factorization_recommendations(db, user_id)
-    #print("Skill Recommendations: ", sr, len(sr))
-    #print("Matrix Factorization Recommendations: ", mfr, len(mfr))
-
-    # Merge the two recommendation lists and keep only the top 15 with the highest skill similarity score
-    sr = sr[:15]
-    merged_recommendations = []
-    for job_id, _ in sr:
-        for job in mfr:
-            if job_id == job[0]:
-                merged_recommendations.append(job)
-                break
     
-    sorted_merged_recommendations = sorted(merged_recommendations, key=lambda x: x[1], reverse=True)
+    # Normalize the matrix factorization scores
+    mfr_scores = [job[1] for job in mfr]
+    min_mfr = min(mfr_scores)
+    max_mfr = max(mfr_scores)
+    normalized_mfr_scores = [(score - min_mfr) / (max_mfr - min_mfr) if max_mfr != min_mfr else 0 for score in mfr_scores]
+    mfr = [(mfr[i][0], normalized_mfr_scores[i]) for i in range(len(mfr))]
 
-    return sorted_merged_recommendations
+    sr_dict = {job[0]: job[1] for job in sr}
+    mfr_dict = {job[0]: job[1] for job in mfr}
+
+    # Combine the recommendations
+    combined_recommendations = {}
+    for job_id, score in sr_dict.items():
+        combined_recommendations[job_id] = score * 0.5
+    for job_id, score in mfr_dict.items():
+        if job_id in combined_recommendations:
+            combined_recommendations[job_id] += score * 0.5
+        else:
+            combined_recommendations[job_id] = score * 0.5
+    
+    sorted_combined_recommendations = sorted(combined_recommendations.items(), key=lambda x: x[1], reverse=True)
+    sorted_combined_recommendations = sorted_combined_recommendations[:10]
+
+    
+    return sorted_combined_recommendations
 
 #print("Hybrid Recommendations: ", hybrid_algorithm(db, 5))
