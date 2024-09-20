@@ -529,8 +529,19 @@ async def get_pending_friends(current_user: dict = Depends(get_current_user), db
 @app.get("/notifications/other", response_model=schemas.NotificationsList, tags=["notifications"])
 async def read_notifications(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     notifications = crud.read_notifications(db, current_user.id)
-    serialized_notifications = jsonable_encoder(notifications)
-    return JSONResponse(content=serialized_notifications, status_code=200)
+
+    nots = [schemas.NotificationResponse(
+                notification_id= n.notification_id,
+                notifier= crud.convert_to_little_user_schema(crud.get_user_by_id(db, n.notifier_id)),
+                post_id= n.post_id,
+                notification_type= n.notification_type,
+                date_created= n.date_created) 
+                for n in notifications]
+
+    print("OK")
+    sorted_nots = sorted(nots, key=lambda x: datetime.fromisoformat(str(x.date_created)), reverse=True)
+
+    return schemas.NotificationsList(notifications=sorted_nots)
 
 @app.put("/notifications/resolve", response_class=JSONResponse, tags=["notifications"])
 async def resolve_notifications(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
