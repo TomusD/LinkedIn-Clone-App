@@ -78,7 +78,7 @@ fun WorkModal(
                 val work: Work = Work(organization, role, startDate.toString(), endDate?.toString())
 
                 updateWork(work)
-                Toast.makeText(context, "Re-visit to see the updated list", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Work Experience added!", Toast.LENGTH_SHORT).show()
                 onSave(work)
             }
         } catch (e: NumberFormatException) {

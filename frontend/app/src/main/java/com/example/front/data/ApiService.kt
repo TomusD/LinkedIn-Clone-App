@@ -105,7 +105,7 @@ interface ApiService {
     fun getSkills(@Path("user_id") user_id: Int): Call<SkillsList>
 
     @GET("/profile/publicity/all/{user_id}")
-    fun getPublicity(@Path("user_id") user_id: Int): Call<Map<String, Boolean>>
+    fun getPublicity(@Path("user_id") user_id: Int): Call<MutableMap<String, Boolean>>
 
     @PUT("/profile/publicity/{information}")
     fun updatePublicity(@Path("information") info: String): Call<APIResponse>

@@ -15,13 +15,13 @@ data class UsersList(
 
 data class WorkList(
     @SerializedName("workList")
-    var workList: List<WorkResponse>
+    var workList: MutableList<WorkResponse>
 )
 
 
 data class EducationList(
     @SerializedName("eduList")
-    var eduList: List<EducationResponse>
+    var eduList: MutableList<EducationResponse>
 )
 
 

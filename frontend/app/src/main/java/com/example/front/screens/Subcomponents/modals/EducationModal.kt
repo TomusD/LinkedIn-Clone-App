@@ -87,7 +87,7 @@ fun EducationModal(
 
                 val education = Education(organization, science_field, degreeValue, startDate.toString(), endDate?.toString())
                 updateWork(education)
-                Toast.makeText(context, "Re-visit to see the updated list", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Education added!", Toast.LENGTH_SHORT).show()
                 onSave(Education(organization, science_field, degreeValue, dateStarted, dateEnded))
             }
         } catch (e: DateTimeParseException) {

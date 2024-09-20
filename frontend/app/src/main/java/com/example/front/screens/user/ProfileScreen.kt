@@ -115,7 +115,6 @@ fun ProfileScreen(viewModel: BasicViewModel = viewModel()) {
             navigationIcon = {
                 IconButton(onClick = {
                     val activity = (context as? Activity)
-                    // Call this to finish the current activity
                     activity?.finish()
                 }) {
                     Icon(
@@ -222,7 +221,7 @@ fun WorkExperienceTab(workList: List<WorkResponse>, viewModel: BasicViewModel, p
             WorkModal(
                 onDismiss = { showDialog = false },
                 onSave = { work ->
-                    println("Saved Work Experience: $work")
+                    viewModel.updateWork(work)
                     showDialog = false
                 }
             )
@@ -284,6 +283,7 @@ fun EducationTab(eduList: List<EducationResponse> = mutableListOf(), viewModel: 
                 onDismiss = { showDialog = false },
                 onSave = { education ->
                     Log.d("MYTEST", "Saved Education: $education")
+                    viewModel.updateEducation(education)
                     showDialog = false
                 }
             )
@@ -389,7 +389,6 @@ fun SkillsTab(skillsSet: List<String>, viewModel: BasicViewModel, publicity: Boo
 
     val scrollState = rememberScrollState()
 
-    // Display selected skills as chips
     FlowRow(
         modifier = Modifier
             .fillMaxWidth()

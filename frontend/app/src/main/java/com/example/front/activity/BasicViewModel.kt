@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import com.example.front.data.ApiClient
 import com.example.front.data.SessionManager
 import com.example.front.data.base.User
+import com.example.front.data.request.Education
+import com.example.front.data.request.Work
 import com.example.front.data.response.APIResponse
 import com.example.front.data.response.AllJobs
 import com.example.front.data.response.EducationList
@@ -45,8 +47,16 @@ class BasicViewModel : ViewModel() {
         })
     }
 
-    private val _workList = MutableStateFlow<List<WorkResponse>>(emptyList())
-    val workList: StateFlow<List<WorkResponse>> get() = _workList
+    private val _workList = MutableStateFlow<MutableList<WorkResponse>>(mutableListOf())
+    val workList: StateFlow<MutableList<WorkResponse>> get() = _workList
+
+    fun updateWork(work: Work) {
+        val wr = WorkResponse(-1, work.organization, work.role, work.date_started, work.date_ended)
+        _workList.update {
+            it += wr
+            it
+        }
+    }
 
     fun fetchWork(context: Context) {
         val apiClient = ApiClient()
@@ -56,7 +66,7 @@ class BasicViewModel : ViewModel() {
             override fun onResponse(call: Call<WorkList>, response: Response<WorkList>) {
                 if (response.isSuccessful) {
                     Log.d("MYTEST", "WORK-SUCCESS")
-                    _workList.value = response.body()?.workList ?: emptyList()
+                    _workList.value = response.body()?.workList ?: mutableListOf()
                 }
             }
 
@@ -66,8 +76,16 @@ class BasicViewModel : ViewModel() {
         })
     }
 
-    private val _educationList = MutableStateFlow<List<EducationResponse>>(emptyList())
-    val educationList: StateFlow<List<EducationResponse>> get() = _educationList
+    private val _educationList = MutableStateFlow<MutableList<EducationResponse>>(mutableListOf())
+    val educationList: StateFlow<MutableList<EducationResponse>> get() = _educationList
+
+    fun updateEducation(edu: Education) {
+        val er = EducationResponse(-1, edu.organization, edu.science_field, edu.degree, edu.date_started, edu.date_ended)
+        _educationList.update {
+            it += er
+            it
+        }
+    }
 
     fun fetchEducation(context: Context) {
         val apiClient = ApiClient()
@@ -77,7 +95,7 @@ class BasicViewModel : ViewModel() {
             override fun onResponse(call: Call<EducationList>, response: Response<EducationList>) {
                 if (response.isSuccessful) {
                     Log.d("MYTEST", "EDU-SUCCESS")
-                    _educationList.value = response.body()?.eduList ?: emptyList()
+                    _educationList.value = response.body()?.eduList ?: mutableListOf()
                 }
             }
 
@@ -146,13 +164,12 @@ class BasicViewModel : ViewModel() {
 
     fun fetchPublicity(context: Context) {
         val uid = SessionManager(context).getUserInfo(SessionManager.USER_ID)
-        Log.d("MYTEST", "UIDDDDDD       $uid")
 
         val apiClient = ApiClient()
         val call = apiClient.getApiService(context).getPublicity(uid!!.toInt())
 
-        call.enqueue(object : Callback<Map<String, Boolean>> {
-            override fun onResponse(call: Call<Map<String, Boolean>>, response: Response<Map<String, Boolean>>) {
+        call.enqueue(object : Callback<MutableMap<String, Boolean>> {
+            override fun onResponse(call: Call<MutableMap<String, Boolean>>, response: Response<MutableMap<String, Boolean>>) {
                 if (response.isSuccessful) {
                     _publicityMap.value = response.body() ?: mutableMapOf(
                                                                 Pair("work", true),
@@ -162,7 +179,7 @@ class BasicViewModel : ViewModel() {
                 }
             }
 
-            override fun onFailure(call: Call<Map<String, Boolean>>, t: Throwable) {
+            override fun onFailure(call: Call<MutableMap<String, Boolean>>, t: Throwable) {
                 Log.e("MYTEST", "EDU-FAILURE: "+ t.message.toString())
             }
         })

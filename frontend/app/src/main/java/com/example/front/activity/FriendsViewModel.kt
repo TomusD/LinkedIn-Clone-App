@@ -158,7 +158,7 @@ class FriendsViewModel: ViewModel() {
     }
 
     private val _userInfo = MutableStateFlow<UserInfo?>(
-        UserInfo(WorkList(emptyList()), EducationList(emptyList()),
+        UserInfo(WorkList(mutableListOf()), EducationList(mutableListOf()),
             SkillsList(emptyList()), false
         )
     )
