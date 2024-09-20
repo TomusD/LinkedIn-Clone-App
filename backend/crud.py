@@ -377,6 +377,20 @@ def check_friend(db: Session, friend_id: int, user_id: int):
     
     return True
 
+def get_pending_requests(db: Session, user_id: int):
+    model_con = models.user_connection_association
+
+    requests = db.query(model_con).filter(
+        and_(
+            model_con.c.receiver_id==user_id,
+            model_con.c.state=="PENDING")
+    ).all()
+    
+    ids = [i.requester_id for i in requests]
+    users = db.query(models.User).filter(models.User.id.in_(ids)).all()
+
+    return users
+
 
 # Post
 def create_post(db: Session, post: schemas.Post):
@@ -476,7 +490,7 @@ def convert_to_comment_schema(db: Session, post_id: int, commentors):
     sorted_comments = sorted(response_list, key=lambda x: datetime.fromisoformat(str(x.date_commented)), reverse=True)
     return sorted_comments
 
-def convert_to_little_user_schema(db: Session, user: models.User):
+def convert_to_little_user_schema(user: models.User):
     return schemas.UserLittleDetail(
         user_id=user.id,
         user_fullname=f"{user.name} {user.surname}",

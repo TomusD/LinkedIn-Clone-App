@@ -256,7 +256,7 @@ async def get_posts(current_user: dict = Depends(get_current_user), db: Session 
 
     posts = [schemas.PostResponse(
         post_id= p.post_id,
-        user= crud.convert_to_little_user_schema(db, crud.get_user_by_id(db, p.user_id)),
+        user= crud.convert_to_little_user_schema(crud.get_user_by_id(db, p.user_id)),
         input_text= p.input_text,
         image_url= p.media_image_url,
         video_url= p.media_video_url,
@@ -505,7 +505,6 @@ async def send_friend_request(background_tasks: BackgroundTasks, friend_id: int,
     background_tasks.add_task(crud.create_notification, db, current_user.id, friend_id, None, "friend_request")
     return JSONResponse(content={"message": "Friend request sent!"}, status_code=200)
 
-
 @app.put("/users/connect/{requester_id}/{accept}", response_class=JSONResponse, tags=["friends"])
 async def handle_friend_request(requester_id: int, accept: bool, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     crud.handle_friend_request(db, requester_id, current_user.id, accept)
@@ -514,14 +513,26 @@ async def handle_friend_request(requester_id: int, accept: bool, current_user: d
     return JSONResponse(content={"message": f"Friend request {action}!"}, status_code=200)
 
 
+
 # Notifications
-@app.get("/user/notification/", response_class=JSONResponse, tags=["notifications"])
+
+@app.get("/notifications/friends/pending", response_model=schemas.UserList, tags=["notifications"])
+async def get_pending_friends(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    pending = crud.get_pending_requests(db, current_user.id)
+    schema_users: list[schemas.User] =  [schemas.User(id =p.id, 
+                                            name = p.name, 
+                                            surname = p.surname, 
+                                            email = p.email, 
+                                            image_path = p.image_path) for p in pending]
+    return schemas.UserList(users=schema_users)
+
+@app.get("/notifications/other", response_model=schemas.NotificationsList, tags=["notifications"])
 async def read_notifications(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     notifications = crud.read_notifications(db, current_user.id)
     serialized_notifications = jsonable_encoder(notifications)
     return JSONResponse(content=serialized_notifications, status_code=200)
 
-@app.put("/user/notification/", response_class=JSONResponse, tags=["notifications"])
+@app.put("/notifications/resolve", response_class=JSONResponse, tags=["notifications"])
 async def resolve_notifications(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     crud.resolve_notifications(db, current_user.id)
     return JSONResponse(content={"message": "Notifications resolved!"}, status_code=200)
@@ -555,7 +566,7 @@ def search_posts(query: str = "", current_user: dict = Depends(get_current_user)
     print(db_posts)
     posts = [schemas.PostResponse(
         post_id= p.post_id,
-        user= crud.convert_to_little_user_schema(db, crud.get_user_by_id(db, p.user_id)),
+        user= crud.convert_to_little_user_schema(crud.get_user_by_id(db, p.user_id)),
         input_text= p.input_text,
         image_url= p.media_image_url,
         video_url= p.media_video_url,

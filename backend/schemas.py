@@ -169,6 +169,13 @@ class AllJobs(BaseModel):
     jobs_uploaded: list[JobUploaded]
 
 
+class NotificationResponse(BaseModel):
+    notification_id: int
+    notifier: UserLittleDetail
+    post_id: Optional[int]
+    notification_type: str
+    date_created: datetime
+
 # Responses as lists
 class UserList(BaseModel):
     users: list[User]
@@ -188,7 +195,10 @@ class PostsList(BaseModel):
 class ChatsList(BaseModel):
     chatsPreviews: list[ChatPreview]
 
+class NotificationsList(BaseModel):
+    notifications: list[NotificationResponse]
 
+# UserInfo
 class UserInfo(BaseModel):
     work: Optional[WorkList]
     education: Optional[EduList]
