@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 from datetime import date, datetime
 from helpers import *
 import recommendation_system as rs
@@ -23,7 +23,22 @@ def get_user_by_id(db: Session, id: int):
 
 def get_connections(db: Session, user_id: str):
     users = db.query(models.User).filter(models.User.id==user_id).first()
-    return users.get_connections()
+
+    model_con = models.user_connection_association
+    
+    friends = []
+    for friend in users.get_connections():
+        row = db.query(model_con).filter(
+            or_(
+                and_((model_con.c.requester_id==user_id), (model_con.c.receiver_id==friend.id)),
+                and_((model_con.c.requester_id==friend.id), (model_con.c.receiver_id==user_id))
+                )
+            ).first()
+        print(row)
+        if row.state == "ACCEPTED":
+            friends.append(friend)
+
+    return friends
 
 def get_post_owner_id(db: Session, post_id: int):
     post = db.query(models.Post).filter(models.Post.post_id == post_id).first()
@@ -86,6 +101,7 @@ def authenticate_user(db: Session, email: str, password: str):
     if not hashing.verify_password(password, user.hashed_password):
         return False
     return user
+
 
 def get_all_skills(db: Session):
     return db.query(models.Skill).all()
@@ -343,8 +359,23 @@ def handle_friend_request(db: Session, sender_id: int, receiver_id: int, accepte
 def check_friend(db: Session, friend_id: int, user_id: int):
     user = db.query(models.User).filter(models.User.id==user_id).first()
     friend = db.query(models.User).filter(models.User.id==friend_id).first()
-
-    return True if friend in user.get_connections() else False
+    
+    if friend in user.get_connections():
+        model_con = models.user_connection_association
+        
+        row = db.query(model_con).filter(
+            or_(
+                and_((model_con.c.requester_id==user.id), (model_con.c.receiver_id==friend.id)),
+                and_((model_con.c.requester_id==friend.id), (model_con.c.receiver_id==user.id))
+                )
+            ).first()
+        
+        if row.state=="PENDING":
+            return False
+    else:
+        return False 
+    
+    return True
 
 
 # Post
