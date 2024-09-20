@@ -2,14 +2,11 @@ from sqlalchemy.orm import Session
 import crud
 import random
 
-def jaccard_similarity(list1, list2):
-    set1 = set(list1)
-    set2 = set(list2)
-    intersection = len(set1.intersection(set2))
-    union = len(set1.union(set2))
-    if union == 0:
-        return 0
-    return intersection / union
+def similarity_score(user_skills, job_skills):
+    user_set = set(user_skills)
+    job_set = set(job_skills)
+    intersection = len(user_set.intersection(job_set))
+    return intersection / len(job_set)
 
 # Skill recommendations algorithm based on Jaccard similarity
 def skill_recommendations(db: Session, user_id: int):
@@ -19,7 +16,7 @@ def skill_recommendations(db: Session, user_id: int):
 
     for job in jobs:
         job_skills = crud.get_job_skills(db, job.job_id)
-        similarity = jaccard_similarity(user_skills, job_skills)
+        similarity = similarity_score(user_skills, job_skills)
         if similarity > 0:
             recommended_jobs.append((job.job_id, similarity))
     recommended_jobs.sort(key=lambda x: x[1], reverse=True)
