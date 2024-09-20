@@ -175,7 +175,8 @@ fun NotificationCard(notification: Notification) {
                 }
                 Text(
                     color = Color.Gray,
-                    text = formatDateTime(notification.date_created.replace(regex = Regex("\\.\\d*"), replacement = "")),
+                    text = formatDateTime(notification.date_created.replace(regex = Regex("\\.\\d*"), replacement = ""))
+                )
             }
             HorizontalDivider(modifier = Modifier
                 .width(10.dp)
