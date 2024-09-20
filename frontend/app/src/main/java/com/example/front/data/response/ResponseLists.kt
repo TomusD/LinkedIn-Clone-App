@@ -1,6 +1,7 @@
 package com.example.front.data.response
 
 import com.example.front.data.base.ChatPreview
+import com.example.front.data.base.Notification
 import com.example.front.data.base.User
 import com.example.front.data.base.UserMessage
 import com.google.gson.annotations.SerializedName
@@ -59,4 +60,9 @@ data class ChatsList(
 data class MessagesList(
     @SerializedName("messages")
     var messages: List<UserMessage>?
+)
+
+data class NotificationsList(
+    @SerializedName("notifications")
+    var notifications: List<Notification>?
 )
