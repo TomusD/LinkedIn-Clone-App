@@ -1,7 +1,9 @@
 package com.example.front.screens.Subcomponents
 
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -135,7 +137,6 @@ fun FriendRequestCard(user: User, onAnswer: (uid: Int, answer: Boolean) -> Unit)
 fun NotificationCard(notification: Notification) {
     val msg = if (notification.notification_type == "like_post") "liked" else "commented on"
 
-
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -159,12 +160,22 @@ fun NotificationCard(notification: Notification) {
             Spacer(modifier = Modifier.width(10.dp))
 
             Column {
+                if (!notification.is_resolved) {
+                    Text(
+                        text = "${notification.notifier.user_fullname.split(" ")[0]} $msg your post!",
+                        textAlign = TextAlign.Start,
+                        fontWeight = FontWeight(700)
+                    )
+                } else {
+                    Text(
+                        text = "${notification.notifier.user_fullname.split(" ")[0]} $msg your post!",
+                        textAlign = TextAlign.Start,
+                        fontWeight = FontWeight(400)
+                    )
+                }
                 Text(
-                    text = "${notification.notifier.user_fullname.split(" ")[0]} $msg your post!",
-                    textAlign = TextAlign.Start,
-                    fontWeight = FontWeight(400)
-                )
-                Text(color = Color.Gray, text = formatDateTime(notification.date_created.replace(regex = Regex("\\.\\d*"), replacement = "")))
+                    color = Color.Gray,
+                    text = formatDateTime(notification.date_created.replace(regex = Regex("\\.\\d*"), replacement = "")),
             }
             HorizontalDivider(modifier = Modifier
                 .width(10.dp)
