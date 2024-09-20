@@ -12,6 +12,7 @@ import com.example.front.data.response.ChatsList
 import com.example.front.data.response.EducationList
 import com.example.front.data.response.JobsList
 import com.example.front.data.response.MessagesList
+import com.example.front.data.response.NotificationsList
 import com.example.front.data.response.PostsList
 import com.example.front.data.response.SkillsList
 import com.example.front.data.response.UserInfo
@@ -136,6 +137,23 @@ interface ApiService {
 
     @GET("/search/posts")
     fun searchPosts(@Query("query") query: String): Call<PostsList>
+
+
+
+    @GET("/notifications/other")
+    fun getOtherNotifications(): Call<NotificationsList>
+
+    @GET("/notifications/friends/pending")
+    fun getFriendRequestsNotifications(): Call<UsersList>
+
+    @PUT("/users/connect/{friend_id}/{accept}")
+    fun answerFriendRequest(@Path("friend_id") friendId: Int, @Path("accept") accept: Boolean): Call<APIResponse>
+
+    @POST("/notifications/resolve")
+    fun resolveNotifications(@Body notifications: NotificationsList): Call<APIResponse>
+
+
+
 
     @GET("/chats")
     fun getChats(): Call<ChatsList>
