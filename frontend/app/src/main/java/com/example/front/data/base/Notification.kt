@@ -7,5 +7,6 @@ data class Notification(
     @SerializedName("notifier") val notifier: UserLittleDetail,
     @SerializedName("post_id") val post_id: Int,
     @SerializedName("notification_type") val notification_type: String,
-    @SerializedName("date_created") val date_created: String
+    @SerializedName("date_created") val date_created: String,
+    @SerializedName("is_resolved") val is_resolved: Boolean
 )
