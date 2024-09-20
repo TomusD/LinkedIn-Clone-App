@@ -92,12 +92,24 @@ fun FriendProfileScreen(user: User, viewModel: FriendsViewModel = viewModel()) {
                     verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
 
                     AsyncImage(model = user.imagePath, contentDescription = "user-profile",
-                            modifier = Modifier.clip(RoundedCornerShape(10.dp)).size(80.dp))
-                    Text(
-                        text = "${titlize(user.name)} ${titlize(user.surname)}",
-                        fontSize = 5.em,
-                        fontWeight = FontWeight.Bold
-                    )
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .size(80.dp))
+
+                    Column {
+                        Text(
+                            text = "${titlize(user.name)} ${titlize(user.surname)}",
+                            fontSize = 5.em,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = user.email,
+                            fontSize = 3.em,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Gray
+                        )
+                    }
+
 
 
                     if (userInfo?.is_friend == false) {
