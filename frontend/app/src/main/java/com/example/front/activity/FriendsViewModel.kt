@@ -5,14 +5,17 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.front.data.ApiClient
 import com.example.front.data.base.ChatPreview
+import com.example.front.data.base.Notification
 import com.example.front.data.base.User
 import com.example.front.data.base.UserMessage
 import com.example.front.data.response.APIResponse
 import com.example.front.data.response.ChatsList
 import com.example.front.data.response.EducationList
 import com.example.front.data.response.MessagesList
+import com.example.front.data.response.NotificationsList
 import com.example.front.data.response.SkillsList
 import com.example.front.data.response.UserInfo
+import com.example.front.data.response.UsersList
 import com.example.front.data.response.WorkList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -87,6 +90,72 @@ class FriendsViewModel: ViewModel() {
         })
     }
 
+
+    fun answerFriendRequest(context: Context, userId: Int, accepted: Boolean) {
+        val apiClient = ApiClient()
+        val call = apiClient.getApiService(context).answerFriendRequest(userId, accepted)
+        call.enqueue(object : Callback<APIResponse> {
+            override fun onResponse(call: Call<APIResponse>, response: Response<APIResponse>) {
+                if (response.isSuccessful) {
+                        Log.d("MYTEST", "ANSWER FR - SUCCESS - $accepted === ${response.body()}")
+                } else {
+                        Log.d("MYTEST", "ANSWER FR - NO SUCCESS - $accepted === ${response.body()}")
+
+                }
+            }
+
+            override fun onFailure(call: Call<APIResponse>, t: Throwable) {
+                Log.e("MYTEST", "FAILURE - ANSWER FR - $accepted: "+ t.message.toString())
+            }
+        })
+    }
+
+    private val _pendingRequests = MutableStateFlow<List<User>>(emptyList())
+    val pendingRequests: StateFlow<List<User>> get() = _pendingRequests
+
+    fun getFRNotifications(context: Context) {
+        val apiClient = ApiClient()
+        val call = apiClient.getApiService(context).getFriendRequestsNotifications()
+        call.enqueue(object : Callback<UsersList> {
+            override fun onResponse(call: Call<UsersList>, response: Response<UsersList>) {
+                if (response.isSuccessful) {
+                    Log.d("MYTEST", "GET FR notifications - SUCCESS === ${response.body()}")
+
+                    _pendingRequests.value = response.body()?.users ?: listOf()
+                } else {
+                    Log.d("MYTEST", "GET FR notifications - NO SUCCESS === ${response.body()}")
+
+                }
+            }
+            override fun onFailure(call: Call<UsersList>, t: Throwable) {
+                Log.e("MYTEST", "FAILURE - ANSWER FR: "+ t.message.toString())
+            }
+        })
+    }
+
+    private val _pendingOtherRequests = MutableStateFlow<List<Notification>?>(listOf())
+    val pendingOtherRequests: StateFlow<List<Notification>?> get() = _pendingOtherRequests
+
+    fun getOtherNotifications(context: Context) {
+        val apiClient = ApiClient()
+        val call = apiClient.getApiService(context).getOtherNotifications()
+        call.enqueue(object : Callback<NotificationsList> {
+            override fun onResponse(call: Call<NotificationsList>, response: Response<NotificationsList>) {
+                if (response.isSuccessful) {
+                    Log.d("MYTEST", "GET FR notifications - SUCCESS === ${response.body()}")
+
+                    _pendingOtherRequests.value = response.body()?.notifications ?: listOf()
+                } else {
+                    Log.d("MYTEST", "GET FR notifications - NO SUCCESS === ${response.body()}")
+
+                }
+            }
+
+            override fun onFailure(call: Call<NotificationsList>, t: Throwable) {
+                Log.e("MYTEST", "FAILURE - ANSWER FR: "+ t.message.toString())
+            }
+        })
+    }
 
     private val _userInfo = MutableStateFlow<UserInfo?>(
         UserInfo(WorkList(emptyList()), EducationList(emptyList()),
