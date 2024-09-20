@@ -535,12 +535,11 @@ async def read_notifications(current_user: dict = Depends(get_current_user), db:
                 notifier= crud.convert_to_little_user_schema(crud.get_user_by_id(db, n.notifier_id)),
                 post_id= n.post_id,
                 notification_type= n.notification_type,
-                date_created= n.date_created) 
+                date_created= n.date_created,
+                is_resolved=n.is_resolved) 
                 for n in notifications]
 
-    print("OK")
-    sorted_nots = sorted(nots, key=lambda x: datetime.fromisoformat(str(x.date_created)), reverse=True)
-
+    sorted_nots = sorted(nots, key=lambda x: (not x.is_resolved ,datetime.fromisoformat(str(x.date_created))), reverse=True)
     return schemas.NotificationsList(notifications=sorted_nots)
 
 @app.put("/notifications/resolve", response_class=JSONResponse, tags=["notifications"])

@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, desc
 from datetime import date, datetime
 from helpers import *
 import recommendation_system as rs
@@ -583,10 +583,25 @@ def create_notification(db: Session, notifier_id: int, receiver_id: int, post_id
     return "OK"
 
 def read_notifications(db: Session, user_id: int):
-    notifications = db.query(models.Notification).filter(models.Notification.receiver_id == user_id,
-                                                         models.Notification.is_resolved == False,
-                                                        models.Notification.receiver_id != models.Notification.notifier_id ).all()
-    return notifications
+    model_not = models.Notification
+    notifications = db.query(model_not).filter(model_not.receiver_id == user_id,
+                                                model_not.notification_type != "friend_request",
+                                                model_not.is_resolved == False,
+                                                model_not.receiver_id != model_not.notifier_id).all()
+    if len(notifications) >= 30:
+        return notifications
+    
+    remaining = 30 - len(notifications)
+    rest_notifications = db.query(model_not)\
+                                .filter(model_not.receiver_id == user_id,
+                                        model_not.notification_type != "friend_request",
+                                        model_not.is_resolved == True,
+                                        model_not.receiver_id != model_not.notifier_id) \
+                                .order_by(desc(model_not.date_created)) \
+                                .limit(remaining) \
+                                .all()
+
+    return notifications+rest_notifications
 
 def resolve_notifications(db: Session, user_id: int):
     db.query(models.Notification).filter(models.Notification.receiver_id == user_id,

@@ -175,6 +175,7 @@ class NotificationResponse(BaseModel):
     post_id: Optional[int]
     notification_type: str
     date_created: datetime
+    is_resolved: bool
 
 # Responses as lists
 class UserList(BaseModel):
