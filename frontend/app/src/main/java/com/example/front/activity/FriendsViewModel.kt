@@ -3,6 +3,7 @@ package com.example.front.activity
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.front.data.ApiClient
 import com.example.front.data.base.ChatPreview
 import com.example.front.data.base.Notification
@@ -17,8 +18,10 @@ import com.example.front.data.response.SkillsList
 import com.example.front.data.response.UserInfo
 import com.example.front.data.response.UsersList
 import com.example.front.data.response.WorkList
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -139,22 +142,32 @@ class FriendsViewModel: ViewModel() {
     fun getOtherNotifications(context: Context) {
         val apiClient = ApiClient()
         val call = apiClient.getApiService(context).getOtherNotifications()
-        call.enqueue(object : Callback<NotificationsList> {
-            override fun onResponse(call: Call<NotificationsList>, response: Response<NotificationsList>) {
-                if (response.isSuccessful) {
-                    Log.d("MYTEST", "GET FR notifications - SUCCESS === ${response.body()}")
 
-                    _pendingOtherRequests.value = response.body()?.notifications ?: listOf()
-                } else {
-                    Log.d("MYTEST", "GET FR notifications - NO SUCCESS === ${response.body()}")
+        viewModelScope.launch {
+            call.enqueue(object : Callback<NotificationsList> {
+                override fun onResponse(call: Call<NotificationsList>, response: Response<NotificationsList>) {
+                    if (response.isSuccessful) {
+                        Log.d("MYTEST", "GET FR notifications - SUCCESS === ${response.body()}")
 
+                        _pendingOtherRequests.value = response.body()?.notifications ?: listOf()
+
+                    } else {
+                        Log.d("MYTEST", "GET FR notifications - NO SUCCESS === ${response.body()}")
+
+                    }
                 }
-            }
 
-            override fun onFailure(call: Call<NotificationsList>, t: Throwable) {
-                Log.e("MYTEST", "FAILURE - ANSWER FR: "+ t.message.toString())
-            }
-        })
+                override fun onFailure(call: Call<NotificationsList>, t: Throwable) {
+                    Log.e("MYTEST", "FAILURE - ANSWER FR: "+ t.message.toString())
+                }
+            })
+
+            delay(2000L)
+
+            resolveNotifications(context)
+
+        }
+
     }
 
     private val _userInfo = MutableStateFlow<UserInfo?>(
@@ -162,6 +175,27 @@ class FriendsViewModel: ViewModel() {
             SkillsList(emptyList()), false
         )
     )
+
+    fun resolveNotifications(context: Context) {
+        val apiClient = ApiClient()
+        val call = apiClient.getApiService(context).resolveNotifications()
+
+        call.enqueue(object : Callback<APIResponse> {
+            override fun onResponse(call: Call<APIResponse>, response: Response<APIResponse>) {
+                if (response.isSuccessful) {
+                    Log.d("MYTEST", "Resolve notifications - SUCCESS === ${response.body()}")
+
+                } else {
+                    Log.d("MYTEST", "Resolve notifications - NO SUCCESS === ${response.body()}")
+
+                }
+            }
+
+            override fun onFailure(call: Call<APIResponse>, t: Throwable) {
+                Log.e("MYTEST", "FAILURE - Resolve: "+ t.message.toString())
+            }
+        })
+    }
 
     val userInfo: StateFlow<UserInfo?> get() = _userInfo
 
