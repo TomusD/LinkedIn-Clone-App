@@ -195,6 +195,7 @@ fun WorkExperienceTab(workList: List<WorkResponse>, viewModel: BasicViewModel, p
     ToggleButton(isPublic) {
         viewModel.updatePublicity(context, "work")
         isPublic = !isPublic
+        viewModel.updatePublicityToggle("work", isPublic)
     }
 
     Column (
@@ -254,6 +255,7 @@ fun EducationTab(eduList: List<EducationResponse> = mutableListOf(), viewModel: 
     ToggleButton(isPublic) {
         viewModel.updatePublicity(context, "education")
         isPublic = !isPublic
+        viewModel.updatePublicityToggle("education", isPublic)
     }
 
     Column (
@@ -326,6 +328,7 @@ fun SkillsTab(skillsSet: List<String>, viewModel: BasicViewModel, publicity: Boo
     ToggleButton(isPublic) {
         viewModel.updatePublicity(context, "skills")
         isPublic = !isPublic
+        viewModel.updatePublicityToggle("skills", isPublic)
     }
 
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp)) {

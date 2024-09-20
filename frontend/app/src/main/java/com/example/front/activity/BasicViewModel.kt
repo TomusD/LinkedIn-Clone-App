@@ -134,8 +134,15 @@ class BasicViewModel : ViewModel() {
     }
 
 
-    private val _publicityMap = MutableStateFlow<Map<String, Boolean>>(mutableMapOf())
-    val publicityMap: StateFlow<Map<String, Boolean>> get() = _publicityMap
+    private val _publicityMap = MutableStateFlow<MutableMap<String, Boolean>>(mutableMapOf())
+    val publicityMap: StateFlow<MutableMap<String, Boolean>> get() = _publicityMap
+
+    fun updatePublicityToggle(field: String, public: Boolean) {
+        _publicityMap.update {
+            it[field] = public
+            it
+        }
+    }
 
     fun fetchPublicity(context: Context) {
         val uid = SessionManager(context).getUserInfo(SessionManager.USER_ID)
