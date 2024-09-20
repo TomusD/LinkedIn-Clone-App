@@ -149,8 +149,8 @@ interface ApiService {
     @PUT("/users/connect/{friend_id}/{accept}")
     fun answerFriendRequest(@Path("friend_id") friendId: Int, @Path("accept") accept: Boolean): Call<APIResponse>
 
-    @POST("/notifications/resolve")
-    fun resolveNotifications(@Body notifications: NotificationsList): Call<APIResponse>
+    @PUT("/notifications/resolve")
+    fun resolveNotifications(): Call<APIResponse>
 
 
 
