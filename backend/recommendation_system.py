@@ -8,7 +8,7 @@ def similarity_score(user_skills, job_skills):
     intersection = len(user_set.intersection(job_set))
     return intersection / len(job_set)
 
-# Skill recommendations algorithm based on Jaccard similarity
+# Skill recommendations algorithm based on similarity score
 def skill_recommendations(db: Session, user_id: int):
     user_skills = crud.get_user_skills(db, user_id)
     jobs = set(crud.get_all_jobs(db, user_id))
